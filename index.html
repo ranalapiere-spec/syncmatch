@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>SYNC Match - Learn, Share, Grow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #F4EBE1;
+            --card-bg: rgba(255, 250, 246, 0.9);
+            --card-border: rgba(196, 154, 126, 0.25);
+            --text-main: #46372E;
+            --text-sub: #7A6A5E;
+            --accent: #A3795C;
+            --pill-active-bg: #46372E;
+            --pill-active-text: #FAF7F4;
+            --nav-bg: rgba(244, 235, 225, 0.95);
+            --shadow: 0 8px 24px rgba(70, 55, 46, 0.06);
+            --chrome-glow: rgba(163, 121, 92, 0.25);
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #0B0B0F;
+            --card-bg: rgba(25, 22, 32, 0.8);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FAF7F4;
+            --text-sub: #A095A8;
+            --accent: #C49A7E;
+            --pill-active-bg: #C49A7E;
+            --pill-active-text: #0B0B0F;
+            --nav-bg: rgba(15, 13, 20, 0.92);
+            --shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+            --chrome-glow: rgba(196, 154, 126, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-main);
+        }
+
+        .glass-card, button, .icon-btn, .nav-item, .filter-pill, .user-search-card {
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .user-search-card:active, button:active, .icon-btn:active, .filter-pill:active {
+            transform: scale(0.97);
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 400px;
+            pointer-events: none;
+        }
+
+        .toast-msg {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 12px 18px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInOut 3s ease forwards;
+            pointer-events: auto;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-15px); }
+            15% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-15px); }
+        }
+
+        /* Login & Modals */
+        #auth-screen, #onboarding-screen, #edit-profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-main);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        #onboarding-screen, #edit-profile-modal {
+            display: none;
+            overflow-y: auto;
+            text-align: left;
+            align-items: stretch;
+            z-index: 2100;
+            background: rgba(11, 11, 15, 0.85);
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-logo-badge {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            color: var(--accent);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .modal-card {
+            max-width: 440px;
+            margin: auto;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .avatar-upload-box {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            background: var(--bg-main);
+            border: 2px dashed var(--accent);
+            margin: 0 auto 18px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            color: var(--accent);
+            font-size: 1.5rem;
+            overflow: hidden;
+        }
+
+        .avatar-upload-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-plus-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            background: var(--text-main);
+            color: var(--bg-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-main);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: 16px;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+        }
+
+        .chip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .chip {
+            padding: 7px 14px;
+            border-radius: 20px;
+            background: var(--bg-main);
+            border: 1px solid var(--card-border);
+            font-size: 0.78rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .chip.selected {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .add-chip-btn {
+            padding: 7px 14px;
+            border-radius: 20px;
+            background: transparent;
+            border: 1px dashed var(--accent);
+            font-size: 0.78rem;
+            color: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px 10px 20px;
+        }
+
+        .header-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title-text h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
+        }
+
+        .header-title-text h1 span {
+            font-weight: 400;
+            color: var(--text-sub);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .badge-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 7px;
+            height: 7px;
+            background: #E53935;
+            border-radius: 50%;
+        }
+
+        .content-area {
+            padding: 8px 20px;
+            flex: 1;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .view-section {
+            display: none;
+            width: 100%;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Stories Bar */
+        .stories-container {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            margin-bottom: 8px;
+            scrollbar-width: none;
+        }
+        .stories-container::-webkit-scrollbar { display: none; }
+
+        .story-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .story-ring {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .story-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .story-plus-icon {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--text-main);
+            color: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            border: 2px solid var(--bg-main);
+        }
+
+        .story-item span {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            max-width: 64px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        /* Search Input & Filter Pills (Sesuai Referensi Gambar 1001221267 & 1001221251) */
+        .search-input-wrapper {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .search-input-wrapper input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            outline: none;
+            color: var(--text-main);
+            font-size: 0.88rem;
+        }
+
+        .search-input-wrapper input::placeholder {
+            color: var(--text-sub);
+            opacity: 0.75;
+        }
+
+        .filter-pills-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 14px;
+            scrollbar-width: none;
+        }
+        .filter-pills-scroll::-webkit-scrollbar { display: none; }
+
+        .filter-pill {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .filter-pill.active {
+            background: var(--pill-active-bg);
+            color: var(--pill-active-text);
+            border-color: var(--pill-active-bg);
+        }
+
+        /* User Search Result Card (Sesuai Referensi) */
+        .user-search-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-search-avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .user-search-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .user-search-name {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-handle-badge {
+            background: rgba(163, 121, 92, 0.14);
+            color: var(--text-sub);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .user-skills-line {
+            font-size: 0.78rem;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 3px;
+        }
+
+        .user-meta-line {
+            font-size: 0.74rem;
+            color: var(--text-sub);
+        }
+
+        /* Glass Card Umum */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        /* Komunitas */
+        .community-post-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+        }
+
+        .community-textarea {
+            width: 100%;
+            background: var(--bg-main);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-size: 0.88rem;
+            resize: none;
+            height: 80px;
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        .community-feed-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 14px;
+        }
+
+        /* UME Sanctuary */
+        .ume-greeting-card { display: flex; align-items: center; gap: 15px; }
+        .ume-avatar { width: 65px; height: 65px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; }
+        .ume-info-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .ume-mini-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 12px; box-shadow: var(--shadow); }
+        .ume-actions-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
+        .ume-action-item { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 12px 4px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; box-shadow: var(--shadow); }
+        .ume-action-item i { font-size: 1.1rem; color: var(--accent); }
+        .ume-action-item span { font-size: 0.65rem; color: var(--text-main); font-weight: 600; }
+        .ume-music-player { display: flex; flex-direction: column; gap: 12px; }
+        .todo-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; cursor: pointer; }
+        .todo-item.completed span { text-decoration: line-through; color: var(--text-sub); }
+        .ume-quote-card { background: linear-gradient(135deg, rgba(163,121,92,0.15), var(--card-bg)), var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+
+        /* Profil Saya */
+        .profile-view-container { position: relative; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 26px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 14px; }
+        .profile-banner { width: 100%; height: 110px; background-color: #332922; background-size: cover; background-position: center; position: relative; }
+        .customize-btn-floating { position: absolute; top: 12px; right: 12px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: var(--text-main); cursor: pointer; backdrop-filter: blur(10px); box-shadow: var(--shadow); display: flex; align-items: center; gap: 6px; }
+        .profile-avatar-row { padding: 0 18px; margin-top: -38px; display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+        .profile-main-avatar { width: 75px; height: 75px; border-radius: 50%; border: 3px solid var(--card-bg); object-fit: cover; background: var(--accent); }
+        .profile-stats-box { display: flex; gap: 16px; background: var(--bg-main); padding: 8px 14px; border-radius: 16px; border: 1px solid var(--card-border); text-align: center; }
+        .profile-bio-section { padding: 0 18px 18px 18px; }
+        .skill-progress-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px; }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 12px;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.7rem;
+            gap: 4px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .nav-item i {
+            font-size: 1.15rem;
+        }
+
+        .nav-ume-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .nav-ume-circle {
+            width: 50px;
+            height: 50px;
+            background: var(--text-main);
+            color: var(--bg-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 8px 25px var(--chrome-glow);
+            margin-top: -12px;
+            border: 2px solid var(--card-border);
+        }
+
+        .nav-ume-center span {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg-main);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: var(--shadow);
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <!-- 1. Halaman Login -->
+    <div id="auth-screen">
+        <div class="auth-logo-badge glass-card">
+            <i class="fa-solid fa-compass"></i>
+        </div>
+        <div style="font-family: 'Playfair Display'; font-size: 2.3rem; font-style: italic; margin-bottom: 5px; color: var(--text-main);">SYNC Match</div>
+        <p style="color: var(--text-sub); margin-bottom: 30px; font-size: 0.88rem;">— Learn • Share • Grow —</p>
+        <button class="btn-primary glass-card" onclick="handleGoogleLogin()"><i class="fa-brands fa-google" style="margin-right: 8px;"></i> Masuk dengan Google</button>
+    </div>
+
+    <!-- 2. Onboarding Pengguna Baru -->
+    <div id="onboarding-screen">
+        <div class="modal-card">
+            <div style="font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Complete Your Profile</div>
+            <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 18px;">Tell us more about yourself ♡</p>
+            
+            <div class="avatar-upload-box" id="onboard-avatar-box" onclick="document.getElementById('file-input').click()">
+                <i class="fa-regular fa-user"></i>
+                <div class="avatar-plus-badge">+</div>
+            </div>
+            <input type="file" id="file-input" style="display: none;" accept="image/*" onchange="handleImageUpload(event)">
+
+            <input type="text" id="onboard-username" class="form-input" placeholder="Masukkan username (tanpa @)">
+            <input type="text" id="onboard-fullname" class="form-input" placeholder="Nama lengkap">
+            <input type="number" id="onboard-age" class="form-input" placeholder="Usia (mis: 16)">
+            <input type="text" id="onboard-bio" class="form-input" placeholder="Bio singkat (mis: Have a good day)">
+
+            <label style="font-size: 0.78rem; color: var(--text-sub); margin-bottom: 6px; display: block;">Keahlian yang Dimiliki</label>
+            <div class="chip-container" id="skills-chips">
+                <div class="chip" onclick="toggleChip(this)">Coding</div>
+                <div class="chip" onclick="toggleChip(this)">Web Development</div>
+                <div class="chip" onclick="toggleChip(this)">UI/UX Design</div>
+                <div class="chip" onclick="toggleChip(this)">Illustration</div>
+                <div class="chip" onclick="toggleChip(this)">Editing</div>
+                <div class="chip" onclick="toggleChip(this)">Made CGI Effect</div>
+                <div class="chip" onclick="toggleChip(this)">Writing</div>
+                <div class="chip" onclick="toggleChip(this)">Copywriting</div>
+                <div class="chip" onclick="toggleChip(this)">English</div>
+                <div class="add-chip-btn" onclick="addCustomSkill()">+ Tambah Skill Lainnya</div>
+            </div>
+
+            <button class="btn-primary glass-card" style="margin-top: 0;" onclick="saveOnboardingData()">Daftar Sekarang ✨</button>
+        </div>
+    </div>
+    <!-- 3. Modal Customize Profil -->
+    <div id="edit-profile-modal">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-family: 'Playfair Display'; font-size: 1.3rem;">Customize Profil</h3>
+                <button onclick="closeCustomizeModal()" style="background: transparent; border: none; font-size: 1.2rem; color: var(--text-main); cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <label style="font-size: 0.78rem; color: var(--text-sub); display: block; margin-bottom: 6px;">Foto Profil (Crop & Upload)</label>
+            <div class="avatar-upload-box" id="edit-avatar-box" onclick="document.getElementById('edit-avatar-file').click()">
+                <i class="fa-regular fa-user"></i>
+                <div class="avatar-plus-badge">+</div>
+            </div>
+            <input type="file" id="edit-avatar-file" style="display: none;" accept="image/*" onchange="handleEditAvatar(event)">
+
+            <label style="font-size: 0.78rem; color: var(--text-sub); display: block; margin-bottom: 6px;">Pilih Banner Profil</label>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px;">
+                <div onclick="selectBannerTheme('#332922')" style="height: 45px; background: #332922; border-radius: 12px; cursor: pointer; border: 2px solid var(--card-border);"></div>
+                <div onclick="selectBannerTheme('#5A4033')" style="height: 45px; background: #5A4033; border-radius: 12px; cursor: pointer; border: 2px solid var(--card-border);"></div>
+                <div onclick="document.getElementById('edit-banner-file').click()" style="height: 45px; background: var(--card-bg); border-radius: 12px; cursor: pointer; border: 2px dashed var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--accent);">Upload</div>
+            </div>
+            <input type="file" id="edit-banner-file" style="display: none;" accept="image/*" onchange="handleEditBanner(event)">
+
+            <label style="font-size: 0.78rem; color: var(--text-sub);">Bio Singkat</label>
+            <input type="text" id="edit-bio-input" class="form-input" placeholder="Have a good day">
+
+            <label style="font-size: 0.78rem; color: var(--text-sub);">Atur Keahlian (Skills)</label>
+            <div class="chip-container" id="edit-skills-chips"></div>
+            <button class="add-chip-btn" onclick="addEditCustomSkill()" style="margin-bottom: 14px;">+ Tambah Skill Baru</button>
+
+            <label style="font-size: 0.78rem; color: var(--text-sub); display: block; margin-bottom: 6px;">Progres Kemahiran Skill (%)</label>
+            <div id="skill-sliders-container"></div>
+
+            <button class="btn-primary glass-card" onclick="saveProfileCustomization()">Simpan Perubahan ✨</button>
+        </div>
+    </div>
+
+    <!-- 4. Aplikasi Utama -->
+    <div class="app-container">
+        <header>
+            <div class="header-logo-group">
+                <div class="header-title-text">
+                    <h1>SYNC <span>Match</span></h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn glass-card" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+                <button class="icon-btn glass-card" onclick="showToast('Tidak ada notifikasi baru')">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="badge-dot"></span>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            
+            <!-- ================= TAB HOME (Sesuai Contoh Searching 1001221267 & 1001221251) ================= -->
+            <section id="view-home" class="view-section active">
+                
+                <!-- Stories Row -->
+                <div class="stories-container" id="home-stories-bar">
+                    <div class="story-item" onclick="showToast('Fitur Unggah Story Kamu')">
+                        <div class="story-ring" style="border-color: var(--text-sub);">
+                            <img src="" id="my-story-avatar" class="story-img" alt="Story">
+                            <div class="story-plus-icon"><i class="fa-solid fa-plus"></i></div>
+                        </div>
+                        <span>Story Kamu</span>
+                    </div>
+                </div>
+
+                <!-- Search Input Real-Time -->
+                <div class="search-input-wrapper">
+                    <input type="text" id="home-search-input" placeholder="Cari ID @username atau keahlian..." oninput="filterPublicUsers()">
+                    <i class="fa-solid fa-xmark" id="clear-search-btn" style="color: var(--text-sub); cursor: pointer; display: none;" onclick="clearHomeSearch()"></i>
+                </div>
+
+                <!-- Filter Kategori Pills -->
+                <div class="filter-pills-scroll" id="category-filter-pills">
+                    <div class="filter-pill active" onclick="selectCategoryFilter('All', this)">All</div>
+                    <div class="filter-pill" onclick="selectCategoryFilter('Tech & Coding', this)">Tech & Coding</div>
+                    <div class="filter-pill" onclick="selectCategoryFilter('Creative & Visual', this)">Creative & Visual</div>
+                    <div class="filter-pill" onclick="selectCategoryFilter('Writing & Language', this)">Writing & Language</div>
+                </div>
+
+                <!-- Daftar Pengguna Publik Asli (Hasil Pencarian & Filter) -->
+                <div id="public-users-list">
+                    <p style="font-size: 0.82rem; color: var(--text-sub); text-align: center; padding: 20px 0;">Memuat daftar pengguna SYNC Match...</p>
+                </div>
+            </section>
+
+            <!-- ================= TAB KOMUNITAS ================= -->
+            <section id="view-komunitas" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h2 style="font-size: 1.2rem; font-weight: 700;">Komunitas Belajar ✨</h2>
+                    <span style="font-size: 0.75rem; color: var(--accent); background: var(--card-bg); padding: 6px 12px; border-radius: 16px; border: 1px solid var(--card-border);">Feed Diskusi</span>
+                </div>
+
+                <div class="community-post-box">
+                    <textarea id="post-content-input" class="community-textarea" placeholder="Bagikan catatan belajar, pertanyaan, atau progres belajarmu..."></textarea>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <select id="post-category-select" style="background: var(--bg-main); border: 1px solid var(--card-border); border-radius: 12px; padding: 6px 10px; font-size: 0.75rem; color: var(--text-main); outline: none;">
+                                <option value="Study Log">📚 Study Log</option>
+                                <option value="Tanya Jawab">❓ Tanya Jawab</option>
+                                <option value="Progres">🚀 Progres</option>
+                                <option value="Diskusi">💬 Diskusi</option>
+                            </select>
+
+                            <button type="button" class="icon-btn glass-card" style="width: 32px; height: 32px;" onclick="document.getElementById('post-file-input').click()" title="Upload File">
+                                <i class="fa-solid fa-paperclip" style="font-size: 0.8rem;"></i>
+                            </button>
+                            <input type="file" id="post-file-input" style="display: none;" onchange="handlePostFile(event)">
+
+                            <button type="button" class="icon-btn glass-card" style="width: 32px; height: 32px;" onclick="toggleRecordVoice()" id="mic-btn" title="Rekam Voice Note">
+                                <i class="fa-solid fa-microphone" style="font-size: 0.8rem;"></i>
+                            </button>
+
+                            <button type="button" class="icon-btn glass-card" style="width: 32px; height: 32px;" onclick="document.getElementById('post-video-input').click()" title="Kirim Video">
+                                <i class="fa-solid fa-video" style="font-size: 0.8rem;"></i>
+                            </button>
+                            <input type="file" id="post-video-input" style="display: none;" accept="video/*" onchange="handlePostVideo(event)">
+                        </div>
+
+                        <button class="btn-primary glass-card" style="margin-top: 0; padding: 8px 20px; font-size: 0.8rem; width: auto;" onclick="submitCommunityPost()">Posting</button>
+                    </div>
+                    <div id="post-attachment-preview" style="font-size: 0.75rem; color: var(--accent); margin-top: 8px;"></div>
+                </div>
+
+                <div id="community-feed-container">
+                    <p style="font-size: 0.8rem; color: var(--text-sub); text-align: center;">Memuat diskusi komunitas...</p>
+                </div>
+            </section>
+
+            <!-- ================= TAB UME SANCTUARY ================= -->
+            <section id="view-ume" class="view-section">
+                <div class="glass-card ume-greeting-card">
+                    <img src="" id="ume-user-avatar" class="ume-avatar" alt="Avatar">
+                    <div style="flex: 1;">
+                        <h2 style="font-size: 1.1rem; font-weight: 700;" id="ume-display-greeting">Good Morning, User ✨</h2>
+                        <p style="font-size: 0.78rem; color: var(--text-sub); font-style: italic;">"Keep going, better days are coming."</p>
+                    </div>
+                </div>
+
+                <div class="ume-info-row">
+                    <div class="ume-mini-box">
+                        <p style="font-size: 0.68rem; color: var(--text-sub); font-weight: 600;">TODAY</p>
+                        <h3 style="font-size: 0.95rem; margin-top: 3px;">18 Nov</h3>
+                        <p style="font-size: 0.7rem; color: var(--accent);">Wednesday</p>
+                    </div>
+                    <div class="ume-mini-box">
+                        <p style="font-size: 0.68rem; color: var(--text-sub); font-weight: 600;">WEATHER</p>
+                        <h3 style="font-size: 0.95rem; margin-top: 3px;">🌤️ 27°C</h3>
+                        <p style="font-size: 0.7rem; color: var(--text-sub);">Partly Cloudy</p>
+                    </div>
+                    <div class="ume-mini-box" onclick="showToast('Status: Be Calm, Be Happy')" style="cursor: pointer;">
+                        <p style="font-size: 0.68rem; color: var(--text-sub); font-weight: 600;">MOOD</p>
+                        <h3 style="font-size: 0.9rem; margin-top: 3px;">🪷 Calm</h3>
+                        <p style="font-size: 0.7rem; color: var(--accent);">Be Happy</p>
+                    </div>
+                </div>
+
+                <div class="ume-actions-grid">
+                    <div class="ume-action-item" onclick="switchTab('chat', document.querySelectorAll('.nav-item')[3])">
+                        <i class="fa-regular fa-comment-dots"></i>
+                        <span>Chat</span>
+                    </div>
+                    <div class="ume-action-item" onclick="switchTab('komunitas', document.querySelectorAll('.nav-item')[1])">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>Explore</span>
+                    </div>
+                    <div class="ume-action-item" onclick="document.getElementById('audio-upload-input').click()">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <span>Files</span>
+                    </div>
+                    <div class="ume-action-item" onclick="showToast('Menu Lainnya UME')">
+                        <i class="fa-solid fa-ellipsis"></i>
+                        <span>More</span>
+                    </div>
+                </div>
+
+                <div class="glass-card ume-music-player">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span style="font-size: 0.7rem; color: var(--accent); font-weight: 600;"><i class="fa-solid fa-music"></i> UME MUSIC STREAM</span>
+                            <h4 id="now-playing-title" style="font-size: 0.95rem; margin-top: 2px;">Better Days</h4>
+                            <p id="now-playing-artist" style="font-size: 0.72rem; color: var(--text-sub);">Suki Waterhouse</p>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="icon-btn glass-card" style="width: 34px; height: 34px;" onclick="searchMusicPrompt()"><i class="fa-solid fa-magnifying-glass" style="font-size: 0.8rem;"></i></button>
+                            <button class="icon-btn glass-card" style="width: 34px; height: 34px;" onclick="document.getElementById('audio-upload-input').click()"><i class="fa-solid fa-upload" style="font-size: 0.8rem;"></i></button>
+                            <input type="file" id="audio-upload-input" style="display: none;" accept="audio/*" onchange="handleAudioUpload(event)">
+                        </div>
+                    </div>
+                    <audio id="audio-player" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+                    <div style="display: flex; justify-content: space-around; align-items: center; margin-top: 4px; color: var(--text-main);">
+                        <i class="fa-solid fa-shuffle" style="cursor: pointer; font-size: 0.9rem;" onclick="showToast('Shuffle diaktifkan')"></i>
+                        <i class="fa-solid fa-backward-step" style="cursor: pointer;" onclick="showToast('Sebelumnya')"></i>
+                        <div class="icon-btn glass-card" id="play-pause-btn" style="width: 42px; height: 42px; background: var(--text-main); color: var(--bg-main);" onclick="togglePlayMusic()">
+                            <i class="fa-solid fa-play" id="play-icon"></i>
+                        </div>
+                        <i class="fa-solid fa-forward-step" style="cursor: pointer;" onclick="showToast('Selanjutnya')"></i>
+                        <i class="fa-solid fa-rotate-right" style="cursor: pointer; font-size: 0.9rem;" onclick="showToast('Repeat diaktifkan')"></i>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                    <div class="glass-card" style="margin-bottom: 0;">
+                        <span style="font-size: 0.72rem; color: var(--text-sub); font-weight: 600;"><i class="fa-regular fa-calendar"></i> Calendar</span>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; text-align: center; font-weight: 600; margin-top: 8px;">
+                            <span>16</span><span>17</span>
+                            <span style="background: var(--text-main); color: var(--bg-main); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center;">18</span>
+                            <span>19</span><span>20</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card" style="margin-bottom: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-size: 0.72rem; color: var(--text-sub); font-weight: 600;"><i class="fa-solid fa-list-check"></i> To Do List</span>
+                            <button onclick="addNewTodoPrompt()" style="background: transparent; border: none; color: var(--accent); cursor: pointer; font-size: 0.85rem;"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="todo-list-container" style="display: flex; flex-direction: column; gap: 6px;">
+                            <div class="todo-item completed" onclick="toggleTodo(this)">
+                                <i class="fa-solid fa-square-check" style="color: var(--accent);"></i>
+                                <span>Finish UI Design</span>
+                            </div>
+                            <div class="todo-item" onclick="toggleTodo(this)">
+                                <i class="fa-regular fa-square" style="color: var(--text-sub);"></i>
+                                <span>Read a book</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab Chat -->
+            <section id="view-chat" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-main);">Pesan Real-Time</h2>
+                <div class="glass-card" id="chat-active-box">
+                    <p style="font-size: 0.88rem; color: var(--text-sub);">Pilih partner dari halaman Home untuk mulai obrolan.</p>
+                </div>
+            </section>
+
+            <!-- Tab Profil Saya -->
+            <section id="view-profile" class="view-section">
+                <div class="profile-view-container">
+                    <div class="profile-banner" id="profile-banner-bg">
+                        <button class="customize-btn-floating glass-card" onclick="openCustomizeModal()">
+                            <i class="fa-solid fa-pen-to-square"></i> Customize Profil
+                        </button>
+                    </div>
+
+                    <div class="profile-avatar-row">
+                        <img src="" id="profile-view-avatar" class="profile-main-avatar" alt="Avatar">
+                        <div class="profile-stats-box">
+                            <div class="p-stat" style="text-align: center;">
+                                <h4 id="stat-skills-count" style="font-size: 0.85rem; font-weight: 700;">0</h4>
+                                <p style="font-size: 0.62rem; color: var(--text-sub);">Skills</p>
+                            </div>
+                            <div class="p-stat" style="text-align: center;">
+                                <h4 style="font-size: 0.85rem; font-weight: 700;">0</h4>
+                                <p style="font-size: 0.62rem; color: var(--text-sub);">Posts</p>
+                            </div>
+                            <div class="p-stat" style="text-align: center;">
+                                <h4 id="stat-progress-avg" style="font-size: 0.85rem; font-weight: 700;">0%</h4>
+                                <p style="font-size: 0.62rem; color: var(--text-sub);">Progress</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-bio-section">
+                        <h3 id="profile-view-name" style="font-size: 1.15rem; font-weight: 700;">-</h3>
+                        <p id="profile-view-handle-tag" style="font-size: 0.75rem; color: var(--text-sub); margin-bottom: 6px;">@- • Student</p>
+                        <p id="profile-view-bio" style="font-size: 0.82rem; color: var(--text-main);">-</p>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="font-size: 0.95rem; font-weight: 700;">Keahlian yang Dibagikan</h4>
+                        <span style="font-size: 0.75rem; color: var(--accent); cursor: pointer;" onclick="openCustomizeModal()">+ Atur Skill</span>
+                    </div>
+                    <div class="chip-container" id="profile-skills-display"></div>
+                </div>
+
+                <div class="skill-progress-card">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 4px;"><i class="fa-solid fa-chart-line" style="color: var(--accent);"></i> Progres Belajar Skill</h4>
+                    <div id="profile-progress-sliders-view"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home', this)">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('komunitas', this)">
+                <i class="fa-solid fa-compass"></i>
+                <span>Komunitas</span>
+            </div>
+            <div class="nav-ume-center" onclick="switchTab('ume', this)">
+                <div class="nav-ume-circle glass-card">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <span>U Mode</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('chat', this)">
+                <i class="fa-regular fa-comment-dots"></i>
+                <span>Chat</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile', this)">
+                <i class="fa-regular fa-user"></i>
+                <span>Profil</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Firebase & Logika Sistem -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyC5V6OBw_pVdUZO-01HloF7u_OOGjvJb3I",
+          authDomain: "syncmatcteen.firebaseapp.com",
+          databaseURL: "https://syncmatcteen-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "syncmatcteen",
+          storageBucket: "syncmatcteen.firebasestorage.app",
+          messagingSenderId: "880276728619",
+          appId: "1:880276728619:web:9845c02854697a0db5336e",
+          measurementId: "G-JRGVRFD18P"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        window.showToast = function(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg glass-card';
+            toast.innerHTML = `<i class="fa-solid fa-sparkles" style="color: var(--accent);"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        };
+
+        window.handleGoogleLogin = function() {
+            signInWithPopup(auth, provider).catch((error) => {
+                showToast("Gagal Masuk: " + error.message);
+            });
+        };
+
+        let currentUserData = {};
+        let allPublicUsers = [];
+        let activeCategory = 'All';
+
+        // Pemetaan Kategori Skill (Sesuai Pill Filter)
+        const categorySkillMap = {
+            'Tech & Coding': ['Coding', 'Web Development', '3D Modeling', 'Programming', 'AI'],
+            'Creative & Visual': ['UI/UX Design', 'Illustration', 'Editing', 'Made CGI Effect', 'Design'],
+            'Writing & Language': ['Writing', 'Copywriting', 'English', 'Indonesian', 'Vietnamese']
+        };
+
+        async function loadPublicUsers() {
+            const listContainer = document.getElementById('public-users-list');
+            const storiesBar = document.getElementById('home-stories-bar');
+            try {
+                const snap = await getDocs(collection(db, "users"));
+                allPublicUsers = [];
+                const myUid = auth.currentUser ? auth.currentUser.uid : '';
+
+                // Reset stories selain Story Kamu
+                const myStoryEl = storiesBar.firstElementChild;
+                storiesBar.innerHTML = '';
+                storiesBar.appendChild(myStoryEl);
+
+                snap.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.uid === myUid) return; // Kecualikan akun sendiri
+                    allPublicUsers.push(data);
+
+                    // Tambahkan ke baris story
+                    const storyDiv = document.createElement('div');
+                    storyDiv.className = 'story-item';
+                    storyDiv.onclick = () => showToast(`Melihat story @${data.username || 'user'}`);
+                    storyDiv.innerHTML = `
+                        <div class="story-ring">
+                            <img src="${data.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}" class="story-img" alt="Avatar">
+                        </div>
+                        <span>@${data.username || 'user'}</span>
+                    `;
+                    storiesBar.appendChild(storyDiv);
+                });
+
+                renderFilteredUsers(allPublicUsers);
+            } catch (err) {
+                listContainer.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-sub); text-align: center;">Gagal memuat daftar pengguna.</p>';
+            }
+        }
+
+        window.selectCategoryFilter = function(category, el) {
+            activeCategory = category;
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            filterPublicUsers();
+        };
+
+        window.clearHomeSearch = function() {
+            document.getElementById('home-search-input').value = '';
+            document.getElementById('clear-search-btn').style.display = 'none';
+            filterPublicUsers();
+        };
+
+        window.filterPublicUsers = function() {
+            const keyword = document.getElementById('home-search-input').value.trim().toLowerCase();
+            document.getElementById('clear-search-btn').style.display = keyword ? 'block' : 'none';
+
+            const filtered = allPublicUsers.filter(u => {
+                const name = (u.fullname || '').toLowerCase();
+                const username = (u.username || '').toLowerCase();
+                const skills = (u.skills || []).map(s => s.toLowerCase());
+
+                const matchesKeyword = !keyword ||
+                    name.includes(keyword) ||
+                    username.includes(keyword) ||
+                    skills.some(s => s.includes(keyword));
+
+                let matchesCategory = true;
+                if (activeCategory !== 'All') {
+                    const allowedSkills = (categorySkillMap[activeCategory] || []).map(s => s.toLowerCase());
+                    matchesCategory = skills.some(s => allowedSkills.some(allowed => s.includes(allowed) || allowed.includes(s)));
+                }
+
+                return matchesKeyword && matchesCategory;
+            });
+
+            renderFilteredUsers(filtered);
+        };
+
+        function renderFilteredUsers(users) {
+            const container = document.getElementById('public-users-list');
+            container.innerHTML = '';
+
+            if (users.length === 0) {
+                container.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-sub); text-align: center; padding: 24px 0;">Tidak ditemukan pengguna yang cocok.</p>';
+                return;
+            }
+
+            users.forEach(u => {
+                const card = document.createElement('div');
+                card.className = 'user-search-card';
+                card.onclick = () => {
+                    showToast(`Membuka obrolan dengan ${u.fullname || u.username}`);
+                    switchTab('chat', document.querySelectorAll('.nav-item')[3]);
+                    document.getElementById('chat-active-box').innerHTML = `
+                        <h4 style="margin-bottom:6px;">Chat dengan ${u.fullname || u.username} (@${u.username || 'user'})</h4>
+                        <p style="font-size:0.8rem; color:var(--text-sub);">Keahlian: ${(u.skills || []).join(', ') || '-'}</p>
+                    `;
+                };
+
+                const skillsText = (u.skills && u.skills.length > 0)
+                    ? u.skills.map(s => `• ${s}`).join('  ')
+                    : '• Student';
+                const ageText = u.age ? `${u.age} y/o • ` : '';
+                const handleBadge = u.username ? `@${u.username}` : '@user';
+
+                const avatarHtml = u.photoURL
+                    ? `<img src="${u.photoURL}" class="user-search-avatar" alt="Avatar">`
+                    : `<div class="user-search-avatar">${(u.fullname || u.username || 'U').charAt(0).toUpperCase()}</div>`;
+
+                card.innerHTML = `
+                    ${avatarHtml}
+                    <div class="user-search-info">
+                        <div class="user-search-header">
+                            <span class="user-search-name">${u.fullname || u.username || 'User'}</span>
+                            <span class="user-handle-badge">${handleBadge}</span>
+                        </div>
+                        <div class="user-skills-line">${skillsText}</div>
+                        <div class="user-meta-line">${ageText}Student</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /* --- Komunitas Logic --- */
+        let attachedMedia = { type: null, url: null, name: null };
+
+        window.handlePostFile = function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    attachedMedia = { type: 'file', url: evt.target.result, name: file.name };
+                    document.getElementById('post-attachment-preview').innerText = `📎 Terlampir: ${file.name}`;
+                    showToast("File berhasil dilampirkan!");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.handlePostVideo = function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    attachedMedia = { type: 'video', url: evt.target.result, name: file.name };
+                    document.getElementById('post-attachment-preview').innerText = `🎥 Terlampir Video: ${file.name}`;
+                    showToast("Video berhasil dilampirkan!");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        let mediaRecorder, audioChunks = [], isRecording = false;
+        window.toggleRecordVoice = async function() {
+            const micBtn = document.getElementById('mic-btn');
+            if(!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            attachedMedia = { type: 'audio', url: e.target.result, name: 'Voice Note' };
+                            document.getElementById('post-attachment-preview').innerText = `🎤 Terlampir Voice Note`;
+                            showToast("Voice note berhasil direkam!");
+                        };
+                        reader.readAsDataURL(audioBlob);
+                    };
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.style.color = '#E53935';
+                    showToast("Merekam suara...");
+                } catch(err) {
+                    showToast("Gagal mengakses mikrofon!");
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.style.color = 'inherit';
+            }
+        };
+
+        window.submitCommunityPost = async function() {
+            const user = auth.currentUser;
+            if(!user) return;
+            const text = document.getElementById('post-content-input').value;
+            const category = document.getElementById('post-category-select').value;
+
+            if(!text.trim() && !attachedMedia.url) {
+                showToast("Tulis sesuatu atau lampirkan media terlebih dahulu!");
+                return;
+            }
+
+            const postData = {
+                uid: user.uid,
+                authorName: currentUserData.fullname || currentUserData.username || user.displayName || 'User',
+                authorPhoto: currentUserData.photoURL || user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+                authorUsername: currentUserData.username || 'user',
+                content: text,
+                category: category,
+                media: attachedMedia,
+                likes: 0,
+                commentsCount: 0,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await addDoc(collection(db, "community_posts"), postData);
+                document.getElementById('post-content-input').value = '';
+                attachedMedia = { type: null, url: null, name: null };
+                document.getElementById('post-attachment-preview').innerText = '';
+                showToast("Berhasil diposting ke Komunitas! ✨");
+                loadCommunityFeed();
+            } catch(err) {
+                showToast("Gagal memposting: " + err.message);
+            }
+        };
+
+        async function loadCommunityFeed() {
+            const container = document.getElementById('community-feed-container');
+            if(!container) return;
+            try {
+                const q = query(collection(db, "community_posts"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                container.innerHTML = '';
+
+                querySnapshot.forEach((docSnap) => {
+                    const post = docSnap.data();
+                    const card = document.createElement('div');
+                    card.className = 'community-feed-card';
+
+                    let mediaHtml = '';
+                    if(post.media && post.media.type === 'file') {
+                        mediaHtml = `<div style="margin-top: 10px; background: var(--bg-main); padding: 8px 12px; border-radius: 12px; font-size: 0.8rem;"><i class="fa-solid fa-file"></i> <a href="${post.media.url}" download="${post.media.name}" style="color: var(--accent);">${post.media.name}</a></div>`;
+                    } else if(post.media && post.media.type === 'video') {
+                        mediaHtml = `<div style="margin-top: 10px;"><video src="${post.media.url}" controls style="width: 100%; border-radius: 12px; max-height: 250px;"></video></div>`;
+                    } else if(post.media && post.media.type === 'audio') {
+                        mediaHtml = `<div style="margin-top: 10px;"><audio src="${post.media.url}" controls style="width: 100%;"></audio></div>`;
+                    }
+
+                    card.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <img src="${post.authorPhoto}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                            <div>
+                                <h4 style="font-size: 0.9rem; font-weight: 700;">${post.authorName} <span style="font-size: 0.7rem; color: var(--accent); font-weight: normal;">• ${post.category || 'Study Log'}</span></h4>
+                                <p style="font-size: 0.7rem; color: var(--text-sub);">@${post.authorUsername}</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">${post.content}</p>
+                        ${mediaHtml}
+                    `;
+                    container.appendChild(card);
+                });
+
+                if(container.children.length === 0) {
+                    container.innerHTML = '<p style="font-size: 0.8rem; color: var(--text-sub); text-align: center;">Belum ada postingan di komunitas.</p>';
+                }
+            } catch(err) {
+                container.innerHTML = '<p style="font-size: 0.8rem; color: var(--text-sub); text-align: center;">Gagal memuat feed komunitas.</p>';
+            }
+        }
+
+        /* --- Profil & UME Logic --- */
+        let uploadedPhotoBase64 = "";
+        window.handleImageUpload = function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    uploadedPhotoBase64 = evt.target.result;
+                    document.getElementById('onboard-avatar-box').innerHTML = `<img src="${uploadedPhotoBase64}"><div class="avatar-plus-badge">+</div>`;
+                    showToast("Foto profil dimuat!");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.handleEditAvatar = function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    currentUserData.photoURL = evt.target.result;
+                    document.getElementById('edit-avatar-box').innerHTML = `<img src="${currentUserData.photoURL}"><div class="avatar-plus-badge">+</div>`;
+                    showToast("Foto profil diperbarui!");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.handleEditBanner = function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    currentUserData.bannerURL = `url('${evt.target.result}')`;
+                    document.getElementById('profile-banner-bg').style.backgroundImage = currentUserData.bannerURL;
+                    showToast("Banner kustom diterapkan!");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.selectBannerTheme = function(color) {
+            currentUserData.bannerURL = color;
+            document.getElementById('profile-banner-bg').style.backgroundImage = 'none';
+            document.getElementById('profile-banner-bg').style.backgroundColor = color;
+            showToast("Tema banner dipilih!");
+        };
+
+        window.openCustomizeModal = function() {
+            document.getElementById('edit-profile-modal').style.display = 'flex';
+            document.getElementById('edit-bio-input').value = currentUserData.bio || "";
+            if(currentUserData.photoURL) {
+                document.getElementById('edit-avatar-box').innerHTML = `<img src="${currentUserData.photoURL}"><div class="avatar-plus-badge">+</div>`;
+            }
+            renderEditModalSkills();
+            renderEditModalSliders();
+        };
+
+        window.closeCustomizeModal = function() { document.getElementById('edit-profile-modal').style.display = 'none'; };
+        window.toggleChip = function(el) { el.classList.toggle('selected'); };
+
+        window.addCustomSkill = function() {
+            const val = prompt("Masukkan skill tambahan:");
+            if (val && val.trim()) {
+                const container = document.getElementById('skills-chips');
+                const chip = document.createElement('div');
+                chip.className = 'chip selected';
+                chip.innerText = val.trim();
+                chip.onclick = function() { toggleChip(this); };
+                container.insertBefore(chip, container.lastElementChild);
+            }
+        };
+
+        window.addEditCustomSkill = function() {
+            const val = prompt("Masukkan skill baru:");
+            if(val && val.trim()) {
+                const sk = val.trim();
+                if(!currentUserData.skills) currentUserData.skills = [];
+                if(!currentUserData.skillProgress) currentUserData.skillProgress = {};
+                if(!currentUserData.skills.includes(sk)) {
+                    currentUserData.skills.push(sk);
+                    currentUserData.skillProgress[sk] = 25;
+                    renderEditModalSkills();
+                    renderEditModalSliders();
+                    showToast("Skill ditambahkan!");
+                }
+            }
+        };
+
+        function renderEditModalSkills() {
+            const container = document.getElementById('edit-skills-chips');
+            container.innerHTML = '';
+            ["Coding", "Web Development", "UI/UX Design", "Illustration", "Editing", "Made CGI Effect", "Writing", "Copywriting", "English"].forEach(sk => {
+                const isSelected = (currentUserData.skills || []).includes(sk);
+                const chip = document.createElement('div');
+                chip.className = `chip ${isSelected ? 'selected' : ''}`;
+                chip.innerText = sk;
+                chip.onclick = function() {
+                    chip.classList.toggle('selected');
+                    if(!currentUserData.skills) currentUserData.skills = [];
+                    if(!currentUserData.skillProgress) currentUserData.skillProgress = {};
+                    if(chip.classList.contains('selected')) {
+                        if(!currentUserData.skills.includes(sk)) currentUserData.skills.push(sk);
+                        if(currentUserData.skillProgress[sk] === undefined) currentUserData.skillProgress[sk] = 20;
+                    } else {
+                        currentUserData.skills = currentUserData.skills.filter(s => s !== sk);
+                        delete currentUserData.skillProgress[sk];
+                    }
+                    renderEditModalSliders();
+                };
+                container.appendChild(chip);
+            });
+        }
+
+        function renderEditModalSliders() {
+            const container = document.getElementById('skill-sliders-container');
+            container.innerHTML = '';
+            const progressObj = currentUserData.skillProgress || {};
+            Object.keys(progressObj).forEach(sk => {
+                const val = progressObj[sk];
+                const div = document.createElement('div');
+                div.style.marginBottom = '10px';
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 3px;">
+                        <span>${sk}</span>
+                        <span id="slider-val-${sk}">${val}%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="${val}" style="width:100%; accent-color:var(--accent);" oninput="updateSkillProgressValue('${sk}', this.value)">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.updateSkillProgressValue = function(sk, val) {
+            if(!currentUserData.skillProgress) currentUserData.skillProgress = {};
+            currentUserData.skillProgress[sk] = parseInt(val);
+            document.getElementById(`slider-val-${sk}`).innerText = `${val}%`;
+        };
+
+        window.saveProfileCustomization = async function() {
+            const user = auth.currentUser;
+            if(!user) return;
+            currentUserData.bio = document.getElementById('edit-bio-input').value;
+            try {
+                await setDoc(doc(db, "users", user.uid), currentUserData, { merge: true });
+                closeCustomizeModal();
+                updateProfileUI(currentUserData);
+                showToast("Profil berhasil diperbarui ✨");
+            } catch(err) {
+                showToast("Gagal menyimpan: " + err.message);
+            }
+        };
+
+        let isPlaying = false;
+        const audioPlayer = document.getElementById('audio-player');
+        window.togglePlayMusic = function() {
+            const playIcon = document.getElementById('play-icon');
+            if (isPlaying) {
+                audioPlayer.pause();
+                playIcon.className = 'fa-solid fa-play';
+                isPlaying = false;
+                showToast("Musik dijeda");
+            } else {
+                audioPlayer.play().then(() => {
+                    playIcon.className = 'fa-solid fa-pause';
+                    isPlaying = true;
+                    showToast("Memutar musik UME");
+                }).catch(err => showToast("Gagal memutar: " + err.message));
+            }
+        };
+
+        window.handleAudioUpload = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                audioPlayer.src = URL.createObjectURL(file);
+                document.getElementById('now-playing-title').innerText = file.name.replace(/\.[^/.]+$/, "");
+                document.getElementById('now-playing-artist').innerText = "File Perangkat Lokal";
+                audioPlayer.play();
+                document.getElementById('play-icon').className = 'fa-solid fa-pause';
+                isPlaying = true;
+                showToast("Musik lokal dimuat!");
+            }
+        };
+
+        window.searchMusicPrompt = function() {
+            const q = prompt("Cari judul lagu:");
+            if (q && q.trim()) {
+                document.getElementById('now-playing-title').innerText = q.trim();
+                document.getElementById('now-playing-artist').innerText = "Hasil Pencarian";
+                audioPlayer.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
+                audioPlayer.play();
+                document.getElementById('play-icon').className = 'fa-solid fa-pause';
+                isPlaying = true;
+            }
+        };
+
+        window.toggleTodo = function(el) {
+            el.classList.toggle('completed');
+            const icon = el.querySelector('i');
+            icon.className = el.classList.contains('completed') ? 'fa-solid fa-square-check' : 'fa-regular fa-square';
+            icon.style.color = el.classList.contains('completed') ? 'var(--accent)' : 'var(--text-sub)';
+        };
+
+        window.addNewTodoPrompt = function() {
+            const task = prompt("Masukkan tugas baru:");
+            if (task && task.trim()) {
+                const container = document.getElementById('todo-list-container');
+                const item = document.createElement('div');
+                item.className = 'todo-item';
+                item.onclick = function() { toggleTodo(this); };
+                item.innerHTML = `<i class="fa-regular fa-square" style="color: var(--text-sub);"></i> <span>${task.trim()}</span>`;
+                container.appendChild(item);
+            }
+        };
+
+        function updateProfileUI(data) {
+            currentUserData = data;
+            const name = data.fullname || data.username || 'User';
+            const ageStr = data.age ? ` • ${data.age} y/o` : '';
+            document.getElementById('profile-view-name').innerText = name;
+            document.getElementById('profile-view-handle-tag').innerText = `@${data.username || 'user'}${ageStr} • Student`;
+            document.getElementById('profile-view-bio').innerText = data.bio || "Have a good day";
+            document.getElementById('ume-display-greeting').innerText = `Good Morning, ${name} ✨`;
+            
+            const avatarUrl = data.photoURL || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150";
+            document.getElementById('profile-view-avatar').src = avatarUrl;
+            document.getElementById('ume-user-avatar').src = avatarUrl;
+            document.getElementById('my-story-avatar').src = avatarUrl;
+
+            if(data.bannerURL) {
+                if(data.bannerURL.startsWith('url(')) {
+                    document.getElementById('profile-banner-bg').style.backgroundImage = data.bannerURL;
+                } else {
+                    document.getElementById('profile-banner-bg').style.backgroundColor = data.bannerURL;
+                }
+            }
+
+            const skillContainer = document.getElementById('profile-skills-display');
+            skillContainer.innerHTML = '';
+            (data.skills || []).forEach(sk => {
+                const c = document.createElement('div');
+                c.className = 'chip selected';
+                c.innerText = sk;
+                skillContainer.appendChild(c);
+            });
+            document.getElementById('stat-skills-count').innerText = (data.skills || []).length;
+
+            const progressView = document.getElementById('profile-progress-sliders-view');
+            progressView.innerHTML = '';
+            const progressObj = data.skillProgress || {};
+            const keys = Object.keys(progressObj);
+            let total = 0;
+            keys.forEach(sk => {
+                const val = progressObj[sk] || 0;
+                total += val;
+                const item = document.createElement('div');
+                item.style.marginBottom = '12px';
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">
+                        <span>${sk}</span>
+                        <span>${val}%</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: var(--bg-main); border-radius: 4px; overflow: hidden; border: 1px solid var(--card-border);">
+                        <div style="width: ${val}%; height: 100%; background: var(--accent); border-radius: 4px;"></div>
+                    </div>
+                `;
+                progressView.appendChild(item);
+            });
+            document.getElementById('stat-progress-avg').innerText = keys.length > 0 ? Math.round(total / keys.length) + '%' : '0%';
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('auth-screen').style.display = 'none';
+                const userDocRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userDocRef);
+
+                if (!userSnap.exists()) {
+                    document.getElementById('onboarding-screen').style.display = 'flex';
+                    if (user.photoURL) {
+                        uploadedPhotoBase64 = user.photoURL;
+                        document.getElementById('onboard-avatar-box').innerHTML = `<img src="${user.photoURL}"><div class="avatar-plus-badge">+</div>`;
+                    }
+                    if (user.displayName) {
+                        document.getElementById('onboard-fullname').value = user.displayName;
+                    }
+                } else {
+                    document.getElementById('onboarding-screen').style.display = 'none';
+                    updateProfileUI(userSnap.data());
+                    loadPublicUsers();
+                    loadCommunityFeed();
+                }
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('onboarding-screen').style.display = 'none';
+            }
+        });
+
+        window.saveOnboardingData = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+            const username = document.getElementById('onboard-username').value.replace(/^@/, '').trim();
+            const fullname = document.getElementById('onboard-fullname').value.trim();
+            const age = document.getElementById('onboard-age').value.trim();
+            const bio = document.getElementById('onboard-bio').value.trim();
+
+            if (!username || !fullname) {
+                showToast("Mohon isi username dan nama lengkap terlebih dahulu!");
+                return;
+            }
+
+            const selectedSkills = Array.from(document.querySelectorAll('#skills-chips .chip.selected')).map(c => c.innerText);
+            const finalPhoto = uploadedPhotoBase64 || user.photoURL || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150";
+
+            const initialProgress = {};
+            selectedSkills.forEach(s => { initialProgress[s] = 20; });
+
+            const newUserData = {
+                uid: user.uid,
+                email: user.email,
+                photoURL: finalPhoto,
+                bannerURL: "#332922",
+                username,
+                fullname,
+                age: age || "",
+                bio: bio || "Have a good day",
+                skills: selectedSkills,
+                skillProgress: initialProgress,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await setDoc(doc(db, "users", user.uid), newUserData);
+                document.getElementById('onboarding-screen').style.display = 'none';
+                updateProfileUI(newUserData);
+                loadPublicUsers();
+                loadCommunityFeed();
+                showToast("Profil berhasil dibuat! Selamat datang ✨");
+            } catch (err) {
+                showToast("Gagal menyimpan profil: " + err.message);
+            }
+        };
+    </script>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                icon.className = 'fa-solid fa-moon';
+                localStorage.setItem('theme', 'light');
+                showToast("Mode Terang diaktifkan");
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                icon.className = 'fa-solid fa-sun';
+                localStorage.setItem('theme', 'dark');
+                showToast("Mode Gelap diaktifkan");
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+        } else {
+            document.getElementById('theme-icon').className = 'fa-solid fa-moon';
+        }
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById('view-' + tabId).classList.add('active');
+            if (element && element.classList.contains('nav-item')) {
+                element.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
