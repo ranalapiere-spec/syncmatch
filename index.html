@@ -1,0 +1,2554 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SYNC Match — Learn • Share • Grow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' };</script>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #FAF7F4; --bg-card: rgba(255,255,255,0.88); --bg-soft: #F2ECE6;
+      --text-main: #2C2623; --text-sub: #6E5D52; --accent: #46372E;
+      --border-c: rgba(70,55,46,0.1); --nav-bg: rgba(255,255,255,0.92);
+    }
+    html.dark {
+      --bg-main: #131118; --bg-card: rgba(34,30,44,0.75); --bg-soft: rgba(48,42,62,0.65);
+      --text-main: #F4F1F8; --text-sub: #C8C0D6; --accent: #8B75B8;
+      --border-c: rgba(255,255,255,0.1); --nav-bg: rgba(28,24,38,0.9);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-main); color: var(--text-main); transition: 0.3s ease; }
+    .font-editorial { font-family: 'Cormorant Garamond', serif; }
+    .app-shell { max-width: 440px; min-height: 100vh; margin: 0 auto; padding-bottom: 105px; position: relative; }
+    .glass-card { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-c); box-shadow: 0 8px 24px -6px rgba(0,0,0,0.08); }
+    .soft-pill { background: var(--bg-soft); border: 1px solid var(--border-c); }
+    .btn-accent { background: var(--accent); color: #FAF7F4; }
+    .tap-ios { transition: transform 0.15s ease, opacity 0.15s ease; cursor: pointer; }
+    .tap-ios:active { transform: scale(0.95); opacity: 0.85; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    #sync-toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-130%); z-index: 9999; width: calc(100% - 32px); max-width: 400px; transition: transform 0.35s cubic-bezier(0.22,1,0.36,1); }
+    #sync-toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- 1. CUSTOM TOAST MODERN (Pengganti alert) -->
+  <div id="sync-toast" class="glass-card rounded-2xl p-3.5 flex items-center gap-3">
+    <div id="toast-badge" class="w-9 h-9 rounded-xl btn-accent flex items-center justify-center text-sm font-bold shrink-0">✦</div>
+    <div class="flex-1 min-w-0">
+      <p id="toast-title" class="text-xs font-bold truncate">Info</p>
+      <p id="toast-msg" class="text-[11px] opacity-80 truncate">Pesan sistem</p>
+    </div>
+  </div>
+
+  <!-- 2. CUSTOM MODAL MODERN (Pengganti confirm & prompt) -->
+  <div id="sync-modal" class="fixed inset-0 z-[9998] hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div class="glass-card rounded-3xl p-5 w-full max-w-[360px] animate-fade">
+      <h3 id="modal-title" class="font-bold text-base mb-1">Konfirmasi</h3>
+      <p id="modal-msg" class="text-xs opacity-80 mb-3 leading-relaxed">Yakin ingin melanjutkan?</p>
+      <input id="modal-input" type="text" class="hidden w-full soft-pill rounded-xl px-3.5 py-2.5 text-xs mb-4 focus:outline-none" placeholder="Ketik di sini..." />
+      <div class="flex gap-2 justify-end">
+        <button onclick="closeModal()" class="tap-ios soft-pill px-4 py-2 rounded-xl text-xs font-semibold">Batal</button>
+        <button id="modal-confirm-btn" class="tap-ios btn-accent px-4 py-2 rounded-xl text-xs font-semibold">Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. SHELL UTAMA APLIKASI -->
+  <div class="app-shell px-4 pt-4">
+    <!-- Header Jam & Kompas Real-Time -->
+    <header class="flex items-center justify-between mb-4">
+      <div onclick="openQuickNote()" class="tap-ios flex items-center gap-2.5">
+        <div class="w-11 h-11 rounded-full glass-card flex flex-col items-center justify-center">
+          <span class="text-xs leading-none">🧭</span>
+          <span id="live-clock" class="text-[9px] font-bold mt-0.5">--:--</span>
+        </div>
+        <div>
+          <h1 class="font-editorial text-2xl font-bold leading-none">SYNC <span class="italic font-semibold">Match</span></h1>
+          <p class="text-[9px] tracking-[0.18em] uppercase opacity-70 mt-1">Learn • Share • Grow</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleTheme()" class="tap-ios w-10 h-10 rounded-full glass-card flex items-center justify-center text-sm"><span id="theme-icon">🌙</span></button>
+        <button onclick="showToast('Notifikasi', 'Belum ada pemberitahuan baru')" class="tap-ios w-10 h-10 rounded-full glass-card flex items-center justify-center relative">🔔</button>
+        <button onclick="toggleDrawer()" class="tap-ios w-10 h-10 rounded-full glass-card flex items-center justify-center">☰</button>
+      </div>
+    </header>
+
+    <!-- Area Halaman Dinamis (Akan diisi Bagian 2, 3, dst.) -->
+    <main id="app-views">
+      <section id="view-home" class="space-y-4">
+        <div class="glass-card rounded-3xl p-4 text-center">
+          <p class="text-xs opacity-75">Kerangka Utama SYNC Match Siap ✓</p>
+          <p class="font-editorial text-xl font-bold mt-1">Siap Lanjut ke Bagian 2 (Auth & Beranda)</p>
+        </div>
+      </section>
+      <section id="view-komunitas" class="hidden"></section>
+      <section id="view-grup" class="hidden"></section>
+      <section id="view-chat" class="hidden"></section>
+      <section id="view-profil" class="hidden"></section>
+      <section id="view-umode" class="hidden"></section>
+      <section id="view-syncg" class="hidden"></section>
+    </main>
+  </div>
+
+  <!-- 4. FLOATING PILL BOTTOM NAVIGATION -->
+  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[408px] rounded-full px-3 py-2 flex items-center justify-between z-50 border border-black/10 dark:border-white/10 shadow-xl" style="background: var(--nav-bg); backdrop-filter: blur(18px);">
+    <button onclick="switchTab('home')" id="nav-home" class="tap-ios nav-btn btn-accent px-3.5 py-2 rounded-full flex items-center gap-1.5 text-xs font-semibold"><span>🏠</span><span>Home</span></button>
+    <button onclick="switchTab('komunitas')" id="nav-komunitas" class="tap-ios nav-btn p-2 rounded-full flex flex-col items-center text-[10px] opacity-75"><span class="text-sm">✦</span><span>Komunitas</span></button>
+    <button onclick="switchTab('grup')" id="nav-grup" class="tap-ios nav-btn p-2 rounded-full flex flex-col items-center text-[10px] opacity-75"><span class="text-sm">👥</span><span>Grup</span></button>
+    <button onclick="switchTab('chat')" id="nav-chat" class="tap-ios nav-btn p-2 rounded-full flex flex-col items-center text-[10px] opacity-75"><span class="text-sm">💬</span><span>Chat</span></button>
+    <button onclick="switchTab('profil')" id="nav-profil" class="tap-ios nav-btn p-2 rounded-full flex flex-col items-center text-[10px] opacity-75"><span class="text-sm">👤</span><span>Profil</span></button>
+  </nav>
+
+  <!-- SCRIPT CORE (Toast, Modal, Tema, Jam, Tab Switcher) -->
+  <script>
+    // Tema Light/Dark
+    const htmlEl = document.documentElement;
+    if (localStorage.getItem('sync_theme') === 'dark') {
+      htmlEl.classList.add('dark');
+      document.getElementById('theme-icon').textContent = '☀️';
+    }
+    function toggleTheme() {
+      const isDark = htmlEl.classList.toggle('dark');
+      localStorage.setItem('sync_theme', isDark ? 'dark' : 'light');
+      document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+      showToast('Tema Diubah', isDark ? 'Dark Glassmorphism Aktif' : 'Editorial Cream Aktif');
+    }
+
+    // Jam Real-Time di Header
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('live-clock').textContent =
+        String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    // Custom Toast (Zero Native Alert)
+    let toastTimer;
+    function showToast(title, msg) {
+      document.getElementById('toast-title').textContent = title;
+      document.getElementById('toast-msg').textContent = msg;
+      const box = document.getElementById('sync-toast');
+      box.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.remove('show'), 2600);
+    }
+
+    // Custom Modal (Zero Native Confirm/Prompt)
+    function showModal({ title, msg, confirmText = 'Ya', withInput = false, placeholder = '', onConfirm }) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-msg').textContent = msg;
+      const inp = document.getElementById('modal-input');
+      inp.value = ''; inp.placeholder = placeholder;
+      inp.classList.toggle('hidden', !withInput);
+      const btn = document.getElementById('modal-confirm-btn');
+      btn.textContent = confirmText;
+      btn.onclick = () => { const val = inp.value; closeModal(); if (onConfirm) onConfirm(val); };
+      document.getElementById('sync-modal').classList.replace('hidden', 'flex');
+    }
+    function closeModal() {
+      document.getElementById('sync-modal').classList.replace('flex', 'hidden');
+    }
+
+    // Quick Note dari Header Kompas
+    function openQuickNote() {
+      const saved = localStorage.getItem('sync_quick_note') || '';
+      showModal({
+        title: 'Catatan Cepat (Quick Note)',
+        msg: saved ? 'Catatan terakhir: "' + saved + '"' : 'Tulis pengingat singkatmu hari ini:',
+        confirmText: 'Simpan', withInput: true, placeholder: 'Tulis catatan...',
+        onConfirm: (val) => { if(val.trim()) { localStorage.setItem('sync_quick_note', val.trim()); showToast('Tersimpan', 'Catatan cepat diperbarui'); } }
+      });
+    }
+
+    function toggleDrawer() {
+      showToast('Menu Samping', 'Bahasa, U Mode & Pusat Bantuan akan dipasang di Bagian 2');
+    }
+
+    // Navigasi Tab
+    function switchTab(tab) {
+      document.querySelectorAll('#app-views > section').forEach(s => s.classList.add('hidden'));
+      const target = document.getElementById('view-' + tab);
+      if (target) target.classList.remove('hidden');
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('btn-accent', 'px-3.5', 'py-2', 'flex-row', 'gap-1.5', 'font-semibold');
+        b.classList.add('p-2', 'flex-col', 'opacity-75');
+      });
+      const activeBtn = document.getElementById('nav-' + tab);
+      if (activeBtn) {
+        activeBtn.classList.remove('p-2', 'flex-col', 'opacity-75');
+        activeBtn.classList.add('btn-accent', 'px-3.5', 'py-2', 'flex-row', 'gap-1.5', 'font-semibold');
+      }
+    }
+  </script>
+
+  <!-- === TEMPEL BAGIAN 2 DI BAWAH BARIS INI =
+  <!-- === BAGIAN 2: SIDE DRAWER, AUTH FIREBASE & ONBOARDING === -->
+  
+  <!-- Side Drawer Overlay -->
+  <div id="side-drawer" class="fixed inset-0 z-[9990] hidden bg-black/50 backdrop-blur-sm" onclick="if(event.target===this) toggleDrawer()">
+    <div class="glass-card w-72 h-full ml-auto p-5 flex flex-col justify-between overflow-y-auto">
+      <div>
+        <div class="flex items-center justify-between pb-4 border-b border-black/10 dark:border-white/10">
+          <div>
+            <p id="drawer-name" class="font-bold text-sm">Tamu SYNC</p>
+            <p id="drawer-email" class="text-[11px] opacity-70 truncate">Belum masuk akun</p>
+            <span id="dev-badge" class="hidden mt-1.5 inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full btn-accent font-bold">👑 DEVELOPER</span>
+          </div>
+          <button onclick="toggleDrawer()" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs">✕</button>
+        </div>
+
+        <!-- Pengalih 5 Bahasa -->
+        <div class="mt-4">
+          <p class="text-[11px] font-bold uppercase tracking-wider opacity-65 mb-2" data-i18n="lang_label">Bahasa Antarmuka</p>
+          <div class="grid grid-cols-3 gap-1.5">
+            <button onclick="setLanguage('id')" class="tap-ios lang-btn soft-pill py-1.5 rounded-xl text-[11px] font-semibold" data-lang="id">🇮🇩 ID</button>
+            <button onclick="setLanguage('en')" class="tap-ios lang-btn soft-pill py-1.5 rounded-xl text-[11px] font-semibold" data-lang="en">🇺🇸 EN</button>
+            <button onclick="setLanguage('vi')" class="tap-ios lang-btn soft-pill py-1.5 rounded-xl text-[11px] font-semibold" data-lang="vi">🇻🇳 VI</button>
+            <button onclick="setLanguage('tl')" class="tap-ios lang-btn soft-pill py-1.5 rounded-xl text-[11px] font-semibold" data-lang="tl">🇵🇭 TL</button>
+            <button onclick="setLanguage('zh')" class="tap-ios lang-btn soft-pill py-1.5 rounded-xl text-[11px] font-semibold" data-lang="zh">🇨🇳 中文</button>
+          </div>
+        </div>
+
+        <!-- Menu Pintasan Drawer -->
+        <div class="mt-5 space-y-2">
+          <button onclick="toggleDrawer(); switchTab('umode')" class="tap-ios w-full soft-pill p-3 rounded-2xl flex items-center gap-2.5 text-xs font-semibold">
+            <span>🌙</span><span data-i18n="menu_umode">Ruang Pribadi U Mode</span>
+          </button>
+          <button onclick="toggleDrawer(); switchTab('syncg')" class="tap-ios w-full soft-pill p-3 rounded-2xl flex items-center gap-2.5 text-xs font-semibold">
+            <span>✦</span><span data-i18n="menu_syncg">Asisten AI SyncG</span>
+          </button>
+          <button onclick="toggleDrawer(); openHelpReport()" class="tap-ios w-full soft-pill p-3 rounded-2xl flex items-center gap-2.5 text-xs font-semibold">
+            <span>🛟</span><span data-i18n="menu_help">Pusat Bantuan & Laporan</span>
+          </button>
+          <button id="dev-reports-btn" onclick="toggleDrawer(); viewDevReports()" class="hidden tap-ios w-full btn-accent p-3 rounded-2xl flex items-center gap-2.5 text-xs font-semibold">
+            <span>🛡️</span><span>Panel Laporan Developer</span>
+          </button>
+        </div>
+      </div>
+
+      <button id="auth-action-btn" onclick="handleAuthAction()" class="tap-ios w-full btn-accent py-2.5 rounded-2xl text-xs font-bold mt-6">
+        Masuk / Daftar Akun
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Login & Onboarding -->
+  <div id="auth-overlay" class="fixed inset-0 z-[9995] hidden items-center justify-center p-4 bg-black/55 backdrop-blur-md overflow-y-auto">
+    <!-- Form Login -->
+    <div id="login-card" class="glass-card rounded-3xl p-6 w-full max-w-[380px]">
+      <div class="text-center mb-4">
+        <h2 class="font-editorial text-2xl font-bold">SYNC <span class="italic">Match</span></h2>
+        <p class="text-xs opacity-75 mt-1">Masuk untuk mulai belajar & berkolaborasi</p>
+      </div>
+      <button onclick="loginWithGoogle()" class="tap-ios w-full btn-accent py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 mb-3">
+        <span>G</span><span>Masuk dengan Google</span>
+      </button>
+      <div class="space-y-2.5">
+        <input id="auth-email" type="email" placeholder="Email kamu..." class="w-full soft-pill rounded-xl px-3.5 py-2.5 text-xs focus:outline-none" />
+        <input id="auth-pass" type="password" placeholder="Password (min. 6 karakter)..." class="w-full soft-pill rounded-xl px-3.5 py-2.5 text-xs focus:outline-none" />
+        <div class="flex gap-2 pt-1">
+          <button onclick="loginEmail(false)" class="tap-ios flex-1 soft-pill py-2.5 rounded-xl text-xs font-bold">Masuk</button>
+          <button onclick="loginEmail(true)" class="tap-ios flex-1 btn-accent py-2.5 rounded-xl text-xs font-bold">Daftar Baru</button>
+        </div>
+      </div>
+      <div class="flex items-center justify-between mt-4 pt-3 border-t border-black/10 dark:border-white/10">
+        <button onclick="setFirebaseApiKey()" class="tap-ios text-[11px] opacity-75 underline">🔑 Pasang API Key</button>
+        <button onclick="closeAuthOverlay()" class="tap-ios text-[11px] opacity-75">Tutup ✕</button>
+      </div>
+    </div>
+
+    <!-- Form Onboarding Pengguna Baru -->
+    <div id="onboarding-card" class="hidden glass-card rounded-3xl p-5 w-full max-w-[380px] space-y-2.5">
+      <h3 class="font-editorial text-xl font-bold">Lengkapi Profil Belajar ✨</h3>
+      <p class="text-[11px] opacity-75">Isi data singkat agar partner belajar mudah mengenalmu.</p>
+      <input id="ob-name" type="text" placeholder="Nama Panggilan" class="w-full soft-pill rounded-xl px-3 py-2 text-xs focus:outline-none" />
+      <div class="flex gap-2">
+        <input id="ob-user" type="text" placeholder="@username" class="w-2/3 soft-pill rounded-xl px-3 py-2 text-xs focus:outline-none" />
+        <input id="ob-age" type="number" placeholder="Usia" class="w-1/3 soft-pill rounded-xl px-3 py-2 text-xs focus:outline-none" />
+      </div>
+      <input id="ob-role" type="text" placeholder="Peran (contoh: Student, Designer)" class="w-full soft-pill rounded-xl px-3 py-2 text-xs focus:outline-none" />
+      <input id="ob-skills" type="text" placeholder="Keahlian (pisahkan koma: Fisika, UI/UX)" class="w-full soft-pill rounded-xl px-3 py-2 text-xs focus:outline-none" />
+      <input id="ob-goal" type="text" placeholder="Tujuan mencari partner belajar..." class="w-full soft-pill rounded-xl px-3 py-2 text-xs focus:outline-none" />
+      <textarea id="ob-bio" rows="2" placeholder="Bio singkat..." class="w-full soft-pill rounded-xl px-3 py-2 text-xs focus:outline-none"></textarea>
+      <button onclick="saveOnboarding()" class="tap-ios w-full btn-accent py-2.5 rounded-xl text-xs font-bold">Simpan & Mulai ✦</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK (Compat untuk Single-File) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    const DEV_EMAIL = 'yourvansky@gmail.com';
+    let currentUser = null;
+    let userProfile = null;
+    let db = null, auth = null;
+
+    // Inisialisasi Firebase sync-a1047
+    function initFirebase() {
+      const savedKey = localStorage.getItem('sync_fb_apikey') || 'TEMPEL_API_KEY_FIREBASE_KAMU';
+      if (savedKey === 'TEMPEL_API_KEY_FIREBASE_KAMU') return false;
+      if (!firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey: savedKey,
+          authDomain: "sync-a1047.firebaseapp.com",
+          projectId: "sync-a1047",
+          storageBucket: "sync-a1047.firebasestorage.app"
+        });
+      }
+      auth = firebase.auth();
+      db = firebase.firestore();
+      auth.onAuthStateChanged(async (user) => {
+        currentUser = user;
+        if (user) {
+          const isDev = (user.email || '').toLowerCase() === DEV_EMAIL;
+          document.getElementById('drawer-name').textContent = user.displayName || user.email.split('@')[0];
+          document.getElementById('drawer-email').textContent = user.email;
+          document.getElementById('dev-badge').classList.toggle('hidden', !isDev);
+          document.getElementById('dev-reports-btn').classList.toggle('hidden', !isDev);
+          document.getElementById('auth-action-btn').textContent = 'Keluar Akun (Logout)';
+          await loadUserProfile(user);
+        } else {
+          document.getElementById('drawer-name').textContent = 'Tamu SYNC';
+          document.getElementById('drawer-email').textContent = 'Belum masuk akun';
+          document.getElementById('dev-badge').classList.add('hidden');
+          document.getElementById('dev-reports-btn').classList.add('hidden');
+          document.getElementById('auth-action-btn').textContent = 'Masuk / Daftar Akun';
+        }
+      });
+      return true;
+    }
+
+    function setFirebaseApiKey() {
+      showModal({
+        title: 'API Key Firebase (sync-a1047)',
+        msg: 'Tempel Web API Key dari Firebase Console agar Login & Database aktif:',
+        confirmText: 'Simpan Key', withInput: true, placeholder: 'AIzaSy...',
+        onConfirm: (key) => {
+          if (key.trim()) {
+            localStorage.setItem('sync_fb_apikey', key.trim());
+            initFirebase();
+            showToast('Terhubung', 'Firebase sync-a1047 siap digunakan!');
+          }
+        }
+      });
+    }
+
+    async function loadUserProfile(user) {
+      const ref = db.collection('users').doc(user.uid);
+      const snap = await ref.get();
+      if (!snap.exists) {
+        document.getElementById('login-card').classList.add('hidden');
+        document.getElementById('onboarding-card').classList.remove('hidden');
+        document.getElementById('auth-overlay').classList.replace('hidden', 'flex');
+      } else {
+        userProfile = snap.data();
+        await ref.update({ online: true, lastSeen: firebase.firestore.FieldValue.serverTimestamp() });
+        if (typeof renderHomeProfile === 'function') renderHomeProfile();
+      }
+    }
+
+    async function saveOnboarding() {
+      if (!currentUser || !db) return;
+      const isDev = (currentUser.email || '').toLowerCase() === DEV_EMAIL;
+      const skillsArr = document.getElementById('ob-skills').value.split(',').map(s => s.trim()).filter(Boolean);
+      const progressMap = {};
+      skillsArr.forEach(s => progressMap[s] = 10);
+      userProfile = {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        name: document.getElementById('ob-name').value.trim() || 'Learner',
+        username: (document.getElementById('ob-user').value.trim() || '@user').replace(/^@?/, '@'),
+        age: document.getElementById('ob-age').value || '17',
+        role: isDev ? 'Developer' : (document.getElementById('ob-role').value.trim() || 'Student'),
+        isDev: isDev,
+        skills: skillsArr.length ? skillsArr : ['General Study'],
+        skillProgress: progressMap,
+        goal: document.getElementById('ob-goal').value.trim() || 'Belajar bersama',
+        bio: document.getElementById('ob-bio').value.trim() || 'Let’s learn together ♡',
+        vouchCount: 0, friends: [], bookmarks: [], badge: isDev ? 'Developer' : 'Early Explorer',
+        online: true
+      };
+      await db.collection('users').doc(currentUser.uid).set(userProfile);
+      closeAuthOverlay();
+      showToast('Selamat Datang!', 'Profil SYNC Match berhasil dibuat');
+      if (typeof renderHomeProfile === 'function') renderHomeProfile();
+    }
+
+    async function loginWithGoogle() {
+      if (!initFirebase()) return setFirebaseApiKey();
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+        closeAuthOverlay();
+        showToast('Berhasil Masuk', 'Selamat datang di SYNC Match!');
+      } catch (e) { showToast('Gagal Login', e.message); }
+    }
+
+    async function loginEmail(isRegister) {
+      if (!initFirebase()) return setFirebaseApiKey();
+      const email = document.getElementById('auth-email').value.trim();
+      const pass = document.getElementById('auth-pass').value;
+      if (!email || pass.length < 6) return showToast('Periksa Data', 'Isi email & password min. 6 karakter');
+      try {
+        if (isRegister) await auth.createUserWithEmailAndPassword(email, pass);
+        else await auth.signInWithEmailAndPassword(email, pass);
+        closeAuthOverlay();
+        showToast('Berhasil', isRegister ? 'Akun berhasil dibuat!' : 'Berhasil masuk!');
+      } catch (e) { showToast('Kendala Auth', e.message); }
+    }
+
+    function toggleDrawer() {
+      const d = document.getElementById('side-drawer');
+      d.classList.toggle('hidden');
+    }
+    function closeAuthOverlay() {
+      document.getElementById('auth-overlay').classList.replace('flex', 'hidden');
+      document.getElementById('login-card').classList.remove('hidden');
+      document.getElementById('onboarding-card').classList.add('hidden');
+    }
+    function handleAuthAction() {
+      toggleDrawer();
+      if (currentUser && auth) {
+        showModal({
+          title: 'Keluar Akun', msg: 'Yakin ingin keluar dari sesi saat ini?', confirmText: 'Keluar',
+          onConfirm: () => { auth.signOut(); showToast('Keluar', 'Kamu telah keluar dari akun'); }
+        });
+      } else {
+        document.getElementById('auth-overlay').classList.replace('hidden', 'flex');
+      }
+    }
+
+    // Pusat Bantuan & Laporan (Routing ke Developer yourvansky@gmail.com)
+    function openHelpReport() {
+      showModal({
+        title: 'Pusat Bantuan & Laporan',
+        msg: 'Laporanmu akan dikirim langsung ke Developer (yourvansky@gmail.com):',
+        confirmText: 'Kirim Laporan', withInput: true, placeholder: 'Jelaskan kendala atau masukanmu...',
+        onConfirm: async (text) => {
+          if (!text.trim()) return;
+          if (db) {
+            await db.collection('reports').add({
+              from: currentUser ? currentUser.email : 'Anonim',
+              targetDev: DEV_EMAIL,
+              message: text.trim(),
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
+          showToast('Laporan Terkirim', 'Diteruskan ke Developer yourvansky@gmail.com');
+        }
+      });
+    }
+
+    async function viewDevReports() {
+      if (!db || !currentUser || currentUser.email.toLowerCase() !== DEV_EMAIL) return;
+      const snap = await db.collection('reports').orderBy('createdAt', 'desc').limit(5).get();
+      const list = snap.empty ? 'Belum ada laporan masuk.' : snap.docs.map(d => '• ' + d.data().from + ': ' + d.data().message).join('\n');
+      showModal({ title: 'Laporan Masuk (Developer)', msg: list, confirmText: 'Tutup' });
+    }
+
+    // Sistem 5 Bahasa (ID, EN, VI, TL, ZH)
+    const I18N = {
+      id: { lang_label: 'Bahasa Antarmuka', menu_umode: 'Ruang Pribadi U Mode', menu_syncg: 'Asisten AI SyncG', menu_help: 'Pusat Bantuan & Laporan' },
+      en: { lang_label: 'Interface Language', menu_umode: 'U Mode Sanctuary', menu_syncg: 'SyncG AI Assistant', menu_help: 'Help & Report Center' },
+      vi: { lang_label: 'Ngôn ngữ giao diện', menu_umode: 'Không gian U Mode', menu_syncg: 'Trợ lý AI SyncG', menu_help: 'Trung tâm Hỗ trợ' },
+      tl: { lang_label: 'Wika ng App', menu_umode: 'Pribadong U Mode', menu_syncg: 'SyncG AI Katulong', menu_help: 'Tulong at Ulat' },
+      zh: { lang_label: '界面语言', menu_umode: 'U Mode 个人空间', menu_syncg: 'SyncG 学习助手', menu_help: '帮助与反馈中心' }
+    };
+    function setLanguage(lang) {
+      localStorage.setItem('sync_lang', lang);
+      const dict = I18N[lang] || I18N.id;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+      showToast('Bahasa Diperbarui', 'Bahasa aktif: ' + lang.toUpperCase());
+    }
+
+    // Jalankan otomatis saat halaman dibuka
+    initFirebase();
+    setLanguage(localStorage.getItem('sync_lang') || 'id');
+  </script>
+
+  <!-- === TEMPEL BAGIAN 3 DI BAWAH BARIS INI === -->
+  <!-- === BAGIAN 3: BERANDA, 24-HOUR STORIES & PARTNER MATCHING === -->
+
+  <!-- Modal Buat Story 24 Jam -->
+  <div id="story-create-modal" class="fixed inset-0 z-[9992] hidden items-center justify-center p-4 bg-black/55 backdrop-blur-sm">
+    <div class="glass-card rounded-3xl p-5 w-full max-w-[370px] space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="font-editorial text-xl font-bold">Buat Story 24 Jam ✨</h3>
+        <button onclick="closeSubModal('story-create-modal')" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs">✕</button>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="setStoryType('text')" id="st-btn-text" class="tap-ios flex-1 btn-accent py-2 rounded-xl text-xs font-semibold">Teks Kustom</button>
+        <button onclick="setStoryType('photo')" id="st-btn-photo" class="tap-ios flex-1 soft-pill py-2 rounded-xl text-xs font-semibold">Foto / Gambar</button>
+      </div>
+      <div id="st-text-box" class="space-y-2">
+        <textarea id="st-text-input" rows="3" placeholder="Tulis progres belajarmu hari ini..." class="w-full soft-pill rounded-2xl p-3 text-xs focus:outline-none"></textarea>
+        <div class="flex items-center gap-2 text-[11px]">
+          <span class="opacity-70">Latar:</span>
+          <button onclick="pickStoryBg('#46372E')" class="w-6 h-6 rounded-full bg-[#46372E] border border-white/40"></button>
+          <button onclick="pickStoryBg('#7C62B2')" class="w-6 h-6 rounded-full bg-[#7C62B2] border border-white/40"></button>
+          <button onclick="pickStoryBg('#8C5E58')" class="w-6 h-6 rounded-full bg-[#8C5E58] border border-white/40"></button>
+          <button onclick="pickStoryBg('#2E4A3E')" class="w-6 h-6 rounded-full bg-[#2E4A3E] border border-white/40"></button>
+        </div>
+      </div>
+      <div id="st-photo-box" class="hidden">
+        <input id="st-file-input" type="file" accept="image/*" class="w-full soft-pill rounded-xl p-2.5 text-xs" />
+      </div>
+      <label class="flex items-center justify-between soft-pill px-3.5 py-2.5 rounded-xl text-xs cursor-pointer">
+        <span>🔒 Privasi Khusus Teman (Friend-Only)</span>
+        <input id="st-friend-only" type="checkbox" checked class="accent-[#46372E]" />
+      </label>
+      <button onclick="publishStory()" class="tap-ios w-full btn-accent py-2.5 rounded-xl text-xs font-bold">Bagikan Story (24 Jam)</button>
+    </div>
+  </div>
+
+  <!-- Modal Lihat Story 24 Jam -->
+  <div id="story-view-modal" class="fixed inset-0 z-[9993] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div id="story-stage" class="rounded-3xl p-5 w-full max-w-[370px] min-h-[430px] flex flex-col justify-between text-white relative overflow-hidden shadow-2xl" style="background:#46372E;">
+      <div class="flex items-center justify-between z-10">
+        <div class="flex items-center gap-2">
+          <div id="sv-avatar" class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">Y</div>
+          <div>
+            <p id="sv-name" class="text-xs font-bold">User</p>
+            <p id="sv-time" class="text-[10px] opacity-80">Aktif • Kedaluwarsa 24j</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button id="sv-delete-btn" onclick="deleteActiveStory()" class="hidden tap-ios px-2.5 py-1 rounded-full bg-rose-600/90 text-[10px] font-bold">Hapus</button>
+          <button onclick="closeSubModal('story-view-modal')" class="tap-ios w-8 h-8 rounded-full bg-black/30 text-xs">✕</button>
+        </div>
+      </div>
+      <div id="sv-content" class="my-auto text-center py-6 z-10"></div>
+      <div class="bg-black/30 backdrop-blur-md rounded-2xl p-3 z-10">
+        <p class="text-[11px] font-semibold">👁️ Dilihat oleh (<span id="sv-view-count">0</span>)</p>
+        <p id="sv-viewers" class="text-[10px] opacity-80 truncate mt-0.5">Belum ada penonton</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Profil Publik Partner -->
+  <div id="public-profile-modal" class="fixed inset-0 z-[9991] hidden items-center justify-center p-4 bg-black/55 backdrop-blur-sm overflow-y-auto">
+    <div id="public-profile-body" class="glass-card rounded-3xl p-5 w-full max-w-[390px] space-y-3.5"></div>
+  </div>
+
+  <script>
+    let activeSkillFilter = 'Semua';
+    let selectedStoryBg = '#46372E';
+    let selectedStoryType = 'text';
+    let viewingStory = null;
+
+    // Data awal partner (akan tergabung otomatis dengan user asli dari Firestore)
+    const SAMPLE_PARTNERS = [
+      { uid: 'demo_eve', name: 'Eve', username: '@cherylliaeve', age: 17, role: 'Student', badge: 'UI/UX Mentor', online: true, bio: 'Suka desain antarmuka & ngoding bareng ☕', skills: ['UI/UX', 'Coding', 'English'], lookingFor: 'Frontend & Figma', vouchCount: 19, progress: 84, match: '89%' },
+      { uid: 'demo_moreeno', name: 'moreeno', username: '@morenoxcavz80', age: 16, role: 'Student', badge: 'Early Explorer', online: false, bio: 'have an goodday', skills: ['Writing', 'Editing', 'Illustration', '3D Modeling'], lookingFor: 'Cooking & Editing', vouchCount: 14, progress: 72, match: '87%' },
+      { uid: 'demo_santo', name: 'Santo Men', username: '@santomen7272', age: 18, role: 'Student', badge: 'Dedicated Learner', online: true, bio: 'Fokus Fisika, Akuntansi & Coding setiap malam', skills: ['Fisika', 'Akuntansi', 'Coding'], lookingFor: 'Latihan Soal', vouchCount: 22, progress: 91, match: '85%' }
+    ];
+
+    let storiesList = [
+      { id: 'st1', uid: 'demo_cher', name: 'cherylllia. ♡', type: 'text', text: 'Baru beres rangkum bab Akuntansi hari ini ✨', bg: '#5C4738', friendOnly: false, createdAt: Date.now() - 3600000, viewers: ['Eve', 'moreeno'] },
+      { id: 'st2', uid: 'demo_moreeno', name: 'moreeno', type: 'text', text: 'Lagi belajar 3D Modeling sambil dengerin lofi 🎧', bg: '#3E354D', friendOnly: false, createdAt: Date.now() - 7200000, viewers: ['Vansky'] }
+    ];
+
+    function closeSubModal(id) {
+      document.getElementById(id).classList.replace('flex', 'hidden');
+    }
+
+    function openStoryCreator() {
+      document.getElementById('story-create-modal').classList.replace('hidden', 'flex');
+    }
+    function setStoryType(t) {
+      selectedStoryType = t;
+      document.getElementById('st-text-box').classList.toggle('hidden', t !== 'text');
+      document.getElementById('st-photo-box').classList.toggle('hidden', t !== 'photo');
+      document.getElementById('st-btn-text').className = t === 'text' ? 'tap-ios flex-1 btn-accent py-2 rounded-xl text-xs font-semibold' : 'tap-ios flex-1 soft-pill py-2 rounded-xl text-xs font-semibold';
+      document.getElementById('st-btn-photo').className = t === 'photo' ? 'tap-ios flex-1 btn-accent py-2 rounded-xl text-xs font-semibold' : 'tap-ios flex-1 soft-pill py-2 rounded-xl text-xs font-semibold';
+    }
+    function pickStoryBg(c) { selectedStoryBg = c; }
+
+    async function publishStory() {
+      const friendOnly = document.getElementById('st-friend-only').checked;
+      const authorName = userProfile?.name || (currentUser?.email === DEV_EMAIL ? 'Vansky' : 'Kamu');
+      const authorUid = currentUser?.uid || 'guest_me';
+      let newStory = {
+        id: 'st_' + Date.now(), uid: authorUid, name: authorName,
+        type: selectedStoryType, bg: selectedStoryBg, friendOnly,
+        createdAt: Date.now(), expiresAt: Date.now() + 86400000, viewers: []
+      };
+      if (selectedStoryType === 'text') {
+        const txt = document.getElementById('st-text-input').value.trim();
+        if (!txt) return showToast('Kosong', 'Tulis isi story terlebih dahulu');
+        newStory.text = txt;
+        document.getElementById('st-text-input').value = '';
+      } else {
+        const file = document.getElementById('st-file-input').files[0];
+        if (!file) return showToast('Pilih Foto', 'Pilih gambar dari galeri HP kamu');
+        newStory.image = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
+      }
+      storiesList.unshift(newStory);
+      if (db && currentUser) {
+        try { await db.collection('stories').doc(newStory.id).set(newStory); } catch(e) {}
+      }
+      closeSubModal('story-create-modal');
+      showToast('Story Terbit', friendOnly ? 'Dibagikan khusus teman (24 jam)' : 'Story publik aktif 24 jam');
+      renderHomeFeed();
+    }
+
+    function openStoryViewer(id) {
+      // Hapus otomatis story yang lewat 24 jam
+      const now = Date.now();
+      storiesList = storiesList.filter(s => (now - s.createdAt) < 86400000);
+      const st = storiesList.find(s => s.id === id);
+      if (!st) return showToast('Kedaluwarsa', 'Story ini sudah melewati batas 24 jam');
+      viewingStory = st;
+      const viewerName = userProfile?.name || 'Kamu';
+      if (!st.viewers.includes(viewerName)) st.viewers.push(viewerName);
+
+      document.getElementById('story-stage').style.background = st.bg || '#46372E';
+      document.getElementById('sv-avatar').textContent = st.name[0].toUpperCase();
+      document.getElementById('sv-name').textContent = st.name + (st.friendOnly ? ' 🔒' : '');
+      const sisaJam = Math.max(1, Math.ceil((86400000 - (now - st.createdAt)) / 3600000));
+      document.getElementById('sv-time').textContent = `Sisa ${sisaJam} jam lagi`;
+      document.getElementById('sv-view-count').textContent = st.viewers.length;
+      document.getElementById('sv-viewers').textContent = st.viewers.join(', ') || 'Belum ada';
+
+      const isMine = st.uid === (currentUser?.uid || 'guest_me');
+      document.getElementById('sv-delete-btn').classList.toggle('hidden', !isMine);
+
+      const box = document.getElementById('sv-content');
+      if (st.type === 'photo' && st.image) {
+        box.innerHTML = `<img src="${st.image}" class="max-h-64 mx-auto rounded-2xl object-contain shadow-lg" />`;
+      } else {
+        box.innerHTML = `<p class="font-editorial text-2xl font-bold leading-snug px-3">“${st.text}”</p>`;
+      }
+      document.getElementById('story-view-modal').classList.replace('hidden', 'flex');
+    }
+
+    function deleteActiveStory() {
+      if (!viewingStory) return;
+      storiesList = storiesList.filter(s => s.id !== viewingStory.id);
+      if (db && currentUser) db.collection('stories').doc(viewingStory.id).delete().catch(()=>{});
+      closeSubModal('story-view-modal');
+      showToast('Dihapus', 'Story berhasil dihapus');
+      renderHomeFeed();
+    }
+
+    function filterBySkill(skill) {
+      activeSkillFilter = skill;
+      renderHomeFeed();
+    }
+
+    function openPartnerProfile(uid) {
+      const p = SAMPLE_PARTNERS.find(x => x.uid === uid);
+      if (!p) return;
+      document.getElementById('public-profile-body').innerHTML = `
+        <div class="flex justify-between items-start">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-full btn-accent flex items-center justify-center font-editorial text-2xl font-bold">${p.name[0]}</div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h3 class="font-bold text-base">${p.name}</h3>
+                <span class="text-[10px] px-2 py-0.5 rounded-full soft-pill font-semibold">✦ ${p.badge}</span>
+              </div>
+              <p class="text-[11px] opacity-70">${p.username} • ${p.age} y/o • ${p.online ? '🟢 Online' : '⚫ Offline'}</p>
+            </div>
+          </div>
+          <button onclick="closeSubModal('public-profile-modal')" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs">✕</button>
+        </div>
+        <div class="soft-pill rounded-2xl p-2.5 text-center italic text-xs">“${p.bio}”</div>
+        <div class="flex gap-2">
+          <button onclick="showToast('Permintaan Terkirim', 'Undangan berteman dikirim ke ${p.name}')" class="tap-ios flex-1 btn-accent py-2 rounded-xl text-xs font-bold">+ Add Teman</button>
+          <button onclick="vouchPartner('${p.uid}')" class="tap-ios flex-1 soft-pill py-2 rounded-xl text-xs font-bold">♡ Vouch (${p.vouchCount})</button>
+          <button onclick="bookmarkPartner('${p.name}')" class="tap-ios px-3 soft-pill py-2 rounded-xl text-xs font-bold">🔖</button>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-[11px]">
+          <div class="soft-pill rounded-2xl p-2.5"><p class="font-bold mb-1">Skill:</p>${p.skills.map(s=>`<p>• ${s}</p>`).join('')}</div>
+          <div class="soft-pill rounded-2xl p-2.5"><p class="font-bold mb-1">Looking For:</p><p>${p.lookingFor}</p></div>
+          <div class="soft-pill rounded-2xl p-2.5"><p class="font-bold mb-1">Biodata:</p><p>- ${p.age} y/o</p><p>- ${p.role}</p></div>
+        </div>
+        <div class="soft-pill rounded-2xl p-3">
+          <div class="flex justify-between text-xs font-bold mb-1.5"><span>📊 Progres Belajar ${p.name}</span><span>${p.progress}%</span></div>
+          <div class="w-full h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden"><div class="h-full btn-accent" style="width:${p.progress}%"></div></div>
+        </div>
+      `;
+      document.getElementById('public-profile-modal').classList.replace('hidden', 'flex');
+    }
+
+    function vouchPartner(uid) {
+      const p = SAMPLE_PARTNERS.find(x => x.uid === uid);
+      if (p) { p.vouchCount += 1; openPartnerProfile(uid); showToast('Vouch Terkirim ♡', `Kamu memberi apresiasi untuk ${p.name}!`); }
+    }
+    function bookmarkPartner(name) {
+      showToast('Tersimpan 🔖', `Profil ${name} ditambahkan ke Bookmark`);
+    }
+
+    function renderHomeFeed() {
+      const isDev = (currentUser?.email || '').toLowerCase() === DEV_EMAIL;
+      const myName = userProfile?.name || (isDev ? 'Vansky' : 'Learner');
+      const myUser = userProfile?.username || (isDev ? '@yourvansky' : '@sync_user');
+      const myRole = isDev ? 'Developer' : (userProfile?.role || 'Student');
+      const myBio = userProfile?.bio || 'Let’s learn together ♡';
+      const skillsCount = userProfile?.skills?.length || 8;
+      const vouchCount = userProfile?.vouchCount || 24;
+
+      const now = Date.now();
+      const validStories = storiesList.filter(s => (now - s.createdAt) < 86400000);
+      const filterSkills = ['Semua', 'UI/UX', 'Coding', 'Fisika', 'Akuntansi', 'Writing'];
+      const filteredPartners = activeSkillFilter === 'Semua'
+        ? SAMPLE_PARTNERS
+        : SAMPLE_PARTNERS.filter(p => p.skills.some(s => s.toLowerCase().includes(activeSkillFilter.toLowerCase())));
+
+      document.getElementById('view-home').innerHTML = `
+        <!-- 24-Hour Stories -->
+        <div class="flex gap-3.5 overflow-x-auto no-scrollbar py-1">
+          <div onclick="openStoryCreator()" class="tap-ios flex flex-col items-center shrink-0 w-16">
+            <div class="w-14 h-14 rounded-full soft-pill flex items-center justify-center text-xl">+</div>
+            <span class="text-[11px] mt-1.5 truncate w-full text-center opacity-80">Cerita Anda</span>
+          </div>
+          ${validStories.map(s => `
+            <div onclick="openStoryViewer('${s.id}')" class="tap-ios flex flex-col items-center shrink-0 w-16">
+              <div class="p-[2.5px] rounded-full btn-accent">
+                <div class="w-[51px] h-[51px] rounded-full bg-amber-100 text-stone-900 flex items-center justify-center font-bold text-sm">${s.name[0].toUpperCase()}</div>
+              </div>
+              <span class="text-[11px] mt-1.5 truncate w-full text-center">${s.name}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Search & Filter Keahlian -->
+        <div class="space-y-2">
+          <div class="glass-card rounded-2xl px-3.5 py-2.5 flex items-center gap-2">
+            <span class="text-xs opacity-60">🔍</span>
+            <input id="home-search-inp" oninput="searchPartnerLive(this.value)" type="text" placeholder="Cari partner, skill, atau komunitas..." class="bg-transparent text-xs w-full focus:outline-none" />
+          </div>
+          <div class="flex gap-1.5 overflow-x-auto no-scrollbar">
+            ${filterSkills.map(sk => `
+              <button onclick="filterBySkill('${sk}')" class="tap-ios px-3 py-1 rounded-full text-[11px] font-semibold shrink-0 ${activeSkillFilter===sk ? 'btn-accent' : 'soft-pill'}">${sk}</button>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Kartu Profil Utama -->
+        <div class="glass-card rounded-3xl p-4 relative overflow-hidden">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <div class="w-16 h-16 rounded-full p-[2.5px] btn-accent">
+                  <div class="w-full h-full rounded-full btn-accent flex items-center justify-center font-editorial text-2xl font-bold">${myName[0].toUpperCase()}</div>
+                </div>
+                <span class="absolute -top-2 -left-1 text-base">👑</span>
+                <span class="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white"></span>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <h2 class="font-bold text-base">${myName}</h2>
+                  ${isDev ? '<span class="text-[9px] px-2 py-0.5 rounded-full btn-accent font-bold">DEV</span>' : ''}
+                </div>
+                <p class="text-xs opacity-70">${myUser}</p>
+                <span class="inline-block mt-1 text-[10px] px-2.5 py-0.5 rounded-full soft-pill font-medium">• ${myRole}</span>
+              </div>
+            </div>
+            <button onclick="switchTab('umode')" class="tap-ios btn-accent text-[11px] font-semibold px-3 py-1.5 rounded-full shrink-0">✦ U Mode</button>
+          </div>
+          <p class="italic text-xs opacity-80 mt-3">“${myBio}”</p>
+          <div class="grid grid-cols-3 gap-2 mt-3.5 pt-3 border-t border-black/5 dark:border-white/10 text-center">
+            <div><p class="text-sm font-bold">${skillsCount}</p><p class="text-[10px] opacity-65">Skills</p></div>
+            <div class="border-x border-black/5 dark:border-white/10"><p class="text-sm font-bold">${vouchCount}</p><p class="text-[10px] opacity-65">Vouch</p></div>
+            <div><p class="text-sm font-bold">12</p><p class="text-[10px] opacity-65">Bookmark</p></div>
+          </div>
+        </div>
+
+        <!-- 4 Tombol Aksi Cepat -->
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="switchTab('syncg')" class="tap-ios glass-card rounded-2xl py-3 px-1 flex flex-col items-center gap-1"><span class="text-base">✦</span><span class="text-[10px] font-semibold">SyncG AI</span></button>
+          <button onclick="switchTab('komunitas')" class="tap-ios glass-card rounded-2xl py-3 px-1 flex flex-col items-center gap-1"><span class="text-base">👥</span><span class="text-[10px] font-semibold">Komunitas</span></button>
+          <button onclick="switchTab('profil')" class="tap-ios glass-card rounded-2xl py-3 px-1 flex flex-col items-center gap-1"><span class="text-base">🏆</span><span class="text-[10px] font-semibold">Misi & Quest</span></button>
+          <button onclick="switchTab('komunitas')" class="tap-ios glass-card rounded-2xl py-3 px-1 flex flex-col items-center gap-1"><span class="text-base">🎁</span><span class="text-[10px] font-semibold">Event</span></button>
+        </div>
+        <!-- Partner Rekomendasi -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-bold">✦ Partner Rekomendasi</h3>
+            <span class="text-[11px] opacity-70">${filteredPartners.length} tersedia</span>
+          </div>
+          <div id="partner-cards-row" class="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+            ${filteredPartners.map(p => `
+              <div class="glass-card rounded-3xl p-3.5 w-44 shrink-0">
+                <div onclick="openPartnerProfile('${p.uid}')" class="tap-ios">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="relative">
+                      <div class="w-10 h-10 rounded-full btn-accent flex items-center justify-center font-bold text-sm">${p.name[0]}</div>
+                      <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ${p.online?'bg-emerald-500':'bg-stone-400'} border border-white"></span>
+                    </div>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full btn-accent font-semibold">✦ ${p.match}</span>
+                  </div>
+                  <p class="font-bold text-xs truncate">${p.name}</p>
+                  <p class="text-[10px] opacity-65 mb-2 truncate">${p.username}</p>
+                  <div class="soft-pill rounded-full py-1 px-2 text-center text-[10px] font-medium mb-2.5 truncate">${p.skills.slice(0,2).join(' • ')}</div>
+                </div>
+                <div class="flex gap-1.5">
+                  <button onclick="switchTab('chat'); showToast('Chat', 'Membuka obrolan dengan ${p.name}')" class="tap-ios flex-1 soft-pill rounded-xl py-1.5 text-[11px] font-semibold">Chat</button>
+                  <button onclick="bookmarkPartner('${p.name}')" class="tap-ios w-8 soft-pill rounded-xl flex items-center justify-center text-xs">🔖</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function searchPartnerLive(q) {
+      const term = q.toLowerCase();
+      document.querySelectorAll('#partner-cards-row > div').forEach(card => {
+        card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    }
+
+    window.renderHomeProfile = renderHomeFeed;
+    renderHomeFeed();
+  </script>
+
+  <!-- === TEMPEL BAGIAN 4 DI BAWAH BARIS INI === -->
+  <!-- === BAGIAN 4: RUANG PRIBADI "U MODE" (SANCTUARY DASHBOARD) === -->
+  <audio id="umode-audio" preload="metadata"></audio>
+
+  <!-- Modal Pencarian Lagu Streaming (Audius API) -->
+  <div id="music-search-modal" class="fixed inset-0 z-[9992] hidden items-center justify-center p-4 bg-black/55 backdrop-blur-sm">
+    <div class="glass-card rounded-3xl p-5 w-full max-w-[380px] space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="font-editorial text-xl font-bold">Cari Musik Fokus 🎧</h3>
+        <button onclick="closeSubModal('music-search-modal')" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs">✕</button>
+      </div>
+      <div class="flex gap-2">
+        <input id="audius-query" type="text" placeholder="Ketik lofi, piano, study beats..." class="flex-1 soft-pill rounded-xl px-3.5 py-2 text-xs focus:outline-none" onkeydown="if(event.key==='Enter') searchAudiusTracks()" />
+        <button onclick="searchAudiusTracks()" class="tap-ios btn-accent px-4 py-2 rounded-xl text-xs font-bold">Cari</button>
+      </div>
+      <div id="audius-results" class="max-h-60 overflow-y-auto space-y-2 pr-1">
+        <p class="text-[11px] opacity-70 text-center py-4">Ketik judul lagu atau genre lofi untuk streaming dari Audius.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Mood Picker -->
+  <div id="mood-modal" class="fixed inset-0 z-[9992] hidden items-center justify-center p-4 bg-black/55 backdrop-blur-sm">
+    <div class="glass-card rounded-3xl p-5 w-full max-w-[360px] space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="font-editorial text-xl font-bold">Suasana Hati Hari Ini ✨</h3>
+        <button onclick="closeSubModal('mood-modal')" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs">✕</button>
+      </div>
+      <div class="grid grid-cols-2 gap-2" id="mood-options"></div>
+    </div>
+  </div>
+
+  <script>
+    const MOOD_LIST = [
+      { emoji: '🪷', label: 'Tenang & Bahagia' },
+      { emoji: '🔥', label: 'Fokus Penuh' },
+      { emoji: '✨', label: 'Semangat Belajar' },
+      { emoji: '☕', label: 'Santai & Nyaman' },
+      { emoji: '🌧️', label: 'Butuh Istirahat' },
+      { emoji: '🌙', label: 'Mode Begadang' }
+    ];
+
+    let uState = JSON.parse(localStorage.getItem('sync_umode_state') || 'null') || {
+      mood: { emoji: '🪷', label: 'Tenang & Bahagia' },
+      mantra: 'Keep going, better days are coming.',
+      dailyNote: 'Small steps make big changes.',
+      todos: [
+        { id: 1, text: 'Review materi & rangkuman', done: false },
+        { id: 2, text: 'Sesi fokus 45 menit', done: true }
+      ],
+      schedules: [
+        { id: 101, time: '19:00 - 20:30', title: 'Sesi Belajar Fokus' }
+      ]
+    };
+
+    let playlist = [];
+    let currentTrackIdx = 0;
+    let isShuffle = false;
+    let isLoop = false;
+    const audioEl = document.getElementById('umode-audio');
+
+    function saveUState() {
+      localStorage.setItem('sync_umode_state', JSON.stringify(uState));
+    }
+
+    // Pemutar Musik: Audius API + Lokal
+    async function searchAudiusTracks() {
+      const q = document.getElementById('audius-query').value.trim() || 'lofi study';
+      const box = document.getElementById('audius-results');
+      box.innerHTML = '<p class="text-xs text-center py-4 opacity-75">Mencari lagu di Audius...</p>';
+      try {
+        const hostRes = await fetch('https://api.audius.co');
+        const hostJson = await hostRes.json();
+        const host = hostJson.data[0];
+        const res = await fetch(`${host}/v1/tracks/search?query=${encodeURIComponent(q)}&app_name=SYNCMatch`);
+        const json = await res.json();
+        const tracks = (json.data || []).slice(0, 10);
+        if (!tracks.length) {
+          box.innerHTML = '<p class="text-xs text-center py-4 opacity-75">Lagu tidak ditemukan, coba kata kunci lain.</p>';
+          return;
+        }
+        box.innerHTML = tracks.map((t, i) => `
+          <div onclick='playAudiusTrack(${JSON.stringify({
+            title: t.title.replace(/'/g, ""),
+            artist: (t.user?.name || "Audius Artist").replace(/'/g, ""),
+            url: `${host}/v1/tracks/${t.id}/stream?app_name=SYNCMatch`
+          })})' class="tap-ios soft-pill p-2.5 rounded-2xl flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-bold truncate">${t.title}</p>
+              <p class="text-[10px] opacity-70 truncate">${t.user?.name || 'Audius'}</p>
+            </div>
+            <span class="btn-accent w-7 h-7 rounded-full flex items-center justify-center text-[10px] shrink-0">▶</span>
+          </div>
+        `).join('');
+      } catch (e) {
+        box.innerHTML = '<p class="text-xs text-center py-4 text-rose-500">Gagal memuat Audius. Cek koneksi atau pakai File Audio Lokal.</p>';
+      }
+    }
+
+    function playAudiusTrack(track) {
+      playlist.push(track);
+      currentTrackIdx = playlist.length - 1;
+      loadAndPlayTrack(currentTrackIdx);
+      closeSubModal('music-search-modal');
+    }
+
+    function handleLocalAudioUpload(input) {
+      const files = Array.from(input.files || []);
+      if (!files.length) return;
+      files.forEach(f => {
+        playlist.push({
+          title: f.name.replace(/\.[^/.]+$/, ''),
+          artist: 'Audio Lokal HP',
+          url: URL.createObjectURL(f)
+        });
+      });
+      currentTrackIdx = playlist.length - files.length;
+      loadAndPlayTrack(currentTrackIdx);
+      showToast('Audio Dimuat', `${files.length} file lokal siap diputar`);
+    }
+
+    function loadAndPlayTrack(idx) {
+      if (!playlist[idx]) return;
+      const tr = playlist[idx];
+      audioEl.src = tr.url;
+      audioEl.loop = isLoop;
+      audioEl.play().catch(() => {});
+      renderUMode();
+    }
+
+    function togglePlayPause() {
+      if (!playlist.length) {
+        document.getElementById('music-search-modal').classList.replace('hidden', 'flex');
+        return;
+      }
+      if (audioEl.paused) audioEl.play();
+      else audioEl.pause();
+      renderUMode();
+    }
+
+    function nextTrack() {
+      if (!playlist.length) return;
+      currentTrackIdx = isShuffle
+        ? Math.floor(Math.random() * playlist.length)
+        : (currentTrackIdx + 1) % playlist.length;
+      loadAndPlayTrack(currentTrackIdx);
+    }
+
+    function prevTrack() {
+      if (!playlist.length) return;
+      currentTrackIdx = (currentTrackIdx - 1 + playlist.length) % playlist.length;
+      loadAndPlayTrack(currentTrackIdx);
+    }
+
+    function toggleShuffle() {
+      isShuffle = !isShuffle;
+      renderUMode();
+      showToast('Mode Acak', isShuffle ? 'Shuffle aktif' : 'Shuffle nonaktif');
+    }
+
+    function toggleLoop() {
+      isLoop = !isLoop;
+      audioEl.loop = isLoop;
+      renderUMode();
+      showToast('Mode Ulang', isLoop ? 'Ulangi lagu ini aktif' : 'Ulangi lagu nonaktif');
+    }
+
+    audioEl.addEventListener('ended', () => { if (!isLoop) nextTrack(); });
+
+    // Mood, Mantra, Daily Note, To-Do & Jadwal
+    function openMoodPicker() {
+      document.getElementById('mood-options').innerHTML = MOOD_LIST.map(m => `
+        <button onclick="selectMood('${m.emoji}','${m.label}')" class="tap-ios soft-pill p-3 rounded-2xl flex items-center gap-2 text-left">
+          <span class="text-lg">${m.emoji}</span>
+          <span class="text-xs font-semibold">${m.label}</span>
+        </button>
+      `).join('');
+      document.getElementById('mood-modal').classList.replace('hidden', 'flex');
+    }
+
+    function selectMood(emoji, label) {
+      uState.mood = { emoji, label };
+      saveUState();
+      closeSubModal('mood-modal');
+      renderUMode();
+      showToast('Mood Diperbarui', `${emoji} ${label}`);
+    }
+
+    function editMantra() {
+      showModal({
+        title: 'Ubah Mantra Sapaan', msg: 'Tulis kutipan penyemangat pribadimu:',
+        confirmText: 'Simpan', withInput: true, placeholder: uState.mantra,
+        onConfirm: (v) => { if (v.trim()) { uState.mantra = v.trim(); saveUState(); renderUMode(); showToast('Tersimpan', 'Mantra diperbarui'); } }
+      });
+    }
+
+    function editDailyNote() {
+      showModal({
+        title: 'Daily Note', msg: 'Catat refleksi atau target singkat hari ini:',
+        confirmText: 'Simpan', withInput: true, placeholder: uState.dailyNote,
+        onConfirm: (v) => { if (v.trim()) { uState.dailyNote = v.trim(); saveUState(); renderUMode(); showToast('Tersimpan', 'Daily Note diperbarui'); } }
+      });
+    }
+
+    function addTodoItem() {
+      showModal({
+        title: 'Tambah Tugas Baru', msg: 'Apa target belajarmu hari ini?',
+        confirmText: 'Tambah', withInput: true, placeholder: 'Contoh: Latihan soal Fisika bab 3',
+        onConfirm: (v) => {
+          if (v.trim()) {
+            uState.todos.push({ id: Date.now(), text: v.trim(), done: false });
+            saveUState(); renderUMode();
+          }
+        }
+      });
+    }
+
+    function toggleTodo(id) {
+      const item = uState.todos.find(t => t.id === id);
+      if (item) { item.done = !item.done; saveUState(); renderUMode(); }
+    }
+
+    function addStudySchedule() {
+      showModal({
+        title: 'Tambah Jadwal Belajar', msg: 'Format: Jam | Nama Sesi (Contoh: 20:00 | Akuntansi)',
+        confirmText: 'Simpan Jadwal', withInput: true, placeholder: '20:00 - 21:00 | Belajar Coding',
+        onConfirm: (v) => {
+          if (v.trim()) {
+            const parts = v.split('|');
+            uState.schedules.push({
+              id: Date.now(),
+              time: parts.length > 1 ? parts[0].trim() : 'Hari Ini',
+              title: parts.length > 1 ? parts[1].trim() : v.trim()
+            });
+            saveUState(); renderUMode(); showToast('Terjadwal', 'Sesi belajar ditambahkan');
+          }
+        }
+      });
+    }
+
+    function renderUMode() {
+      const isDev = (currentUser?.email || '').toLowerCase() === DEV_EMAIL;
+      const myName = userProfile?.name || (isDev ? 'Vansky' : 'Learner');
+      const now = new Date();
+      const hour = now.getHours();
+      const greet = hour < 12 ? 'Good Morning,' : hour < 18 ? 'Good Afternoon,' : 'Good Evening,';
+      const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      const dayStr = now.toLocaleDateString('en-US', { weekday: 'short' });
+      const curTrack = playlist[currentTrackIdx] || { title: 'Warm Coffee & Study', artist: 'Pilih lagu atau file lokal' };
+      const isPlaying = playlist.length > 0 && !audioEl.paused;
+
+      document.getElementById('view-umode').innerHTML = `
+        <div class="space-y-3.5">
+          <!-- Header U Mode & Tombol Kembali -->
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-widest opacity-70">✦ Personal Sanctuary • U Mode</span>
+            <button onclick="switchTab('home')" class="tap-ios soft-pill px-3 py-1 rounded-full text-[11px] font-semibold">← Beranda</button>
+          </div>
+
+          <!-- Kartu Sapaan & Editable Mantra -->
+          <div class="glass-card rounded-3xl p-4 flex items-center gap-3.5">
+            <div class="relative shrink-0">
+              <div class="w-14 h-14 rounded-full btn-accent flex items-center justify-center font-editorial text-2xl font-bold">${myName[0].toUpperCase()}</div>
+              <span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white"></span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] opacity-70">${greet}</p>
+              <h2 class="font-bold text-lg leading-tight truncate">${myName} ✦</h2>
+              <p onclick="editMantra()" class="tap-ios italic text-xs opacity-80 mt-1 truncate">“${uState.mantra}” ✎</p>
+            </div>
+          </div>
+
+          <!-- Kartu Tanggal, Cuaca & Mood Picker -->
+          <div class="glass-card rounded-3xl p-3.5 grid grid-cols-3 gap-2 text-center items-center">
+            <div>
+              <p class="text-[9px] uppercase opacity-60">TODAY</p>
+              <p class="text-sm font-bold">${dateStr}</p>
+              <p class="text-[10px] opacity-70">${dayStr}</p>
+            </div>
+            <div class="border-x border-black/10 dark:border-white/10">
+              <p class="text-base">⛅</p>
+              <p class="text-sm font-bold">27°C</p>
+              <p class="text-[10px] opacity-70">Partly Cloudy</p>
+            </div>
+            <div onclick="openMoodPicker()" class="tap-ios">
+              <p class="text-lg">${uState.mood.emoji}</p>
+              <p class="text-[11px] font-bold leading-tight mt-0.5">${uState.mood.label}</p>
+            </div>
+          </div>
+
+          <!-- Full-Length Music Player (Audius + Lokal) -->
+          <div class="glass-card rounded-3xl p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <label class="tap-ios soft-pill px-3 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1 cursor-pointer">
+                <span>📁 File Lokal</span>
+                <input type="file" accept="audio/*" multiple class="hidden" onchange="handleLocalAudioUpload(this)" />
+              </label>
+              <button onclick="document.getElementById('music-search-modal').classList.replace('hidden','flex')" class="tap-ios soft-pill px-3 py-1.5 rounded-xl text-[11px] font-semibold">
+                🔍 Cari Lagu (Audius)
+              </button>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl btn-accent flex items-center justify-center text-lg shrink-0 ${isPlaying ? 'animate-pulse' : ''}">🎵</div>
+              <div class="min-w-0 flex-1">
+                <p class="font-bold text-xs truncate">${curTrack.title}</p>
+                <p class="text-[11px] opacity-70 truncate">${curTrack.artist}</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-1 px-2">
+              <button onclick="toggleShuffle()" class="tap-ios text-xs ${isShuffle ? 'font-bold underline' : 'opacity-50'}">🔀</button>
+              <button onclick="prevTrack()" class="tap-ios text-sm">⏮</button>
+              <button onclick="togglePlayPause()" class="tap-ios w-10 h-10 rounded-full btn-accent flex items-center justify-center text-sm font-bold">${isPlaying ? '⏸' : '▶'}</button>
+              <button onclick="nextTrack()" class="tap-ios text-sm">⏭</button>
+              <button onclick="toggleLoop()" class="tap-ios text-xs ${isLoop ? 'font-bold underline' : 'opacity-50'}">🔁</button>
+            </div>
+          </div>
+
+          <!-- Grid: To-Do List & Daily Note -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="glass-card rounded-3xl p-3.5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-xs font-bold">☑ To Do List</p>
+                  <button onclick="addTodoItem()" class="tap-ios w-6 h-6 rounded-full btn-accent text-xs font-bold">+</button>
+                </div>
+                <div class="space-y-1.5 max-h-28 overflow-y-auto">
+                  ${uState.todos.map(t => `
+                    <div onclick="toggleTodo(${t.id})" class="tap-ios flex items-start gap-1.5 text-[11px] ${t.done ? 'line-through opacity-50' : ''}">
+                      <span>${t.done ? '●' : '○'}</span><span class="leading-tight">${t.text}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div onclick="editDailyNote()" class="tap-ios glass-card rounded-3xl p-3.5 flex flex-col justify-between">
+              <p class="text-xs font-bold">✦ Daily Note</p>
+              <p class="font-editorial text-base font-bold leading-snug my-2">“${uState.dailyNote}”</p>
+              <p class="text-[10px] opacity-60">Ketuk untuk edit ✎</p>
+            </div>
+          </div>
+
+          <!-- Jadwal Sesi Belajar -->
+          <div class="glass-card rounded-3xl p-4">
+            <div class="flex items-center justify-between mb-2.5">
+              <p class="text-xs font-bold">📅 Jadwal Sesi Belajar</p>
+              <button onclick="addStudySchedule()" class="tap-ios soft-pill px-2.5 py-1 rounded-xl text-[11px] font-semibold">+ Agenda</button>
+            </div>
+            <div class="space-y-2">
+              ${uState.schedules.map(s => `
+                <div class="soft-pill rounded-2xl px-3 py-2 flex items-center justify-between text-xs">
+                  <span class="font-semibold">${s.title}</span>
+                  <span class="text-[10px] opacity-75">${s.time}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    renderUMode();
+  </script>
+
+  <!-- === TEMPEL BAGIAN 5 DI BAWAH BARIS INI === -->
+  <!-- === BAGIAN 5: PROFIL PRIBADI, CROPPER AVATAR & GAMIFIKASI === -->
+
+  <!-- Modal Circular Avatar Cropper (Galeri & Kamera) -->
+  <div id="avatar-crop-modal" class="fixed inset-0 z-[9994] hidden items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+    <div class="glass-card rounded-3xl p-5 w-full max-w-[360px] space-y-3.5 text-center">
+      <div class="flex items-center justify-between">
+        <h3 class="font-editorial text-xl font-bold">Atur Foto Profil ✨</h3>
+        <button onclick="closeSubModal('avatar-crop-modal')" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs">✕</button>
+      </div>
+      <div class="flex gap-2">
+        <label class="tap-ios flex-1 soft-pill py-2 rounded-xl text-xs font-semibold cursor-pointer">
+          🖼️ Galeri HP
+          <input type="file" accept="image/*" class="hidden" onchange="loadCropSource(this)" />
+        </label>
+        <label class="tap-ios flex-1 soft-pill py-2 rounded-xl text-xs font-semibold cursor-pointer">
+          📷 Kamera
+          <input type="file" accept="image/*" capture="user" class="hidden" onchange="loadCropSource(this)" />
+        </label>
+      </div>
+      <div class="relative w-44 h-44 mx-auto rounded-full overflow-hidden border-4 border-[#46372E] shadow-inner bg-black/10">
+        <canvas id="avatar-crop-canvas" width="220" height="220" class="w-full h-full object-cover"></canvas>
+      </div>
+      <div class="space-y-1">
+        <div class="flex justify-between text-[11px] opacity-75"><span>Zoom Lingkaran</span><span id="crop-zoom-label">1.0x</span></div>
+        <input id="crop-zoom-slider" type="range" min="1" max="2.5" step="0.05" value="1" oninput="drawCropPreview()" class="w-full accent-[#46372E]" />
+      </div>
+      <button onclick="saveCroppedAvatar()" class="tap-ios w-full btn-accent py-2.5 rounded-xl text-xs font-bold">Simpan Foto Profil</button>
+    </div>
+  </div>
+
+  <!-- Modal Kustomisasi Gelar & Bingkai Avatar -->
+  <div id="custom-badge-modal" class="fixed inset-0 z-[9994] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="glass-card rounded-3xl p-5 w-full max-w-[370px] space-y-3.5">
+      <div class="flex items-center justify-between">
+        <h3 class="font-editorial text-xl font-bold">Gelar & Bingkai Avatar 👑</h3>
+        <button onclick="closeSubModal('custom-badge-modal')" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs">✕</button>
+      </div>
+      <div>
+        <p class="text-[11px] font-bold uppercase opacity-70 mb-1.5">Pilih Gelar Profil</p>
+        <div id="badge-choices" class="grid grid-cols-2 gap-1.5"></div>
+      </div>
+      <div>
+        <p class="text-[11px] font-bold uppercase opacity-70 mb-1.5">Pilih Bingkai Avatar</p>
+        <div id="border-choices" class="grid grid-cols-2 gap-1.5"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const AVATAR_BORDERS = [
+      { id: 'editorial', name: 'Editorial Espresso', css: 'background: linear-gradient(135deg, #46372E, #B59B87);', crown: false },
+      { id: 'royal', name: 'Royal Crown Gold', css: 'background: linear-gradient(135deg, #D4AF37, #6B5344);', crown: true },
+      { id: 'lavender', name: 'Midnight Lavender', css: 'background: linear-gradient(135deg, #8B75B8, #3D315B);', crown: false },
+      { id: 'rosewood', name: 'Rosewood Velvet', css: 'background: linear-gradient(135deg, #8C5E58, #E2B4AD);', crown: false }
+    ];
+
+    const PROFILE_BADGES = ['Dedicated Learner', 'Skill Mentor', 'Early Explorer', 'Creative Mind', 'Focus Master'];
+
+    let localProfileMeta = JSON.parse(localStorage.getItem('sync_profile_meta') || 'null') || {
+      avatarUrl: '',
+      borderId: 'royal',
+      badge: 'Dedicated Learner',
+      skills: ['Writing', 'Editing', 'UI/UX', 'Coding'],
+      progress: { 'Writing': 68, 'Editing': 45, 'UI/UX': 82, 'Coding': 55 }
+    };
+
+    let cropImgObj = null;
+
+    function saveLocalProfileMeta() {
+      localStorage.setItem('sync_profile_meta', JSON.stringify(localProfileMeta));
+      if (db && currentUser) {
+        db.collection('users').doc(currentUser.uid).update({
+          skills: localProfileMeta.skills,
+          skillProgress: localProfileMeta.progress,
+          badge: localProfileMeta.badge,
+          borderId: localProfileMeta.borderId,
+          avatarUrl: localProfileMeta.avatarUrl
+        }).catch(() => {});
+      }
+    }
+
+    // Cropper Foto Profil Lingkaran
+    function openAvatarCropper() {
+      document.getElementById('avatar-crop-modal').classList.replace('hidden', 'flex');
+      const canvas = document.getElementById('avatar-crop-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#EAE2DA';
+      ctx.fillRect(0, 0, 220, 220);
+      ctx.fillStyle = '#46372E';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Pilih foto dari Galeri / Kamera', 110, 114);
+    }
+
+    function loadCropSource(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          cropImgObj = img;
+          document.getElementById('crop-zoom-slider').value = 1;
+          drawCropPreview();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function drawCropPreview() {
+      if (!cropImgObj) return;
+      const zoom = parseFloat(document.getElementById('crop-zoom-slider').value || '1');
+      document.getElementById('crop-zoom-label').textContent = zoom.toFixed(1) + 'x';
+      const canvas = document.getElementById('avatar-crop-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 220, 220);
+      const scale = Math.max(220 / cropImgObj.width, 220 / cropImgObj.height) * zoom;
+      const w = cropImgObj.width * scale;
+      const h = cropImgObj.height * scale;
+      ctx.drawImage(cropImgObj, (220 - w) / 2, (220 - h) / 2, w, h);
+    }
+
+    function saveCroppedAvatar() {
+      if (!cropImgObj) return showToast('Pilih Foto', 'Pilih foto terlebih dahulu sebelum menyimpan');
+      const canvas = document.getElementById('avatar-crop-canvas');
+      localProfileMeta.avatarUrl = canvas.toDataURL('image/jpeg', 0.85);
+      saveLocalProfileMeta();
+      closeSubModal('avatar-crop-modal');
+      renderProfileTab();
+      if (typeof renderHomeFeed === 'function') renderHomeFeed();
+      showToast('Foto Diperbarui', 'Foto profil lingkaran berhasil disimpan');
+    }
+
+    // Slider Progres Skill Real-Time
+    function updateSkillSlider(skill, val) {
+      const num = parseInt(val, 10) || 0;
+      localProfileMeta.progress[skill] = num;
+      const pctLabel = document.getElementById('sk-val-' + skill.replace(/\W/g, '_'));
+      if (pctLabel) pctLabel.textContent = num + '%';
+      const avg = calcAverageProgress();
+      const avgEl = document.getElementById('profile-avg-progress');
+      if (avgEl) avgEl.textContent = avg + '%';
+      saveLocalProfileMeta();
+    }
+
+    function calcAverageProgress() {
+      const list = localProfileMeta.skills;
+      if (!list.length) return 0;
+      const total = list.reduce((sum, s) => sum + (localProfileMeta.progress[s] || 0), 0);
+      return Math.round(total / list.length);
+    }
+
+    function addNewSkillItem() {
+      showModal({
+        title: 'Tambah Keahlian Baru', msg: 'Masukkan nama bidang atau mata pelajaran:',
+        confirmText: 'Tambah', withInput: true, placeholder: 'Contoh: Fisika, Akuntansi, Desain',
+        onConfirm: (val) => {
+          const clean = val.trim();
+          if (clean && !localProfileMeta.skills.includes(clean)) {
+            localProfileMeta.skills.push(clean);
+            localProfileMeta.progress[clean] = 15;
+            saveLocalProfileMeta();
+            renderProfileTab();
+            showToast('Skill Ditambahkan', `${clean} masuk ke daftar progres belajarmu`);
+          }
+        }
+      });
+    }
+
+    // Kustomisasi Gelar & Bingkai Avatar
+    function openBadgeBorderModal() {
+      const isDev = (currentUser?.email || '').toLowerCase() === DEV_EMAIL;
+      const allBadges = isDev ? ['Developer', ...PROFILE_BADGES] : PROFILE_BADGES;
+      document.getElementById('badge-choices').innerHTML = allBadges.map(b => `
+        <button onclick="selectProfileBadge('${b}')" class="tap-ios p-2.5 rounded-xl text-xs font-semibold ${localProfileMeta.badge === b ? 'btn-accent' : 'soft-pill'}">${b}</button>
+      `).join('');
+      document.getElementById('border-choices').innerHTML = AVATAR_BORDERS.map(br => `
+        <button onclick="selectAvatarBorder('${br.id}')" class="tap-ios p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 ${localProfileMeta.borderId === br.id ? 'btn-accent' : 'soft-pill'}">
+          <span class="w-4 h-4 rounded-full shrink-0" style="${br.css}"></span>
+          <span class="truncate">${br.name}</span>
+        </button>
+      `).join('');
+      document.getElementById('custom-badge-modal').classList.replace('hidden', 'flex');
+    }
+
+    function selectProfileBadge(b) {
+      localProfileMeta.badge = b;
+      saveLocalProfileMeta();
+      closeSubModal('custom-badge-modal');
+      renderProfileTab();
+      showToast('Gelar Aktif', `Gelar profil diubah menjadi "${b}"`);
+    }
+
+    function selectAvatarBorder(id) {
+      localProfileMeta.borderId = id;
+      saveLocalProfileMeta();
+      closeSubModal('custom-badge-modal');
+      renderProfileTab();
+      showToast('Bingkai Diubah', 'Bingkai cincin avatar diperbarui');
+    }
+
+    function renderProfileTab() {
+      const isDev = (currentUser?.email || '').toLowerCase() === DEV_EMAIL;
+      const myName = userProfile?.name || (isDev ? 'Vansky' : 'Learner');
+      const myUser = userProfile?.username || (isDev ? '@yourvansky' : '@sync_user');
+      const myAge = userProfile?.age || '17';
+      const myRole = isDev ? 'Developer' : (userProfile?.role || 'Student');
+      const myBio = userProfile?.bio || 'Let’s learn together ♡';
+      const borderObj = AVATAR_BORDERS.find(b => b.id === localProfileMeta.borderId) || AVATAR_BORDERS[0];
+      const activeBadge = isDev ? 'Developer' : localProfileMeta.badge;
+      const avgPct = calcAverageProgress();
+
+      const avatarInner = localProfileMeta.avatarUrl
+        ? `<img src="${localProfileMeta.avatarUrl}" class="w-full h-full rounded-full object-cover" />`
+        : `<div class="w-full h-full rounded-full btn-accent flex items-center justify-center font-editorial text-3xl font-bold">${myName[0].toUpperCase()}</div>`;
+
+      document.getElementById('view-profil').innerHTML = `
+        <div class="space-y-3.5">
+          <!-- Kartu Identitas & Statistik 3 Kolom -->
+          <div class="glass-card rounded-3xl overflow-hidden">
+            <div class="h-20 bg-[#2C2623] relative flex items-center justify-end px-4">
+              <button onclick="openBadgeBorderModal()" class="tap-ios bg-white/90 text-[#2C2623] px-3 py-1.5 rounded-full text-[11px] font-bold">
+                ✎ Customize Profil
+              </button>
+            </div>
+            <div class="px-4 pb-4">
+              <div class="flex items-end justify-between -mt-9 mb-2.5">
+                <div onclick="openAvatarCropper()" class="tap-ios relative">
+                  <div class="w-20 h-20 rounded-full p-[3px]" style="${borderObj.css}">
+                    ${avatarInner}
+                  </div>
+                  ${borderObj.crown ? '<span class="absolute -top-2.5 -left-1 text-lg">👑</span>' : ''}
+                  <span class="absolute bottom-0 right-0 w-6 h-6 rounded-full btn-accent border-2 border-white flex items-center justify-center text-[10px]">📷</span>
+                </div>
+
+                <!-- Statistik 3 Kolom -->
+                <div class="soft-pill rounded-2xl px-3 py-2 grid grid-cols-3 gap-3 text-center">
+                  <div><p class="text-xs font-bold">${localProfileMeta.skills.length}</p><p class="text-[9px] opacity-65">Teman/Skill</p></div>
+                  <div class="border-x border-black/10 dark:border-white/10 px-2"><p class="text-xs font-bold">${userProfile?.vouchCount || 24}</p><p class="text-[9px] opacity-65">Vouch</p></div>
+                  <div><p id="profile-avg-progress" class="text-xs font-bold">${avgPct}%</p><p class="text-[9px] opacity-65">Progres</p></div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <h2 class="font-bold text-lg">${myName}</h2>
+                <span class="text-[10px] px-2.5 py-0.5 rounded-full btn-accent font-semibold">✦ ${activeBadge}</span>
+              </div>
+              <p class="text-xs opacity-70 mt-0.5">${myUser} • ${myAge} y/o • ${myRole}</p>
+              <p class="text-xs opacity-85 mt-1.5">${myBio}</p>
+            </div>
+          </div>
+
+          <!-- Banner Pintasan Gelap "Ruang Pribadi U Mode" -->
+          <div onclick="switchTab('umode')" class="tap-ios rounded-3xl p-4 bg-[#2C2623] text-[#FAF7F4] flex items-center justify-between shadow-lg">
+            <div>
+              <p class="text-[10px] uppercase tracking-widest opacity-70">Personal Sanctuary</p>
+              <h3 class="font-editorial text-lg font-bold">Ruang Pribadi U Mode 🌙</h3>
+              <p class="text-[11px] opacity-80">Musik fokus, mood tracker, to-do & catatan harian</p>
+            </div>
+            <span class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-sm">→</span>
+          </div>
+
+          <!-- Keahlian yang Dibagikan -->
+          <div class="glass-card rounded-3xl p-4">
+            <div class="flex items-center justify-between mb-2.5">
+              <h3 class="text-xs font-bold">Keahlian yang Dibagikan</h3>
+              <button onclick="addNewSkillItem()" class="tap-ios text-[11px] font-bold opacity-80">+ Atur Skill</button>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              ${localProfileMeta.skills.map(s => `
+                <span class="soft-pill px-3 py-1 rounded-full text-[11px] font-medium">• ${s}</span>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Slider Progres Belajar Real-Time (0% - 100%) -->
+          <div class="glass-card rounded-3xl p-4 space-y-3">
+            <h3 class="text-xs font-bold">📊 Progres Belajar Skill</h3>
+            ${localProfileMeta.skills.map(s => {
+              const val = localProfileMeta.progress[s] || 0;
+              const safeId = s.replace(/\W/g, '_');
+              return `
+                <div class="soft-pill rounded-2xl p-3">
+                  <div class="flex justify-between text-xs font-semibold mb-1.5">
+                    <span>${s}</span>
+                    <span id="sk-val-${safeId}">${val}%</span>
+                  </div>
+                  <input type="range" min="0" max="100" value="${val}" oninput="updateSkillSlider('${s.replace(/'/g, "\\'")}', this.value)" class="w-full accent-[#46372E]" />
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    renderProfileTab();
+  </script>
+
+  <!-- === TEMPEL BAGIAN 6 DI BAWAH BARIS INI === -->
+  <!-- === BAGIAN 6: CHAT REAL-TIME, 100+ STIKER KAWAII, VOICE NOTE & WEBRTC CALL === -->
+
+  <!-- Overlay Panggilan Suara WebRTC (Incoming & Active Call) -->
+  <div id="webrtc-call-overlay" class="fixed inset-0 z-[9996] hidden flex-col items-center justify-between p-6 bg-[#1B1722]/95 text-[#FAF7F4] backdrop-blur-xl">
+    <div class="text-center mt-8">
+      <span id="call-badge-status" class="text-[11px] uppercase tracking-widest px-3 py-1 rounded-full bg-white/10">Voice Call • WebRTC</span>
+      <div id="call-peer-avatar" class="w-24 h-24 rounded-full btn-accent mx-auto mt-6 flex items-center justify-center font-editorial text-4xl font-bold shadow-2xl ring-4 ring-white/15">E</div>
+      <h3 id="call-peer-name" class="font-bold text-xl mt-4">Eve</h3>
+      <p id="call-timer-text" class="text-xs opacity-75 mt-1">Menghubungkan koneksi suara...</p>
+    </div>
+
+    <!-- Kontrol Panggilan Masuk (Terima / Tolak) -->
+    <div id="incoming-call-controls" class="hidden flex items-center gap-8 mb-10">
+      <button onclick="rejectWebRTCCall()" class="tap-ios w-16 h-16 rounded-full bg-rose-600 flex flex-col items-center justify-center shadow-lg">
+        <span class="text-xl">📵</span><span class="text-[9px] font-bold mt-0.5">Tolak</span>
+      </button>
+      <button onclick="acceptWebRTCCall()" class="tap-ios w-16 h-16 rounded-full bg-emerald-600 flex flex-col items-center justify-center shadow-lg animate-bounce">
+        <span class="text-xl">📞</span><span class="text-[9px] font-bold mt-0.5">Terima</span>
+      </button>
+    </div>
+
+    <!-- Kontrol Panggilan Aktif (Mute & Akhiri) -->
+    <div id="active-call-controls" class="flex items-center gap-6 mb-10">
+      <button onclick="toggleCallMute()" id="call-mute-btn" class="tap-ios w-14 h-14 rounded-full bg-white/15 flex flex-col items-center justify-center">
+        <span id="call-mute-icon" class="text-lg">🎙️</span>
+        <span id="call-mute-label" class="text-[9px] mt-0.5">Mute</span>
+      </button>
+      <button onclick="endWebRTCCall()" class="tap-ios w-16 h-16 rounded-full bg-rose-600 flex flex-col items-center justify-center shadow-lg">
+        <span class="text-xl">📵</span>
+        <span class="text-[9px] font-bold mt-0.5">Akhiri</span>
+      </button>
+    </div>
+    <audio id="webrtc-remote-audio" autoplay></audio>
+  </div>
+
+  <script>
+    // Generator 108 Stiker Kawaii Kustom
+    const KAWAII_FACES = [
+      '(｡♥‿♥｡)', '(づ｡◕‿‿◕｡)づ', '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧', '(✿◠‿◠)', '(≧◡≦) ♡', '(o^▽^o)',
+      '(つ≧▽≦)つ', '(★^O^★)', '(๑˃ᴗ˂)ﻭ', '(・∀・)ノ', '(´｡• ᵕ •｡`)', '(◕‿◕✿)',
+      '(ง •̀_•́)ง', '(•̀ᴗ•́)و ̑̑', '(｡•̀ᴗ-)✧', '(´･ᴗ･ ` )', '(ᵔᴥᵔ)', '(=^･ω･^=)',
+      '(U・x・U)', 'ʕ•ᴥ•ʔ', '(・⊝・)', '(◕ᴗ◕✿)', '(づ￣ ³￣)づ', '(ﾉ´ヮ`)ﾉ*: ･ﾟ',
+      '(๑•́ ₃ •̀๑)', '(╥﹏╥)', '(；′⌒`)', '(・_・;)', '(⊙_⊙)', '(°ロ°) !',
+      '(￣ω￣)', '(－_－) zzZ', '(¬‿¬ )', '(˘︶˘).｡.:*♡', '(♡°▽°♡)', '(っ˘ω˘ς )'
+    ];
+    const KAWAII_TAGS = ['Semangat!', 'Halo ♡', 'Fokus ✨', 'Makasih~', 'Lucu!', 'Keren!', 'Istirahat ☕', 'Gas Belajar!', 'Peluk 🤍'];
+    const KAWAII_STICKERS = Array.from({ length: 108 }, (_, i) => ({
+      id: 'stk_' + i,
+      art: KAWAII_FACES[i % KAWAII_FACES.length],
+      label: KAWAII_TAGS[i % KAWAII_TAGS.length]
+    }));
+
+    let activeChatPartner = null;
+    let isStickerDrawerOpen = false;
+    let isPeerTyping = false;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecordingVN = false;
+    let chatUnsub = null;
+
+    // State Percakapan Default
+    let chatThreads = {
+      'demo_eve': [
+        { id: 'm1', sender: 'them', type: 'text', text: 'Hai! Mau diskusi UI/UX atau coding bareng malam ini? ✨', time: '20:14', status: 'read' },
+        { id: 'm2', sender: 'me', type: 'text', text: 'Boleh banget! Aku lagi rapihin tampilan SYNC Match nih ☕', time: '20:15', status: 'read' }
+      ],
+      'demo_moreeno': [
+        { id: 'm3', sender: 'them', type: 'sticker', sticker: KAWAII_STICKERS[1], time: '21:12', status: 'read' }
+      ],
+      'demo_santo': [
+        { id: 'm4', sender: 'them', type: 'text', text: 'Yuk latihan soal Fisika bab 3 nanti jam 8!', time: '19:40', status: 'delivered' }
+      ]
+    };
+
+    function getChatRoomId(peerUid) {
+      const myUid = currentUser?.uid || 'guest_me';
+      return [myUid, peerUid].sort().join('_');
+    }
+
+    function openPrivateChat(uid) {
+      const partner = (typeof SAMPLE_PARTNERS !== 'undefined' ? SAMPLE_PARTNERS : []).find(p => p.uid === uid)
+        || { uid, name: 'Partner', username: '@partner', online: true };
+      activeChatPartner = partner;
+      isStickerDrawerOpen = false;
+      if (!chatThreads[uid]) chatThreads[uid] = [];
+
+      // Tandai semua pesan dari lawan bicara sebagai terbaca (centang dua biru)
+      chatThreads[uid].forEach(m => { if (m.sender === 'them') m.status = 'read'; });
+
+      // Sinkronisasi Firestore Real-Time jika Firebase aktif
+      if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+      if (db && currentUser) {
+        const roomId = getChatRoomId(uid);
+        chatUnsub = db.collection('chats').doc(roomId).collection('messages')
+          .orderBy('createdAt', 'asc').limit(50)
+          .onSnapshot(snap => {
+            if (!snap.empty) {
+              chatThreads[uid] = snap.docs.map(d => {
+                const data = d.data();
+                return {
+                  id: d.id,
+                  sender: data.senderUid === currentUser.uid ? 'me' : 'them',
+                  type: data.type || 'text',
+                  text: data.text || '',
+                  image: data.image || '',
+                  audio: data.audio || '',
+                  sticker: data.sticker || null,
+                  time: data.time || 'Baru saja',
+                  status: data.status || 'read'
+                };
+              });
+              renderChatTab();
+            }
+          }, () => {});
+      }
+      renderChatTab();
+    }
+
+    function backToChatList() {
+      activeChatPartner = null;
+      if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+      renderChatTab();
+    }
+
+    function renderReadReceipt(status) {
+      if (status === 'sent') return '<span class="text-[10px] opacity-60">✓</span>';
+      if (status === 'delivered') return '<span class="text-[10px] opacity-70">✓✓</span>';
+      return '<span class="text-[10px] text-sky-400 font-bold">✓✓</span>';
+    }
+
+    function handleTypingEvent(val) {
+      if (!activeChatPartner) return;
+      if (db && currentUser) {
+        const roomId = getChatRoomId(activeChatPartner.uid);
+        db.collection('chats').doc(roomId).set({
+          typingBy: val.trim() ? currentUser.uid : ''
+        }, { merge: true }).catch(() => {});
+      }
+    }
+
+    async function pushChatMessage(payload) {
+      if (!activeChatPartner) return;
+      const now = new Date();
+      const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      const msgObj = {
+        id: 'msg_' + Date.now(),
+        sender: 'me',
+        time: timeStr,
+        status: 'sent',
+        ...payload
+      };
+
+      chatThreads[activeChatPartner.uid].push(msgObj);
+      renderChatTab();
+
+      // Simulasi progres centang terkirim -> diterima -> dibaca + balasan typing
+      setTimeout(() => { msgObj.status = 'delivered'; renderChatTab(); }, 500);
+      setTimeout(() => {
+        msgObj.status = 'read';
+        isPeerTyping = true;
+        renderChatTab();
+        setTimeout(() => { isPeerTyping = false; renderChatTab(); }, 1800);
+      }, 1200);
+
+      if (db && currentUser) {
+        const roomId = getChatRoomId(activeChatPartner.uid);
+        await db.collection('chats').doc(roomId).collection('messages').add({
+          senderUid: currentUser.uid,
+          type: payload.type,
+          text: payload.text || '',
+          image: payload.image || '',
+          audio: payload.audio || '',
+          sticker: payload.sticker || null,
+          time: timeStr,
+          status: 'read',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(() => {});
+      }
+    }
+
+    function sendTextMessage() {
+      const inp = document.getElementById('chat-msg-input');
+      if (!inp || !inp.value.trim()) return;
+      const txt = inp.value.trim();
+      inp.value = '';
+      handleTypingEvent('');
+      pushChatMessage({ type: 'text', text: txt });
+    }
+
+    function sendStickerMessage(idx) {
+      const stk = KAWAII_STICKERS[idx];
+      if (!stk) return;
+      isStickerDrawerOpen = false;
+      pushChatMessage({ type: 'sticker', sticker: stk });
+    }
+
+    function sendPhotoMessage(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        pushChatMessage({ type: 'image', image: e.target.result });
+        showToast('Foto Terkirim', 'Gambar berhasil dikirim ke ruang obrolan');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function toggleVoiceNoteRecording() {
+      if (!isRecordingVN) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const audioUrl = URL.createObjectURL(blob);
+            stream.getTracks().forEach(t => t.stop());
+            pushChatMessage({ type: 'voice', audio: audioUrl });
+            showToast('Voice Note Terkirim', 'Pesan suara berhasil dikirim');
+          };
+          mediaRecorder.start();
+          isRecordingVN = true;
+          renderChatTab();
+          showToast('Merekam Suara...', 'Ketuk tombol mikrofon lagi untuk mengirim');
+        } catch (err) {
+          showToast('Izin Mikrofon', 'Aktifkan izin mikrofon di browser untuk merekam Voice Note');
+        }
+      } else {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+        isRecordingVN = false;
+        renderChatTab();
+      }
+    }
+
+    function deleteChatMessage(msgId) {
+      if (!activeChatPartner) return;
+      showModal({
+        title: 'Hapus Pesan',
+        msg: 'Hapus pesan ini dari ruang obrolan?',
+        confirmText: 'Hapus',
+        onConfirm: () => {
+          chatThreads[activeChatPartner.uid] = chatThreads[activeChatPartner.uid].filter(m => m.id !== msgId);
+          if (db && currentUser) {
+            db.collection('chats').doc(getChatRoomId(activeChatPartner.uid)).collection('messages').doc(msgId).delete().catch(() => {});
+          }
+          renderChatTab();
+          showToast('Dihapus', 'Pesan telah dihapus');
+        }
+      });
+    }
+
+    // === SISTEM PANGGILAN SUARA REAL-TIME (WEBRTC + FIRESTORE SIGNALING) ===
+    let rtcPeer = null;
+    let localCallStream = null;
+    let isCallMuted = false;
+    let callTimerInterval = null;
+    let callSeconds = 0;
+    let activeCallDocId = null;
+
+    async function startWebRTCCall() {
+      if (!activeChatPartner) return;
+      document.getElementById('call-peer-name').textContent = activeChatPartner.name;
+      document.getElementById('call-peer-avatar').textContent = activeChatPartner.name[0].toUpperCase();
+      document.getElementById('call-badge-status').textContent = 'Memanggil • WebRTC Voice';
+      document.getElementById('call-timer-text').textContent = 'Menghubungkan suara...';
+      document.getElementById('incoming-call-controls').classList.add('hidden');
+      document.getElementById('active-call-controls').classList.remove('hidden');
+      document.getElementById('webrtc-call-overlay').classList.replace('hidden', 'flex');
+
+      try {
+        localCallStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        rtcPeer = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        localCallStream.getTracks().forEach(track => rtcPeer.addTrack(track, localCallStream));
+        rtcPeer.ontrack = (event) => {
+          document.getElementById('webrtc-remote-audio').srcObject = event.streams[0];
+        };
+
+        if (db && currentUser) {
+          const callRef = db.collection('calls').doc();
+          activeCallDocId = callRef.id;
+          const offer = await rtcPeer.createOffer();
+          await rtcPeer.setLocalDescription(offer);
+          await callRef.set({
+            callerUid: currentUser.uid,
+            callerName: userProfile?.name || 'Learner',
+            calleeUid: activeChatPartner.uid,
+            offer: { type: offer.type, sdp: offer.sdp },
+            status: 'ringing',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          rtcPeer.onicecandidate = e => {
+            if (e.candidate) callRef.collection('callerCandidates').add(e.candidate.toJSON());
+          };
+          callRef.onSnapshot(async snap => {
+            const data = snap.data();
+            if (data?.answer && !rtcPeer.currentRemoteDescription) {
+              await rtcPeer.setRemoteDescription(new RTCSessionDescription(data.answer));
+              beginCallTimer();
+            }
+            if (data?.status === 'ended') endWebRTCCall(true);
+          });
+        }
+        // Mulai timer koneksi suara
+        setTimeout(() => { if (!callTimerInterval) beginCallTimer(); }, 1500);
+      } catch (e) {
+        showToast('Mikrofon Diperlukan', 'Izinkan mikrofon untuk melakukan Voice Call');
+        endWebRTCCall(true);
+      }
+    }
+
+    function beginCallTimer() {
+      callSeconds = 0;
+      document.getElementById('call-badge-status').textContent = 'Terhubung • Suara Jernih';
+      clearInterval(callTimerInterval);
+      callTimerInterval = setInterval(() => {
+        callSeconds++;
+        const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+        const s = String(callSeconds % 60).padStart(2, '0');
+        document.getElementById('call-timer-text').textContent = `${m}:${s}`;
+      }, 1000);
+    }
+
+    function toggleCallMute() {
+      isCallMuted = !isCallMuted;
+      if (localCallStream) localCallStream.getAudioTracks().forEach(t => t.enabled = !isCallMuted);
+      document.getElementById('call-mute-icon').textContent = isCallMuted ? '🔇' : '🎙️';
+      document.getElementById('call-mute-label').textContent = isCallMuted ? 'Unmute' : 'Mute';
+      showToast('Audio', isCallMuted ? 'Mikrofon dibisukan' : 'Mikrofon aktif');
+    }
+
+    function rejectWebRTCCall() {
+      endWebRTCCall();
+      showToast('Panggilan Ditolak', 'Panggilan suara ditolak');
+    }
+
+    async function acceptWebRTCCall() {
+      document.getElementById('incoming-call-controls').classList.add('hidden');
+      document.getElementById('active-call-controls').classList.remove('hidden');
+      beginCallTimer();
+    }
+
+    function endWebRTCCall(silent = false) {
+      clearInterval(callTimerInterval);
+      callTimerInterval = null;
+      if (localCallStream) { localCallStream.getTracks().forEach(t => t.stop()); localCallStream = null; }
+      if (rtcPeer) { rtcPeer.close(); rtcPeer = null; }
+      if (db && activeCallDocId) {
+        db.collection('calls').doc(activeCallDocId).update({ status: 'ended' }).catch(() => {});
+        activeCallDocId = null;
+      }
+      isCallMuted = false;
+      document.getElementById('webrtc-call-overlay').classList.replace('flex', 'hidden');
+      if (!silent) showToast('Panggilan Berakhir', 'Sesi panggilan suara telah selesai');
+    }
+
+    function renderChatTab() {
+      const container = document.getElementById('view-chat');
+      const partners = typeof SAMPLE_PARTNERS !== 'undefined' ? SAMPLE_PARTNERS : [];
+
+      // Tampilan Daftar Obrolan
+      if (!activeChatPartner) {
+        container.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h2 class="font-editorial text-xl font-bold">Pesan & Voice Call 💬</h2>
+              <span class="text-[11px] opacity-70">${partners.length} Kontak</span>
+            </div>
+            <div class="space-y-2.5">
+              ${partners.map(p => {
+                const list = chatThreads[p.uid] || [];
+                const last = list[list.length - 1];
+                const preview = !last ? 'Mulai percakapan belajar...'
+                  : last.type === 'sticker' ? `Stiker ${last.sticker?.label || 'Kawaii'}`
+                  : last.type === 'image' ? '📷 Mengirim foto'
+                  : last.type === 'voice' ? '🎤 Pesan suara'
+                  : last.text;
+                return `
+                  <div onclick="openPrivateChat('${p.uid}')" class="tap-ios glass-card rounded-3xl p-3.5 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="relative shrink-0">
+                        <div class="w-12 h-12 rounded-full btn-accent flex items-center justify-center font-bold text-base">${p.name[0]}</div>
+                        <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full ${p.online ? 'bg-emerald-500' : 'bg-stone-400'} border-2 border-white"></span>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="font-bold text-sm truncate">${p.name}</p>
+                        <p class="text-xs opacity-70 truncate">${preview}</p>
+                      </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <p class="text-[10px] opacity-60">${last?.time || ''}</p>
+                      ${last?.sender === 'me' ? renderReadReceipt(last.status) : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // Tampilan Ruang Obrolan Privat 1-on-1
+      const msgs = chatThreads[activeChatPartner.uid] || [];
+      container.innerHTML = `
+        <div class="glass-card rounded-3xl overflow-hidden flex flex-col" style="height: calc(100vh - 185px); min-height: 430px;">
+          <!-- Header Room Chat -->
+          <div class="p-3.5 border-b border-black/10 dark:border-white/10 flex items-center justify-between">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <button onclick="backToChatList()" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs font-bold shrink-0">←</button>
+              <div class="w-9 h-9 rounded-full btn-accent flex items-center justify-center font-bold text-xs shrink-0">${activeChatPartner.name[0]}</div>
+              <div class="min-w-0">
+                <p class="font-bold text-xs truncate">${activeChatPartner.name}</p>
+                <p class="text-[10px] opacity-75 truncate">
+                  ${isPeerTyping ? '<span class="font-bold text-emerald-600 dark:text-emerald-400">Sedang mengetik...</span>' : (activeChatPartner.online ? '🟢 Online' : '⚫ Offline')}
+                </p>
+              </div>
+            </div>
+            <button onclick="startWebRTCCall()" class="tap-ios btn-accent px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shrink-0">
+              <span>📞</span><span>Call</span>
+            </button>
+          </div>
+          <!-- Area Bubble Pesan -->
+          <div id="chat-messages-scroll" class="flex-1 overflow-y-auto p-3.5 space-y-2.5">
+            ${msgs.map(m => {
+              const isMe = m.sender === 'me';
+              let bodyHtml = '';
+              if (m.type === 'sticker' && m.sticker) {
+                bodyHtml = `<div class="text-center py-1"><p class="text-base font-bold">${m.sticker.art}</p><span class="text-[10px] opacity-80">${m.sticker.label}</span></div>`;
+              } else if (m.type === 'image') {
+                bodyHtml = `<img src="${m.image}" class="max-h-44 rounded-2xl object-cover" />`;
+              } else if (m.type === 'voice') {
+                bodyHtml = `<audio controls src="${m.audio}" class="h-8 w-48"></audio>`;
+              } else {
+                bodyHtml = `<p class="text-xs leading-relaxed break-words">${m.text}</p>`;
+              }
+              return `
+                <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                  <div onclick="deleteChatMessage('${m.id}')" class="tap-ios max-w-[78%] rounded-2xl px-3.5 py-2 ${isMe ? 'btn-accent rounded-br-sm' : 'soft-pill rounded-bl-sm'}">
+                    ${bodyHtml}
+                    <div class="flex items-center justify-end gap-1 mt-1 opacity-75">
+                      <span class="text-[9px]">${m.time}</span>
+                      ${isMe ? renderReadReceipt(m.status) : ''}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Laci 108 Stiker Kawaii -->
+          ${isStickerDrawerOpen ? `
+            <div class="border-t border-black/10 dark:border-white/10 p-2.5 max-h-44 overflow-y-auto grid grid-cols-3 gap-1.5 bg-black/5">
+              ${KAWAII_STICKERS.map((s, idx) => `
+                <button onclick="sendStickerMessage(${idx})" class="tap-ios soft-pill rounded-xl p-2 text-center">
+                  <p class="text-[11px] font-bold truncate">${s.art}</p>
+                  <p class="text-[9px] opacity-70 truncate">${s.label}</p>
+                </button>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          <!-- Input Bar (Stiker, Foto, Voice Note & Kirim) -->
+          <div class="p-2.5 border-t border-black/10 dark:border-white/10 flex items-center gap-1.5">
+            <button onclick="isStickerDrawerOpen=!isStickerDrawerOpen; renderChatTab()" class="tap-ios w-9 h-9 rounded-full soft-pill text-sm shrink-0">🧸</button>
+            <label class="tap-ios w-9 h-9 rounded-full soft-pill flex items-center justify-center text-sm shrink-0 cursor-pointer">
+              📷
+              <input type="file" accept="image/*" class="hidden" onchange="sendPhotoMessage(this)" />
+            </label>
+            <input id="chat-msg-input" oninput="handleTypingEvent(this.value)" onkeydown="if(event.key==='Enter') sendTextMessage()" type="text" placeholder="Tulis pesan..." class="flex-1 soft-pill rounded-full px-3.5 py-2 text-xs focus:outline-none min-w-0" />
+            <button onclick="toggleVoiceNoteRecording()" class="tap-ios w-9 h-9 rounded-full ${isRecordingVN ? 'bg-rose-600 text-white animate-pulse' : 'soft-pill'} text-sm shrink-0">🎤</button>
+            <button onclick="sendTextMessage()" class="tap-ios w-9 h-9 rounded-full btn-accent text-xs font-bold shrink-0">➤</button>
+          </div>
+        </div>
+      `;
+      const scrollBox = document.getElementById('chat-messages-scroll');
+      if (scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight;
+    }
+
+    renderChatTab();
+  </script>
+
+  <!-- === TEMPEL BAGIAN 7 DI BAWAH BARIS INI === -->
+  <!-- === BAGIAN 7: GRUP BELAJAR, KOMUNITAS/QUEST/EVENT & ASISTEN AI SYNCG === -->
+
+  <script>
+    // ==========================================
+    // 1. SISTEM GRUP BELAJAR (STUDY GROUPS)
+    // ==========================================
+    let activeGroupId = null;
+    let groupUnsub = null;
+
+    let studyGroups = [
+      {
+        id: 'grp_1',
+        code: 'SYNC-ALPHA',
+        name: 'Fokus Fisika & Matematika ✨',
+        desc: 'Diskusi rumus, latihan soal & belajar bareng tiap malam',
+        members: ['Vansky', 'Eve', 'Santo Men'],
+        messages: [
+          { id: 'gm1', sender: 'Santo Men', text: 'Halo semuanya! Malam ini kita bahas latihan soal bab dinamika ya 📚', time: '19:30' },
+          { id: 'gm2', sender: 'Eve', text: 'Siap! Aku sudah siapin catatannya ☕', time: '19:32' }
+        ]
+      },
+      {
+        id: 'grp_2',
+        code: 'SYNC-CRAFT',
+        name: 'UI/UX & Web Dev Studio',
+        desc: 'Berbagi referensi desain editorial, HTML/CSS/JS & proyek bareng',
+        members: ['Vansky', 'moreeno', 'Eve'],
+        messages: [
+          { id: 'gm3', sender: 'moreeno', text: 'Palet warna cream & dark brown bikin mata nyaman banget buat belajar lama!', time: '20:10' }
+        ]
+      }
+    ];
+
+    function generateGroupCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let suffix = '';
+      for (let i = 0; i < 5; i++) suffix += chars[Math.floor(Math.random() * chars.length)];
+      return 'SYNC-' + suffix;
+    }
+
+    function createStudyGroup() {
+      showModal({
+        title: 'Buat Grup Belajar Baru',
+        msg: 'Masukkan nama grup belajar (Kode undangan SYNC-XXXXX akan dibuat otomatis):',
+        confirmText: 'Buat Grup',
+        withInput: true,
+        placeholder: 'Contoh: Pejuang Akuntansi & Ekonomi',
+        onConfirm: async (val) => {
+          const name = val.trim();
+          if (!name) return;
+          const code = generateGroupCode();
+          const myName = userProfile?.name || 'Vansky';
+          const newGrp = {
+            id: 'grp_' + Date.now(),
+            code,
+            name,
+            desc: 'Grup belajar kolaboratif SYNC Match',
+            members: [myName],
+            messages: [
+              { id: 'gm_' + Date.now(), sender: 'Sistem', text: `Grup "${name}" dibuat dengan kode undangan ${code}`, time: 'Baru saja' }
+            ]
+          };
+          studyGroups.unshift(newGrp);
+          if (db && currentUser) {
+            try { await db.collection('groups').doc(newGrp.id).set(newGrp); } catch (e) {}
+          }
+          renderGroupTab();
+          showToast('Grup Dibuat!', `Kode undangan: ${code}`);
+        }
+      });
+    }
+
+    function joinGroupByCode() {
+      showModal({
+        title: 'Gabung Grup Belajar',
+        msg: 'Masukkan kode undangan grup (contoh: SYNC-ALPHA):',
+        confirmText: 'Gabung',
+        withInput: true,
+        placeholder: 'SYNC-XXXXX',
+        onConfirm: async (rawCode) => {
+          const code = rawCode.trim().toUpperCase();
+          if (!code) return;
+          const found = studyGroups.find(g => g.code === code);
+          const myName = userProfile?.name || 'Vansky';
+          if (found) {
+            if (!found.members.includes(myName)) found.members.push(myName);
+            openGroupRoom(found.id);
+            showToast('Berhasil Bergabung', `Selamat datang di ${found.name}!`);
+          } else {
+            // Cek di Firestore jika grup dibuat oleh pengguna lain
+            if (db) {
+              try {
+                const snap = await db.collection('groups').where('code', '==', code).limit(1).get();
+                if (!snap.empty) {
+                  const data = snap.docs[0].data();
+                  studyGroups.unshift(data);
+                  openGroupRoom(data.id);
+                  showToast('Berhasil Bergabung', `Masuk ke grup ${data.name}`);
+                  return;
+                }
+              } catch (e) {}
+            }
+            showToast('Kode Tidak Ditemukan', 'Periksa kembali kode undangan SYNC-XXXXX');
+          }
+        }
+      });
+    }
+
+    function copyGroupCode(code) {
+      if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => {});
+      showToast('Kode Disalin 📋', `Kode ${code} siap dibagikan ke teman belajar`);
+    }
+
+    function openGroupRoom(groupId) {
+      activeGroupId = groupId;
+      if (groupUnsub) { groupUnsub(); groupUnsub = null; }
+      if (db && currentUser) {
+        groupUnsub = db.collection('groups').doc(groupId).collection('messages')
+          .orderBy('createdAt', 'asc').limit(60)
+          .onSnapshot(snap => {
+            if (!snap.empty) {
+              const grp = studyGroups.find(g => g.id === groupId);
+              if (grp) {
+                grp.messages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderGroupTab();
+              }
+            }
+          }, () => {});
+      }
+      renderGroupTab();
+    }
+
+    async function sendGroupMessage() {
+      const inp = document.getElementById('group-chat-input');
+      if (!inp || !inp.value.trim() || !activeGroupId) return;
+      const txt = inp.value.trim();
+      inp.value = '';
+      const grp = studyGroups.find(g => g.id === activeGroupId);
+      if (!grp) return;
+
+      const now = new Date();
+      const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      const senderName = userProfile?.name || ((currentUser?.email || '').toLowerCase() === DEV_EMAIL ? 'Vansky' : 'Kamu');
+
+      grp.messages.push({ id: 'gm_' + Date.now(), sender: senderName, text: txt, time: timeStr });
+      renderGroupTab();
+
+      if (db && currentUser) {
+        await db.collection('groups').doc(activeGroupId).collection('messages').add({
+          sender: senderName,
+          text: txt,
+          time: timeStr,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(() => {});
+      }
+    }
+
+    function renderGroupTab() {
+      const container = document.getElementById('view-grup');
+      if (!activeGroupId) {
+        container.innerHTML = `
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <h2 class="font-editorial text-xl font-bold">Grup Belajar 👥</h2>
+              <div class="flex gap-1.5">
+                <button onclick="joinGroupByCode()" class="tap-ios soft-pill px-3 py-1.5 rounded-full text-[11px] font-bold">🔑 Pakai Kode</button>
+                <button onclick="createStudyGroup()" class="tap-ios btn-accent px-3 py-1.5 rounded-full text-[11px] font-bold">+ Buat Grup</button>
+              </div>
+            </div>
+
+            <div class="space-y-2.5">
+              ${studyGroups.map(g => `
+                <div class="glass-card rounded-3xl p-4 space-y-2.5">
+                  <div class="flex items-start justify-between gap-2">
+                    <div onclick="openGroupRoom('${g.id}')" class="tap-ios flex-1 min-w-0">
+                      <h3 class="font-bold text-sm truncate">${g.name}</h3>
+                      <p class="text-[11px] opacity-75 line-clamp-1 mt-0.5">${g.desc}</p>
+                    </div>
+                    <button onclick="copyGroupCode('${g.code}')" class="tap-ios soft-pill px-2.5 py-1 rounded-xl text-[10px] font-bold shrink-0">
+                      📋 ${g.code}
+                    </button>
+                  </div>
+                  <div class="flex items-center justify-between pt-2 border-t border-black/5 dark:border-white/10">
+                    <span class="text-[10px] opacity-70">👤 ${g.members.length} Anggota</span>
+                    <button onclick="openGroupRoom('${g.id}')" class="tap-ios btn-accent px-3.5 py-1 rounded-full text-[11px] font-semibold">Masuk Ruang →</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const grp = studyGroups.find(g => g.id === activeGroupId);
+      if (!grp) { activeGroupId = null; return renderGroupTab(); }
+      const myName = userProfile?.name || ((currentUser?.email || '').toLowerCase() === DEV_EMAIL ? 'Vansky' : 'Kamu');
+
+      container.innerHTML = `
+        <div class="glass-card rounded-3xl overflow-hidden flex flex-col" style="height: calc(100vh - 185px); min-height: 430px;">
+          <div class="p-3.5 border-b border-black/10 dark:border-white/10 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <button onclick="activeGroupId=null; renderGroupTab()" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs font-bold shrink-0">←</button>
+              <div class="min-w-0">
+                <p class="font-bold text-xs truncate">${grp.name}</p>
+                <p class="text-[10px] opacity-70 truncate">${grp.members.join(', ')}</p>
+              </div>
+            </div>
+            <button onclick="copyGroupCode('${grp.code}')" class="tap-ios soft-pill px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0">📋 ${grp.code}</button>
+          </div>
+
+          <div id="group-msg-scroll" class="flex-1 overflow-y-auto p-3.5 space-y-2.5">
+            ${grp.messages.map(m => {
+              const isMe = m.sender === myName || m.sender === 'Kamu';
+              return `
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                  <span class="text-[9px] opacity-65 mb-0.5 px-1">${m.sender}</span>
+                  <div class="max-w-[80%] rounded-2xl px-3.5 py-2 ${isMe ? 'btn-accent rounded-br-sm' : 'soft-pill rounded-bl-sm'}">
+                    <p class="text-xs leading-relaxed">${m.text}</p>
+                    <p class="text-[9px] opacity-70 text-right mt-0.5">${m.time}</p>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="p-2.5 border-t border-black/10 dark:border-white/10 flex items-center gap-2">
+            <input id="group-chat-input" onkeydown="if(event.key==='Enter') sendGroupMessage()" type="text" placeholder="Kirim pesan ke grup..." class="flex-1 soft-pill rounded-full px-3.5 py-2 text-xs focus:outline-none" />
+            <button onclick="sendGroupMessage()" class="tap-ios w-9 h-9 rounded-full btn-accent text-xs font-bold shrink-0">➤</button>
+          </div>
+        </div>
+      `;
+      const sc = document.getElementById('group-msg-scroll');
+      if (sc) sc.scrollTop = sc.scrollHeight;
+    }
+
+    // ==========================================
+    // 2. RUANG KOMUNITAS, MISI (QUESTS) & EVENT
+    // ==========================================
+    let communitySubTab = 'diskusi';
+
+    let communityPosts = [
+      {
+        id: 'post_1',
+        authorUid: 'demo_eve',
+        authorName: 'Eve',
+        badge: 'UI/UX Mentor',
+        topic: 'Tips Desain & Coding',
+        content: 'Ada yang lagi belajar bikin web app mobile-first pakai Tailwind & Firebase? Yuk share progress kalian di bawah! ✨',
+        time: '12 mnt lalu',
+        comments: [
+          { author: 'Santo Men', text: 'Lagi latihan integrasi Firestore real-time nih!' }
+        ]
+      },
+      {
+        id: 'post_2',
+        authorUid: 'demo_santo',
+        authorName: 'Santo Men',
+        badge: 'Dedicated Learner',
+        topic: 'Akuntansi & Fisika',
+        content: 'Cara paling ampuh biar nggak lupa rumus Fisika & jurnal Akuntansi: kerjain 3 soal tiap pagi di U Mode sambil dengerin lofi ☕',
+        time: '1 jam lalu',
+        comments: []
+      }
+    ];
+
+    let dailyQuests = [
+      { id: 'q1', title: 'Sesi Fokus U Mode (25 Menit)', reward: '+50 XP • Bingkai Espresso', done: false },
+      { id: 'q2', title: 'Beri 1 Vouch ke Partner Belajar', reward: '+30 XP • Lencana Supporter', done: false },
+      { id: 'q3', title: 'Tanya Materi ke Asisten SyncG', reward: '+40 XP • Insight Belajar', done: false }
+    ];
+
+    const WEEKLY_EVENTS = [
+      { id: 'ev1', day: 'Jumat • 19:30 WIB', title: 'Silent Co-Study & Lofi Night 🌙', host: 'Komunitas SYNC Match', joined: false },
+      { id: 'ev2', day: 'Minggu • 15:00 WIB', title: 'Bedah Soal Fisika, Matematika & Akuntansi', host: 'Mentor & Peer Study', joined: false }
+    ];
+
+    function createCommunityPost() {
+      showModal({
+        title: 'Buat Postingan Diskusi ✦',
+        msg: 'Bagikan catatan, pertanyaan pelajaran, atau progres belajarmu:',
+        confirmText: 'Posting',
+        withInput: true,
+        placeholder: 'Tulis diskusi belajarmu...',
+        onConfirm: async (val) => {
+          const text = val.trim();
+          if (!text) return;
+          const isDev = (currentUser?.email || '').toLowerCase() === DEV_EMAIL;
+          const myName = userProfile?.name || (isDev ? 'Vansky' : 'Learner');
+          const myUid = currentUser?.uid || 'guest_me';
+          const post = {
+            id: 'post_' + Date.now(),
+            authorUid: myUid,
+            authorName: myName,
+            badge: isDev ? 'Developer' : (localProfileMeta?.badge || 'Student'),
+            topic: 'Diskusi Belajar',
+            content: text,
+            time: 'Baru saja',
+            comments: []
+          };
+          communityPosts.unshift(post);
+          if (db && currentUser) {
+            try { await db.collection('community_posts').doc(post.id).set(post); } catch (e) {}
+          }
+          renderCommunityTab();
+          showToast('Terbit ✨', 'Postinganmu berhasil dibagikan ke Komunitas');
+        }
+      });
+    }
+
+    function addPostComment(postId) {
+      showModal({
+        title: 'Balas Diskusi',
+        msg: 'Tulis komentarmu untuk postingan ini:',
+        confirmText: 'Kirim Balasan',
+        withInput: true,
+        placeholder: 'Tulis komentar...',
+        onConfirm: (val) => {
+          if (!val.trim()) return;
+          const post = communityPosts.find(p => p.id === postId);
+          if (post) {
+            const myName = userProfile?.name || 'Vansky';
+            post.comments.push({ author: myName, text: val.trim() });
+            renderCommunityTab();
+            showToast('Terkirim', 'Komentar ditambahkan');
+          }
+        }
+      });
+    }
+
+    function deleteCommunityPost(postId) {
+      showModal({
+        title: 'Hapus Postingan',
+        msg: 'Yakin ingin menghapus postingan milikmu ini?',
+        confirmText: 'Hapus',
+        onConfirm: () => {
+          communityPosts = communityPosts.filter(p => p.id !== postId);
+          if (db && currentUser) db.collection('community_posts').doc(postId).delete().catch(() => {});
+          renderCommunityTab();
+          showToast('Dihapus', 'Postingan berhasil dihapus');
+        }
+      });
+    }
+
+    function claimQuest(qId) {
+      const q = dailyQuests.find(x => x.id === qId);
+      if (!q || q.done) return;
+      q.done = true;
+      renderCommunityTab();
+      showToast('Misi Selesai 🏆', `Klaim berhasil: ${q.reward}`);
+    }
+
+    function toggleEventJoin(evId) {
+      const ev = WEEKLY_EVENTS.find(x => x.id === evId);
+      if (!ev) return;
+      ev.joined = !ev.joined;
+      renderCommunityTab();
+      showToast(ev.joined ? 'Terdaftar 🎁' : 'Dibatalkan', ev.joined ? `Kamu terdaftar di "${ev.title}"` : 'Pendaftaran event dibatalkan');
+    }
+
+    function renderCommunityTab() {
+      const myUid = currentUser?.uid || 'guest_me';
+      let contentHtml = '';
+
+      if (communitySubTab === 'diskusi') {
+        contentHtml = `
+          <button onclick="createCommunityPost()" class="tap-ios w-full glass-card rounded-2xl p-3.5 flex items-center justify-between text-xs">
+            <span class="opacity-75">Bagikan pertanyaan atau catatan belajarmu...</span>
+            <span class="btn-accent px-3 py-1 rounded-full font-bold">+ Posting</span>
+          </button>
+          <div class="space-y-3">
+            ${communityPosts.map(p => {
+              const isMine = p.authorUid === myUid;
+              return `
+                <div class="glass-card rounded-3xl p-4 space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-full btn-accent flex items-center justify-center font-bold text-xs">${p.authorName[0]}</div>
+                      <div>
+                        <div class="flex items-center gap-1.5">
+                          <p class="font-bold text-xs">${p.authorName}</p>
+                          <span class="text-[9px] px-2 py-0.5 rounded-full soft-pill font-semibold">${p.badge}</span>
+                        </div>
+                        <p class="text-[10px] opacity-65">${p.topic} • ${p.time}</p>
+                      </div>
+                    </div>
+                    ${isMine ? `<button onclick="deleteCommunityPost('${p.id}')" class="tap-ios text-[10px] text-rose-500 font-bold px-2 py-1 rounded-lg soft-pill">Hapus</button>` : ''}
+                  </div>
+                  <p class="text-xs leading-relaxed">${p.content}</p>
+                  ${p.comments.length ? `
+                    <div class="soft-pill rounded-2xl p-2.5 space-y-1.5">
+                      ${p.comments.map(c => `<p class="text-[11px]"><span class="font-bold">${c.author}:</span> ${c.text}</p>`).join('')}
+                    </div>
+                  ` : ''}
+                  <button onclick="addPostComment('${p.id}')" class="tap-ios text-[11px] font-semibold opacity-80">💬 Balas (${p.comments.length})</button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      } else if (communitySubTab === 'quest') {
+        contentHtml = `
+          <div class="space-y-2.5">
+            ${dailyQuests.map(q => `
+              <div class="glass-card rounded-3xl p-4 flex items-center justify-between gap-3">
+                <div>
+                  <p class="font-bold text-xs">${q.title}</p>
+                  <p class="text-[11px] opacity-75 mt-0.5">${q.reward}</p>
+                </div>
+                <button onclick="claimQuest('${q.id}')" class="tap-ios px-3.5 py-1.5 rounded-full text-[11px] font-bold shrink-0 ${q.done ? 'soft-pill opacity-60' : 'btn-accent'}">
+                  ${q.done ? 'Selesai ✓' : 'Klaim'}
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        contentHtml = `
+          <div class="space-y-2.5">
+            ${WEEKLY_EVENTS.map(ev => `
+              <div class="glass-card rounded-3xl p-4 space-y-2">
+                <span class="text-[10px] px-2.5 py-0.5 rounded-full soft-pill font-semibold">📅 ${ev.day}</span>
+                <h3 class="font-bold text-sm">${ev.title}</h3>
+                <p class="text-[11px] opacity-75">Penyelenggara: ${ev.host}</p>
+                <button onclick="toggleEventJoin('${ev.id}')" class="tap-ios w-full py-2 rounded-xl text-xs font-bold ${ev.joined ? 'soft-pill' : 'btn-accent'}">
+                  ${ev.joined ? '✓ Terdaftar Mengikuti' : 'Ikuti Event Belajar'}
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      document.getElementById('view-komunitas').innerHTML = `
+        <div class="space-y-3.5">
+          <div class="flex items-center justify-between">
+            <h2 class="font-editorial text-xl font-bold">Komunitas & Quest ✦</h2>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 soft-pill p-1 rounded-2xl">
+            <button onclick="communitySubTab='diskusi'; renderCommunityTab()" class="tap-ios py-1.5 rounded-xl text-xs font-bold ${communitySubTab==='diskusi' ? 'btn-accent' : 'opacity-75'}">Diskusi</button>
+            <button onclick="communitySubTab='quest'; renderCommunityTab()" class="tap-ios py-1.5 rounded-xl text-xs font-bold ${communitySubTab==='quest' ? 'btn-accent' : 'opacity-75'}">🏆 Misi</button>
+            <button onclick="communitySubTab='event'; renderCommunityTab()" class="tap-ios py-1.5 rounded-xl text-xs font-bold ${communitySubTab==='event' ? 'btn-accent' : 'opacity-75'}">🎁 Event</button>
+          </div>
+          ${contentHtml}
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 3. ASISTEN AI TERINTEGRASI: SYNCG (GEMINI)
+    // ==========================================
+    let syncGHistory = [
+      {
+        role: 'ai',
+        text: 'Halo! Aku **SyncG**, asisten belajar pribadimu di SYNC Match ✨\nAda materi pelajaran (Fisika, Akuntansi, Matematika, Pemrograman, Bahasa), ringkasan catatan, atau latihan soal yang ingin kita bahas sekarang?'
+      }
+    ];
+    let isSyncGLoading = false;
+
+    function configureSyncGKey() {
+      showModal({
+        title: 'API Key Gemini AI (SyncG)',
+        msg: 'Tempel Gemini API Key agar SyncG menjawab semua pelajaran secara penuh:',
+        confirmText: 'Simpan Key',
+        withInput: true,
+        placeholder: 'AIzaSy...',
+        onConfirm: (k) => {
+          if (k.trim()) {
+            localStorage.setItem('sync_gemini_apikey', k.trim());
+            showToast('SyncG Aktif ✦', 'Gemini AI terhubung ke SyncG!');
+          }
+        }
+      });
+    }
+
+    function useSyncGPreset(promptText) {
+      const inp = document.getElementById('syncg-input');
+      if (inp) {
+        inp.value = promptText;
+        inp.focus();
+      }
+    }
+
+    async function sendToSyncG() {
+      const inp = document.getElementById('syncg-input');
+      if (!inp || !inp.value.trim() || isSyncGLoading) return;
+      const userPrompt = inp.value.trim();
+      inp.value = '';
+
+      syncGHistory.push({ role: 'user', text: userPrompt });
+      isSyncGLoading = true;
+      renderSyncGTab();
+
+      const apiKey = localStorage.getItem('sync_gemini_apikey') || '';
+      try {
+        if (!apiKey) {
+          await new Promise(r => setTimeout(r, 700));
+          syncGHistory.push({
+            role: 'ai',
+            text: `Aku sudah mencatat topikmu: "${userPrompt}" ✨\n\nSupaya aku bisa menghasilkan pembahasan mendalam, rangkuman otomatis, dan soal latihan langsung dari mesin **Gemini AI**, ketuk tombol **🔑 API Key** di pojok kanan atas panel ini untuk menempelkan Gemini API Key kamu ya!`
+          });
+        } else {
+          const systemInstruction = "Kamu adalah SyncG, asisten belajar cerdas (AI Study Companion) di dalam aplikasi SYNC Match. Jawab dengan bahasa yang ramah, suportif, terstruktur, mudah dipahami pelajar, dan adaptif sesuai bahasa pengguna.";
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemInstruction }] },
+              contents: [{ role: 'user', parts: [{ text: userPrompt }] }]
+            })
+          });
+          const data = await res.json();
+          const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text
+            || data?.error?.message
+            || 'Maaf, SyncG belum menerima respons. Coba kirim ulang pertanyaanmu ya.';
+          syncGHistory.push({ role: 'ai', text: reply });
+        }
+      } catch (err) {
+        syncGHistory.push({ role: 'ai', text: 'Koneksi ke server Gemini terganggu. Periksa internetmu dan coba lagi ya.' });
+      } finally {
+        isSyncGLoading = false;
+        renderSyncGTab();
+      }
+    }
+
+    function renderSyncGTab() {
+      document.getElementById('view-syncg').innerHTML = `
+        <div class="glass-card rounded-3xl overflow-hidden flex flex-col" style="height: calc(100vh - 185px); min-height: 440px;">
+          <!-- Header SyncG -->
+          <div class="p-3.5 border-b border-black/10 dark:border-white/10 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <button onclick="switchTab('home')" class="tap-ios w-8 h-8 rounded-full soft-pill text-xs font-bold">←</button>
+              <div class="w-9 h-9 rounded-full btn-accent flex items-center justify-center font-bold text-sm">✦</div>
+              <div>
+                <p class="font-bold text-xs">SyncG AI Companion</p>
+                <p class="text-[10px] opacity-70">Powered by Gemini AI • Study Mode</p>
+              </div>
+            </div>
+            <button onclick="configureSyncGKey()" class="tap-ios soft-pill px-2.5 py-1 rounded-full text-[10px] font-bold">🔑 API Key</button>
+          </div>
+
+          <!-- Preset Prompt Cepat -->
+          <div class="px-3 py-2 border-b border-black/5 dark:border-white/10 flex gap-1.5 overflow-x-auto no-scrollbar">
+            <button onclick="useSyncGPreset('Jelaskan konsep dasar materi ini secara bertahap: ')" class="tap-ios soft-pill px-2.5 py-1 rounded-full text-[10px] font-semibold shrink-0">📖 Jelaskan Konsep</button>
+            <button onclick="useSyncGPreset('Buatkan ringkasan poin-poin inti dari catatan berikut: ')" class="tap-ios soft-pill px-2.5 py-1 rounded-full text-[10px] font-semibold shrink-0">📝 Ringkas Catatan</button>
+            <button onclick="useSyncGPreset('Buatkan 3 latihan soal beserta pembahasan lengkap tentang: ')" class="tap-ios soft-pill px-2.5 py-1 rounded-full text-[10px] font-semibold shrink-0">🎯 Latihan Soal</button>
+            <button onclick="useSyncGPreset('Susunkan jadwal belajar efektif 7 hari untuk menguasai: ')" class="tap-ios soft-pill px-2.5 py-1 rounded-full text-[10px] font-semibold shrink-0">📅 Rencana Belajar</button>
+          </div>
+
+          <!-- Riwayat Percakapan SyncG -->
+          <div id="syncg-chat-scroll" class="flex-1 overflow-y-auto p-3.5 space-y-2.5">
+            ${syncGHistory.map(item => {
+              const isUser = item.role === 'user';
+              const formatted = item.text
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br/>');
+              return `
+                <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
+                  <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${isUser ? 'btn-accent rounded-br-sm' : 'soft-pill rounded-bl-sm'}">
+                    ${formatted}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+            ${isSyncGLoading ? `<div class="soft-pill inline-block rounded-2xl px-3.5 py-2 text-[11px] italic opacity-75">SyncG sedang menyusun penjelasan... ✨</div>` : ''}
+          </div>
+
+          <!-- Input Tanya SyncG -->
+          <div class="p-2.5 border-t border-black/10 dark:border-white/10 flex items-center gap-2">
+            <input id="syncg-input" onkeydown="if(event.key==='Enter') sendToSyncG()" type="text" placeholder="Tanya pelajaran, rumus, atau tugas ke SyncG..." class="flex-1 soft-pill rounded-full px-3.5 py-2 text-xs focus:outline-none" />
+            <button onclick="sendToSyncG()" class="tap-ios w-9 h-9 rounded-full btn-accent text-xs font-bold shrink-0">✦</button>
+          </div>
+        </div>
+      `;
+      const sc = document.getElementById('syncg-chat-scroll');
+      if (sc) sc.scrollTop = sc.scrollHeight;
+    }
+
+    // Render awal semua tab baru
+    renderGroupTab();
+    renderCommunityTab();
+    renderSyncGTab();
+  </script>
+
+</body>
+</html>
