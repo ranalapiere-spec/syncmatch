@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#F5EFEA" id="meta-theme-color" />
+  <title>SYNC Match — Learn • Share • Grow</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --bg-main: #F5EFEA;
+      --bg-card: #FFFFFF;
+      --bg-soft: #EDE4DC;
+      --bg-pill: #F7F2EE;
+      --text-primary: #3A2D26;
+      --text-secondary: #7D6B60;
+      --text-muted: #A18F84;
+      --accent: #4A3B32;
+      --accent-hover: #362A23;
+      --accent-text: #FAF6F2;
+      --border-soft: rgba(74, 59, 50, 0.11);
+      --shadow-card: 0 6px 24px -6px rgba(74, 59, 50, 0.08);
+      --glass-nav: rgba(250, 246, 242, 0.88);
+    }
+
+    html[data-theme="dark"] {
+      --bg-main: #171311;
+      --bg-card: #221C19;
+      --bg-soft: #2D2521;
+      --bg-pill: #28211E;
+      --text-primary: #F3EAE3;
+      --text-secondary: #BBA99E;
+      --text-muted: #8A796F;
+      --accent: #D7C2B2;
+      --accent-hover: #E8D7CA;
+      --accent-text: #1B1512;
+      --border-soft: rgba(243, 234, 227, 0.10);
+      --shadow-card: 0 8px 28px -6px rgba(0, 0, 0, 0.45);
+      --glass-nav: rgba(28, 23, 20, 0.90);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      overscroll-behavior-y: none;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .font-editorial { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .card-surface { background-color: var(--bg-card); border: 1px solid var(--border-soft); box-shadow: var(--shadow-card); transition: background-color 0.22s ease, border-color 0.22s ease; }
+    .soft-surface { background-color: var(--bg-soft); border: 1px solid var(--border-soft); }
+    .pill-surface { background-color: var(--bg-pill); border: 1px solid var(--border-soft); }
+    .btn-accent { background-color: var(--accent); color: var(--accent-text); transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.14s ease; }
+    .btn-accent:active, .tap-ios:active { transform: scale(0.97); }
+    .tap-ios { transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.14s ease; }
+
+    /* Pengunci ukuran avatar seragam anti-membesar di Chat & Daftar */
+    .avatar-36 { width: 36px !important; height: 36px !important; min-width: 36px !important; max-width: 36px !important; min-height: 36px !important; max-height: 36px !important; border-radius: 9999px; object-fit: cover; flex-shrink: 0; display: block; }
+    .avatar-44 { width: 44px !important; height: 44px !important; min-width: 44px !important; max-width: 44px !important; min-height: 44px !important; max-height: 44px !important; border-radius: 9999px; object-fit: cover; flex-shrink: 0; display: block; }
+    .avatar-52 { width: 52px !important; height: 52px !important; min-width: 52px !important; max-width: 52px !important; min-height: 52px !important; max-height: 52px !important; border-radius: 9999px; object-fit: cover; flex-shrink: 0; display: block; }
+    .avatar-64 { width: 64px !important; height: 64px !important; min-width: 64px !important; max-width: 64px !important; min-height: 64px !important; max-height: 64px !important; border-radius: 9999px; object-fit: cover; flex-shrink: 0; display: block; }
+    .avatar-84 { width: 84px !important; height: 84px !important; min-width: 84px !important; max-width: 84px !important; min-height: 84px !important; max-height: 84px !important; border-radius: 9999px; object-fit: cover; flex-shrink: 0; display: block; }
+
+    @keyframes tabFadeIn {
+      from { opacity: 0.4; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .tab-enter { animation: tabFadeIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .vinyl-spin { animation: spinSlow 9s linear infinite; }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .glass-nav {
+      background: var(--glass-nav);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-top: 1px solid var(--border-soft);
+    }
+
+    input, textarea, select {
+      color: var(--text-primary);
+      background-color: var(--bg-pill);
+      border: 1px solid var(--border-soft);
+      outline: none;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+  </style>
+</head>
+<body class="min-h-screen flex justify-center">
+
+  <audio id="global-audio-player" preload="metadata"></audio>
+  <input type="file" id="umode-audio-upload" accept="audio/*" class="hidden" onchange="handleLocalAudioUpload(event)" />
+  <input type="file" id="avatar-file-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)" />
+  <input type="file" id="story-file-input" accept="image/*" class="hidden" onchange="handleStoryImageSelect(event)" />
+
+  <div id="app-shell" class="w-full max-w-[460px] min-h-screen relative flex flex-col pb-24">
+
+    <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 text-center" style="background-color: var(--bg-main);">
+      <div class="w-16 h-16 rounded-2xl soft-surface flex items-center justify-center text-2xl mb-4 shadow-sm">🧭</div>
+      <h1 class="font-editorial text-3xl font-bold tracking-tight" style="color: var(--text-primary);">SYNC Match</h1>
+      <p class="text-xs tracking-[0.22em] uppercase mt-1" style="color: var(--text-muted);">LEARN • SHARE • GROW</p>
+      <div class="mt-6 w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style="border-color: var(--accent); border-top-color: transparent;"></div>
+    </div>
+
+    <div id="auth-screen" class="hidden fixed inset-0 z-40 flex flex-col justify-between p-7 overflow-y-auto" style="background-color: var(--bg-main);">
+      <div class="pt-8">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full soft-surface text-xs font-medium mb-6">
+          <span>✦</span>
+          <span>Peer-to-Peer Skill & Study Sanctuary</span>
+        </div>
+        <h1 class="font-editorial text-5xl font-bold leading-[1.08] tracking-tight">
+          Temukan Partner<br/><span class="italic font-semibold">Belajar & Tumbuh</span><br/>Bersama.
+        </h1>
+        <p class="text-sm leading-relaxed mt-4" style="color: var(--text-secondary);">
+          Ruang kolaborasi tenang bergaya editorial untuk berbagi keahlian, diskusi grup, panggilan suara, dan ruang fokus personal <b>U Mode</b>.
+        </p>
+      </div>
+
+      <div class="card-surface rounded-3xl p-6 my-6">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted);">Masuk Akun</span>
+          <button onclick="toggleTheme()" class="px-3 py-1 rounded-full pill-surface text-xs font-medium tap-ios" id="auth-theme-btn">🌙 Dark</button>
+        </div>
+        <button onclick="loginWithGoogle()" class="w-full py-3.5 px-4 rounded-2xl btn-accent font-semibold text-sm flex items-center justify-center gap-3 shadow-sm">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27c3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81Z"/></svg>
+          <span>Lanjutkan dengan Google</span>
+        </button>
+        <p id="auth-error-msg" class="text-xs text-red-500 mt-3 text-center hidden"></p>
+      </div>
+
+      <div class="text-center text-xs pb-2" style="color: var(--text-muted);">
+        Sesi login tersimpan otomatis • syncmatch.vercel.app
+      </div>
+    </div>
+
+    <header id="top-header" class="sticky top-0 z-20 px-4 pt-3.5 pb-3 flex items-center justify-between" style="background-color: var(--bg-main);">
+      <button onclick="openClockNotesModal()" class="flex items-center gap-2.5 text-left tap-ios group" title="Jam & Quick Notes">
+        <div class="w-10 h-10 rounded-full soft-surface flex items-center justify-center text-lg shadow-xs group-active:scale-95 transition">
+          🧭
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-editorial text-2xl font-bold leading-none tracking-tight">SYNC <i>Match</i></span>
+            <span id="header-live-clock" class="text-[10px] font-semibold px-2 py-0.5 rounded-full pill-surface" style="color: var(--text-secondary);">--:--</span>
+          </div>
+          <p class="text-[9px] tracking-[0.2em] uppercase mt-0.5" style="color: var(--text-muted);">LEARN • SHARE • GROW</p>
+        </div>
+      </button>
+
+      <div class="flex items-center gap-2">
+        <button onclick="toggleTheme()" id="header-theme-btn" class="w-9 h-9 rounded-full card-surface flex items-center justify-center text-sm tap-ios" title="Ganti Tema">🌙</button>
+        <button onclick="openNotificationsModal()" class="relative w-9 h-9 rounded-full card-surface flex items-center justify-center text-sm tap-ios" title="Notifikasi">
+          🔔
+          <span id="notif-badge-dot" class="hidden absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
+        </button>
+        <button onclick="openDrawer()" class="w-9 h-9 rounded-full card-surface flex items-center justify-center text-base tap-ios" title="Menu">☰</button>
+      </div>
+    </header>
+
+    <main id="main-content" class="flex-1 px-4 pt-1"></main>
+
+    <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[460px] z-30 glass-nav px-2 pt-2 pb-3">
+      <div class="grid grid-cols-5 items-center text-center">
+        <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center justify-center py-1.5 rounded-2xl tap-ios">
+          <span class="text-lg leading-none">🏠</span>
+          <span class="text-[10px] font-semibold mt-1" data-i18n="nav_home">Home</span>
+        </button>
+
+        <button onclick="switchTab('community')" id="nav-community" class="flex flex-col items-center justify-center py-1.5 rounded-2xl tap-ios">
+          <span class="text-lg leading-none">✦</span>
+          <span class="text-[10px] font-semibold mt-1" data-i18n="nav_community">Komunitas</span>
+        </button>
+
+        <button onclick="switchTab('umode')" id="nav-umode" class="flex flex-col items-center justify-center -mt-4 tap-ios">
+          <div id="nav-umode-pill" class="w-12 h-12 rounded-2xl btn-accent flex items-center justify-center text-xl shadow-md border-2" style="border-color: var(--bg-main);">
+            ★
+          </div>
+          <span class="text-[10px] font-bold mt-1" style="color: var(--text-primary);">U Mode</span>
+        </button>
+
+        <button onclick="switchTab('chat')" id="nav-chat" class="relative flex flex-col items-center justify-center py-1.5 rounded-2xl tap-ios">
+          <span class="text-lg leading-none">💬</span>
+          <span id="nav-chat-badge" class="hidden absolute top-1 right-4 w-2 h-2 rounded-full bg-red-500"></span>
+          <span class="text-[10px] font-semibold mt-1" data-i18n="nav_chat">Chat</span>
+        </button>
+
+        <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center justify-center py-1.5 rounded-2xl tap-ios">
+          <span class="text-lg leading-none">👤</span>
+          <span class="text-[10px] font-semibold mt-1" data-i18n="nav_profile">Profil</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[70] w-[92%] max-w-[420px] pointer-events-none flex flex-col gap-2"></div>
+
+  <div id="side-drawer" class="hidden fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-[2px]" onclick="if(event.target===this) closeDrawer()">
+    <div class="w-[82%] max-w-[330px] h-full p-5 flex flex-col justify-between overflow-y-auto" style="background-color: var(--bg-main);">
+      <div>
+        <div class="flex items-center justify-between pb-4 border-b" style="border-color: var(--border-soft);">
+          <span class="font-editorial text-2xl font-bold">SYNC Match</span>
+          <button onclick="closeDrawer()" class="w-8 h-8 rounded-full card-surface flex items-center justify-center text-sm tap-ios">✕</button>
+        </div>
+
+        <div class="mt-4 flex flex-col gap-2.5">
+          <button onclick="closeDrawer(); switchTab('profile')" class="w-full p-3.5 rounded-2xl card-surface flex items-center gap-3 text-left text-sm font-medium tap-ios">
+            <span>👤</span> <span data-i18n="menu_profile">Profil, Lencana & Progres</span>
+          </button>
+          <button onclick="closeDrawer(); switchTab('friends')" class="w-full p-3.5 rounded-2xl card-surface flex items-center justify-between text-left text-sm font-medium tap-ios">
+            <span class="flex items-center gap-3"><span>🤝</span> <span data-i18n="menu_friends">Friendlist & Permintaan</span></span>
+            <span id="drawer-friend-req-count" class="hidden px-2 py-0.5 rounded-full text-[11px] font-bold bg-red-500 text-white">0</span>
+          </button>
+          <button onclick="closeDrawer(); switchTab('groups')" class="w-full p-3.5 rounded-2xl card-surface flex items-center gap-3 text-left text-sm font-medium tap-ios">
+            <span>👥</span> <span data-i18n="menu_groups">Grup Belajar</span>
+          </button>
+          <button onclick="closeDrawer(); openQuestsModal()" class="w-full p-3.5 rounded-2xl card-surface flex items-center gap-3 text-left text-sm font-medium tap-ios">
+            <span>🏆</span> <span data-i18n="menu_quests">Misi, Quest & Lencana</span>
+          </button>
+          <button onclick="closeDrawer(); openClockNotesModal()" class="w-full p-3.5 rounded-2xl card-surface flex items-center gap-3 text-left text-sm font-medium tap-ios">
+            <span>🧭</span> <span data-i18n="menu_notes">Jam Digital & Quick Notes</span>
+          </button>
+
+          <div class="p-3.5 rounded-2xl card-surface flex items-center justify-between text-sm font-medium">
+            <span class="flex items-center gap-3"><span>🌓</span> <span data-i18n="menu_theme">Mode Tampilan</span></span>
+            <button onclick="toggleTheme()" id="drawer-theme-label" class="px-3 py-1 rounded-full btn-accent text-xs font-semibold tap-ios">Light</button>
+          </div>
+
+          <div class="p-3.5 rounded-2xl card-surface">
+            <div class="flex items-center justify-between text-sm font-medium mb-2.5">
+              <span class="flex items-center gap-3"><span>🌐</span> <span data-i18n="menu_lang">Bahasa / Language</span></span>
+              <span id="drawer-lang-badge" class="px-2.5 py-0.5 rounded-full btn-accent text-[11px] font-bold">ID</span>
+            </div>
+            <div class="grid grid-cols-5 gap-1.5">
+              <button onclick="setLanguage('id')" class="py-1.5 rounded-xl pill-surface text-xs font-semibold tap-ios lang-opt" data-lang="id">ID</button>
+              <button onclick="setLanguage('en')" class="py-1.5 rounded-xl pill-surface text-xs font-semibold tap-ios lang-opt" data-lang="en">EN</button>
+              <button onclick="setLanguage('vi')" class="py-1.5 rounded-xl pill-surface text-xs font-semibold tap-ios lang-opt" data-lang="vi">VI</button>
+              <button onclick="setLanguage('tl')" class="py-1.5 rounded-xl pill-surface text-xs font-semibold tap-ios lang-opt" data-lang="tl">TL</button>
+              <button onclick="setLanguage('zh')" class="py-1.5 rounded-xl pill-surface text-xs font-semibold tap-ios lang-opt" data-lang="zh">中文</button>
+            </div>
+          </div>
+
+          <button onclick="closeDrawer(); openReportModal()" class="w-full p-3.5 rounded-2xl card-surface flex items-center gap-3 text-left text-sm font-medium tap-ios">
+            <span>🚩</span> <span data-i18n="menu_report">Report Keluhan</span>
+          </button>
+        </div>
+      </div>
+
+      <button onclick="logoutUser()" class="w-full mt-6 py-3 rounded-2xl soft-surface text-red-500 font-semibold text-sm tap-ios" data-i18n="btn_logout">
+        Keluar Akun Google
+      </button>
+    </div>
+  </div>
+
+  <div id="modal-root" class="hidden fixed inset-0 z-50"></div>
+  <script>
+    // =========================================================================
+    // 1. FIREBASE CONFIGURATION (sync-a1047) & PERSISTENT AUTH INITIALIZATION
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1VK7f-jekak_Fwe2-f3xPrT0cDiDWm_c",
+      authDomain: "sync-a1047.firebaseapp.com",
+      projectId: "sync-a1047",
+      storageBucket: "sync-a1047.firebasestorage.app",
+      messagingSenderId: "607814966925",
+      appId: "1:607814966925:web:9c720803ab62d14f8f4cc4",
+      measurementId: "G-JP12FP8CJ1"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const OWNER_EMAIL = "yourvansky@gmail.com";
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+
+    // =========================================================================
+    // 2. MULTI-LANGUAGE DICTIONARY (ID, EN, VI, TL, ZH)
+    // =========================================================================
+    const I18N = {
+      id: {
+        nav_home: "Home", nav_community: "Komunitas", nav_chat: "Chat", nav_profile: "Profil",
+        menu_profile: "Profil, Lencana & Progres", menu_friends: "Friendlist & Permintaan",
+        menu_groups: "Grup Belajar", menu_quests: "Misi, Quest & Lencana",
+        menu_notes: "Jam Digital & Quick Notes", menu_theme: "Mode Tampilan",
+        menu_lang: "Bahasa / Language", menu_report: "Report Keluhan", btn_logout: "Keluar Akun Google",
+        your_story: "Cerita Anda", search_placeholder: "Cari partner, @username, atau skill...",
+        recommended_partners: "Partner Rekomendasi", see_all: "Lihat Semua ›",
+        online: "Online", offline: "Offline", add_friend: "+ Add Teman",
+        requested: "Terkirim", friends: "Teman", vouch: "Vouch",
+        umode_calm: "Tenang & Bahagia", umode_messages: "Pesan Terbaru",
+        umode_todo: "To Do List", umode_calendar: "Kalender",
+        just_now: "Baru saja", mins_ago: "mnt lalu", hours_ago: "jam lalu",
+        story_public: "🌍 Publik", story_friends: "💚 Khusus Teman",
+        type_message: "Tulis pesan...", no_chats: "Belum ada percakapan. Mulai chat dengan partner belajarmu!"
+      },
+      en: {
+        nav_home: "Home", nav_community: "Community", nav_chat: "Chat", nav_profile: "Profile",
+        menu_profile: "Profile, Badges & Progress", menu_friends: "Friendlist & Requests",
+        menu_groups: "Study Groups", menu_quests: "Missions, Quests & Badges",
+        menu_notes: "Digital Clock & Quick Notes", menu_theme: "Appearance Mode",
+        menu_lang: "Language", menu_report: "Report Issue", btn_logout: "Sign Out Google",
+        your_story: "Your Story", search_placeholder: "Search partner, @username, or skill...",
+        recommended_partners: "Recommended Partners", see_all: "See All ›",
+        online: "Online", offline: "Offline", add_friend: "+ Add Friend",
+        requested: "Requested", friends: "Friends", vouch: "Vouch",
+        umode_calm: "Be Calm, Be Happy", umode_messages: "Messages",
+        umode_todo: "To Do List", umode_calendar: "Calendar",
+        just_now: "Just now", mins_ago: "m ago", hours_ago: "h ago",
+        story_public: "🌍 Public", story_friends: "💚 Close Friends",
+        type_message: "Write a message...", no_chats: "No conversations yet. Start chatting with a study partner!"
+      },
+      vi: {
+        nav_home: "Trang chủ", nav_community: "Cộng đồng", nav_chat: "Trò chuyện", nav_profile: "Hồ sơ",
+        menu_profile: "Hồ sơ, Huy hiệu & Tiến độ", menu_friends: "Danh sách bạn bè",
+        menu_groups: "Nhóm học tập", menu_quests: "Nhiệm vụ & Huy hiệu",
+        menu_notes: "Đồng hồ & Ghi chú nhanh", menu_theme: "Chế độ giao diện",
+        menu_lang: "Ngôn ngữ", menu_report: "Báo cáo sự cố", btn_logout: "Đăng xuất Google",
+        your_story: "Tin của bạn", search_placeholder: "Tìm bạn học, @username, kỹ năng...",
+        recommended_partners: "Gợi ý bạn học", see_all: "Xem tất cả ›",
+        online: "Trực tuyến", offline: "Ngoại tuyến", add_friend: "+ Kết bạn",
+        requested: "Đã gửi", friends: "Bạn bè", vouch: "Đề cử",
+        umode_calm: "Bình tĩnh & Hạnh phúc", umode_messages: "Tin nhắn",
+        umode_todo: "Việc cần làm", umode_calendar: "Lịch trình",
+        just_now: "Vừa xong", mins_ago: "phút trước", hours_ago: "giờ trước",
+        story_public: "🌍 Công khai", story_friends: "💚 Bạn thân",
+        type_message: "Nhập tin nhắn...", no_chats: "Chưa có cuộc trò chuyện nào!"
+      },
+      tl: {
+        nav_home: "Home", nav_community: "Komunidad", nav_chat: "Chat", nav_profile: "Profile",
+        menu_profile: "Profile, Badges & Progreso", menu_friends: "Friendlist at Requests",
+        menu_groups: "Study Groups", menu_quests: "Missions at Quests",
+        menu_notes: "Digital Clock at Quick Notes", menu_theme: "Tema ng App",
+        menu_lang: "Wika / Language", menu_report: "Mag-report ng Problema", btn_logout: "Mag-sign Out",
+        your_story: "Iyong Story", search_placeholder: "Maghanap ng partner, @username, skill...",
+        recommended_partners: "Mga Rekomendadong Partner", see_all: "Tingnan Lahat ›",
+        online: "Online", offline: "Offline", add_friend: "+ Add Friend",
+        requested: "Naipadala", friends: "Magkaibigan", vouch: "Vouch",
+        umode_calm: "Kalma at Masaya", umode_messages: "Mga Mensahe",
+        umode_todo: "To Do List", umode_calendar: "Kalendaryo",
+        just_now: "Ngayon lang", mins_ago: "min ang nakalipas", hours_ago: "oras ang nakalipas",
+        story_public: "🌍 Publiko", story_friends: "💚 Mga Kaibigan",
+        type_message: "Mag-type ng mensahe...", no_chats: "Wala pang mensahe. Makipag-chat sa iyong study partner!"
+      },
+      zh: {
+        nav_home: "主页", nav_community: "社区", nav_chat: "聊天", nav_profile: "我的",
+        menu_profile: "个人资料与徽章", menu_friends: "好友列表与请求",
+        menu_groups: "学习小组", menu_quests: "任务与成就",
+        menu_notes: "时钟与随手笔记", menu_theme: "显示模式",
+        menu_lang: "语言设置", menu_report: "问题反馈", btn_logout: "退出登录",
+        your_story: "我的动态", search_placeholder: "搜索学习伙伴、@用户名或技能...",
+        recommended_partners: "推荐学习伙伴", see_all: "查看全部 ›",
+        online: "在线", offline: "离线", add_friend: "+ 加好友",
+        requested: "已发送", friends: "好友", vouch: "赞赏",
+        umode_calm: "保持平和与快乐", umode_messages: "最新消息",
+        umode_todo: "待办清单", umode_calendar: "学习日程",
+        just_now: "刚刚", mins_ago: "分钟前", hours_ago: "小时前",
+        story_public: "🌍 公开", story_friends: "💚 仅好友可见",
+        type_message: "输入消息...", no_chats: "暂无聊天记录，快去和伙伴打个招呼吧！"
+      }
+    };
+
+    function t(key) {
+      const lang = state.lang || 'id';
+      return (I18N[lang] && I18N[lang][key]) || I18N.id[key] || key;
+    }
+
+    // =========================================================================
+    // 3. CENTRALIZED APPLICATION STATE
+    // =========================================================================
+    const state = {
+      user: null,
+      profile: null,
+      users: [],
+      stories: [],
+      posts: [],
+      chats: [],
+      groups: [],
+      activeTab: 'home',
+      activeChatId: null,
+      activeChatPartner: null,
+      activeGroupId: null,
+      searchQuery: '',
+      skillFilter: 'All',
+      theme: localStorage.getItem('sync_theme') || 'light',
+      lang: localStorage.getItem('sync_lang') || 'id',
+      seenNotifIds: new Set(),
+      unsubscribers: [],
+      heartbeatTimer: null,
+      pendingStoryImage: null,
+      pendingStoryVisibility: 'public',
+      music: {
+        playlist: [
+          { title: "Better Days (Lo-Fi Study)", artist: "SYNC Ambient", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+          { title: "Warm Coffee & Pages", artist: "Editorial Beats", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
+        ],
+        currentIndex: 0,
+        isPlaying: false,
+        shuffle: false,
+        loop: false,
+        searchResults: []
+      },
+      call: {
+        activeCallId: null,
+        peerConnection: null,
+        localStream: null,
+        isMuted: false,
+        status: 'idle',
+        remoteUser: null
+      }
+    };
+
+    const STICKERS = ["🌸", "✨", "🫶", "📚", "☕", "🧸", "🎀", "🌙", "🔥", "💯", "🤝", "🎯", "💡", "🎨", "🎧", "🍀"];
+
+    // =========================================================================
+    // 4. THEME, LANGUAGE, CLOCK & NON-BLOCKING TOASTS
+    // =========================================================================
+    function applyTheme(theme) {
+      state.theme = theme;
+      localStorage.setItem('sync_theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
+      const meta = document.getElementById('meta-theme-color');
+      if (meta) meta.setAttribute('content', theme === 'dark' ? '#171311' : '#F5EFEA');
+      const icon = theme === 'dark' ? '☀️' : '🌙';
+      const hBtn = document.getElementById('header-theme-btn');
+      const aBtn = document.getElementById('auth-theme-btn');
+      const dLbl = document.getElementById('drawer-theme-label');
+      if (hBtn) hBtn.textContent = icon;
+      if (aBtn) aBtn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+      if (dLbl) dLbl.textContent = theme === 'dark' ? 'Dark' : 'Light';
+    }
+
+    function toggleTheme() {
+      applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+    }
+
+    function setLanguage(lang) {
+      state.lang = lang;
+      localStorage.setItem('sync_lang', lang);
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        el.textContent = t(k);
+      });
+      const badge = document.getElementById('drawer-lang-badge');
+      if (badge) badge.textContent = lang.toUpperCase();
+      document.querySelectorAll('.lang-opt').forEach(btn => {
+        if (btn.dataset.lang === lang) {
+          btn.style.backgroundColor = 'var(--accent)';
+          btn.style.color = 'var(--accent-text)';
+        } else {
+          btn.style.backgroundColor = 'var(--bg-pill)';
+          btn.style.color = 'var(--text-primary)';
+        }
+      });
+      renderCurrentTab(false);
+    }
+
+    function showToast(title, subtitle = '') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const el = document.createElement('div');
+      el.className = 'card-surface rounded-2xl px-4 py-3 flex items-center justify-between gap-3 shadow-lg pointer-events-auto transition-all duration-200';
+      el.innerHTML = `
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-7 h-7 rounded-full btn-accent flex items-center justify-center text-xs shrink-0">✦</span>
+          <div class="min-w-0">
+            <p class="text-xs font-bold truncate">${escapeHtml(title)}</p>
+            ${subtitle ? `<p class="text-[11px] truncate" style="color: var(--text-secondary);">${escapeHtml(subtitle)}</p>` : ''}
+          </div>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-xs opacity-60 px-1">✕</button>
+      `;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-6px)';
+        setTimeout(() => el.remove(), 220);
+      }, 2200);
+    }
+
+    function startLiveClock() {
+      const update = () => {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        const hClock = document.getElementById('header-live-clock');
+        if (hClock) hClock.textContent = `${hh}:${mm}`;
+        const mClock = document.getElementById('modal-digital-clock');
+        if (mClock) mClock.textContent = `${hh}:${mm}:${ss}`;
+      };
+      update();
+      setInterval(update, 1000);
+    }
+  </script>
+  <script>
+    // =========================================================================
+    // 5. HELPER UTILITIES & AUTH LISTENERS
+    // =========================================================================
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function getFallbackAvatar(name) {
+      const letter = (name || 'S').trim().charAt(0).toUpperCase();
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(letter)}&background=4A3B32&color=FAF6F2&bold=true&size=128`;
+    }
+
+    function getAvatarUrl(userObj) {
+      if (userObj && userObj.photoURL && userObj.photoURL.trim().length > 5) {
+        return userObj.photoURL;
+      }
+      return getFallbackAvatar(userObj?.name || 'S');
+    }
+
+    function isUserOnline(u) {
+      if (!u) return false;
+      if (state.user && u.uid === state.user.uid) return true;
+      if (!u.online || !u.lastActiveMs) return false;
+      return (Date.now() - u.lastActiveMs) < 65000;
+    }
+
+    function formatStoryTime(createdAtMs) {
+      if (!createdAtMs) return t('just_now');
+      const diffSec = Math.max(1, Math.floor((Date.now() - createdAtMs) / 1000));
+      const d = new Date(createdAtMs);
+      const clockStr = `${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')}`;
+      if (diffSec < 60) return `${t('just_now')} • ${clockStr}`;
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin} ${t('mins_ago')} • ${clockStr}`;
+      const diffHr = Math.floor(diffMin / 60);
+      return `${diffHr} ${t('hours_ago')} • ${clockStr}`;
+    }
+
+    function formatMsgClock(ts) {
+      if (!ts) return '';
+      const d = typeof ts === 'number' ? new Date(ts) : (ts.toDate ? ts.toDate() : new Date());
+      return `${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function loginWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => {
+        const errEl = document.getElementById('auth-error-msg');
+        if (errEl) {
+          errEl.textContent = err.message;
+          errEl.classList.remove('hidden');
+        }
+      });
+    }
+
+    function logoutUser() {
+      if (state.user) {
+        db.collection('users').doc(state.user.uid).update({ online: false, lastActiveMs: 0 }).catch(() => {});
+      }
+      state.unsubscribers.forEach(fn => fn && fn());
+      state.unsubscribers = [];
+      if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);
+      auth.signOut();
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      const splash = document.getElementById('splash-screen');
+      const authScreen = document.getElementById('auth-screen');
+
+      if (!user) {
+        state.user = null;
+        state.profile = null;
+        if (splash) splash.classList.add('hidden');
+        if (authScreen) authScreen.classList.remove('hidden');
+        return;
+      }
+
+      state.user = user;
+      if (authScreen) authScreen.classList.add('hidden');
+
+      const userRef = db.collection('users').doc(user.uid);
+      const snap = await userRef.get();
+      if (!snap.exists) {
+        const defaultUsername = '@' + (user.displayName || 'syncuser').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10) + Math.floor(10 + Math.random() * 89);
+        const newProfile = {
+          uid: user.uid,
+          name: user.displayName || 'SYNC Explorer',
+          username: defaultUsername,
+          email: user.email || '',
+          photoURL: user.photoURL || '',
+          bio: 'have a good day ✦',
+          role: 'Student',
+          skills: ['UI/UX Design', 'English', 'Coding'],
+          learningSkill: 'Web Development',
+          learningProgress: 25,
+          vouchedBy: [],
+          friends: [],
+          friendRequests: [],
+          todos: [
+            { id: 't1', text: 'Finish UI Design', done: true },
+            { id: 't2', text: 'Read a book 20 mins', done: false }
+          ],
+          schedules: [
+            { id: 's1', title: 'Study Session', time: '19:00 - 21:00' }
+          ],
+          quickNotes: 'Catatan cepat SYNC Match...\nTulis ide belajar atau pengingat harianmu di sini.',
+          umodeQuote: 'Keep going, better days are coming.',
+          umodeCardQuote: 'Small steps make big changes.',
+          online: true,
+          lastActiveMs: Date.now(),
+          createdAt: Date.now()
+        };
+        await userRef.set(newProfile);
+        state.profile = newProfile;
+      } else {
+        await userRef.update({ online: true, lastActiveMs: Date.now() });
+        state.profile = snap.data();
+      }
+
+      if (splash) splash.classList.add('hidden');
+      startHeartbeat();
+      initRealtimeListeners();
+
+      const params = new URLSearchParams(window.location.search);
+      const joinCode = params.get('join');
+      if (joinCode) handleJoinGroupByCode(joinCode);
+
+      switchTab('home');
+    });
+
+    function startHeartbeat() {
+      if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);
+      const beat = () => {
+        if (!state.user) return;
+        db.collection('users').doc(state.user.uid).update({
+          online: !document.hidden,
+          lastActiveMs: Date.now()
+        }).catch(() => {});
+      };
+      beat();
+      state.heartbeatTimer = setInterval(beat, 25000);
+      document.addEventListener('visibilitychange', beat);
+      window.addEventListener('beforeunload', () => {
+        if (state.user) {
+          db.collection('users').doc(state.user.uid).update({ online: false, lastActiveMs: 0 }).catch(() => {});
+        }
+      });
+    }
+
+    function initRealtimeListeners() {
+      state.unsubscribers.forEach(fn => fn && fn());
+      state.unsubscribers = [];
+
+      const unsubMe = db.collection('users').doc(state.user.uid).onSnapshot(doc => {
+        if (doc.exists) {
+          state.profile = doc.data();
+          const reqCount = (state.profile.friendRequests || []).length;
+          const badge = document.getElementById('drawer-friend-req-count');
+          if (badge) {
+            badge.textContent = reqCount;
+            badge.classList.toggle('hidden', reqCount === 0);
+          }
+          if (!isUserTyping()) {
+            if (state.activeTab === 'home') updateHomeStoriesBar();
+            renderCurrentTab(false);
+          }
+        }
+      });
+      state.unsubscribers.push(unsubMe);
+
+      const unsubUsers = db.collection('users').onSnapshot(snap => {
+        state.users = snap.docs.map(d => d.data());
+        if (!isUserTyping()) {
+          if (state.activeTab === 'home') updateHomePartnerList();
+          else if (['friends', 'chat', 'umode'].includes(state.activeTab)) renderCurrentTab(false);
+        }
+      });
+      state.unsubscribers.push(unsubUsers);
+
+      const unsubStories = db.collection('stories').orderBy('createdAtMs', 'asc').onSnapshot(snap => {
+        const cutoff = Date.now() - (24 * 60 * 60 * 1000);
+        const myFriends = state.profile?.friends || [];
+        state.stories = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter(s => {
+            if (s.createdAtMs <= cutoff) return false;
+            if (s.visibility !== 'friends') return true;
+            if (s.uid === state.user.uid) return true;
+            const authorUser = state.users.find(u => u.uid === s.uid);
+            const authorFriends = authorUser?.friends || [];
+            return myFriends.includes(s.uid) || authorFriends.includes(state.user.uid);
+          });
+        if (state.activeTab === 'home' && !isUserTyping()) {
+          updateHomeStoriesBar();
+        }
+      });
+      state.unsubscribers.push(unsubStories);
+
+      const unsubPosts = db.collection('posts').orderBy('createdAtMs', 'desc').limit(40).onSnapshot(snap => {
+        state.posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (state.activeTab === 'community' && !isUserTyping()) renderCurrentTab(false);
+      });
+      state.unsubscribers.push(unsubPosts);
+
+      const unsubChats = db.collection('chats')
+        .where('participants', 'array-contains', state.user.uid)
+        .onSnapshot(snap => {
+          const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          list.sort((a, b) => (b.updatedAtMs || 0) - (a.updatedAtMs || 0));
+          state.chats = list;
+
+          let hasUnread = false;
+          list.forEach(c => {
+            const lastMsg = c.lastMessage;
+            if (lastMsg && lastMsg.senderId !== state.user.uid) {
+              if (!lastMsg.read) hasUnread = true;
+              if (lastMsg.id && !state.seenNotifIds.has(lastMsg.id)) {
+                state.seenNotifIds.add(lastMsg.id);
+                const isRecent = (Date.now() - (lastMsg.createdAtMs || 0)) < 15000;
+                if (isRecent && state.activeChatId !== c.id) {
+                  const sender = state.users.find(u => u.uid === lastMsg.senderId);
+                  showToast(`${sender ? sender.name : 'Partner'} mengirim pesan`, lastMsg.text || 'Stiker');
+                }
+              }
+            }
+          });
+
+          const chatDot = document.getElementById('nav-chat-badge');
+          if (chatDot) chatDot.classList.toggle('hidden', !hasUnread);
+          const notifDot = document.getElementById('notif-badge-dot');
+          if (notifDot) notifDot.classList.toggle('hidden', !hasUnread && (state.profile?.friendRequests || []).length === 0);
+
+          if (state.activeTab === 'chat' && !state.activeChatId && !isUserTyping()) {
+            renderCurrentTab(false);
+          } else if (state.activeTab === 'umode' && !isUserTyping()) {
+            renderCurrentTab(false);
+          }
+        });
+      state.unsubscribers.push(unsubChats);
+
+      const unsubGroups = db.collection('groups')
+        .where('members', 'array-contains', state.user.uid)
+        .onSnapshot(snap => {
+          state.groups = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          if (state.activeTab === 'groups' && !state.activeGroupId && !isUserTyping()) renderCurrentTab(false);
+        });
+      state.unsubscribers.push(unsubGroups);
+
+      const unsubCalls = db.collection('calls')
+        .where('calleeId', '==', state.user.uid)
+        .where('status', '==', 'ringing')
+        .onSnapshot(snap => {
+          snap.docChanges().forEach(change => {
+            if (change.type === 'added' && state.call.status === 'idle') {
+              const callData = { id: change.doc.id, ...change.doc.data() };
+              if ((Date.now() - (callData.createdAtMs || 0)) < 45000) {
+                openIncomingCallOverlay(callData);
+              }
+            }
+          });
+        });
+      state.unsubscribers.push(unsubCalls);
+    }
+
+    function isUserTyping() {
+      const el = document.activeElement;
+      return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+    }
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      if (tab !== 'chat') {
+        state.activeChatId = null;
+        state.activeChatPartner = null;
+      }
+      if (tab !== 'groups') {
+        state.activeGroupId = null;
+      }
+
+      ['home', 'community', 'umode', 'chat', 'profile'].forEach(name => {
+        const btn = document.getElementById(`nav-${name}`);
+        if (!btn) return;
+        if (name === 'umode') {
+          const pill = document.getElementById('nav-umode-pill');
+          if (pill) pill.style.transform = tab === 'umode' ? 'scale(1.08)' : 'scale(1)';
+        } else {
+          btn.style.backgroundColor = tab === name ? 'var(--bg-soft)' : 'transparent';
+          btn.style.color = tab === name ? 'var(--text-primary)' : 'var(--text-muted)';
+        }
+      });
+
+      renderCurrentTab(true);
+    }
+
+    function renderCurrentTab(animate = false) {
+      const container = document.getElementById('main-content');
+      if (!container || !state.profile) return;
+
+      if (animate) {
+        container.classList.remove('tab-enter');
+        void container.offsetWidth;
+        container.classList.add('tab-enter');
+      }
+
+      switch (state.activeTab) {
+        case 'home':
+          container.innerHTML = renderHomeView();
+          break;
+        case 'community':
+          container.innerHTML = renderCommunityView();
+          break;
+        case 'umode':
+          container.innerHTML = renderUModeView();
+          break;
+        case 'chat':
+          if (state.activeChatId && state.activeChatPartner) {
+            container.innerHTML = renderChatRoomView();
+            subscribeActiveChatMessages(state.activeChatId);
+          } else {
+            container.innerHTML = renderChatListView();
+          }
+          break;
+        case 'profile':
+          container.innerHTML = renderProfileView();
+          break;
+        case 'friends':
+          container.innerHTML = renderFriendsView();
+          break;
+        case 'groups':
+          if (state.activeGroupId) {
+            container.innerHTML = renderGroupRoomView();
+            subscribeActiveGroupMessages(state.activeGroupId);
+          } else {
+            container.innerHTML = renderGroupsListView();
+          }
+          break;
+      }
+    }
+
+    function getGroupedStories() {
+      const map = new Map();
+      state.stories.forEach(s => {
+        if (!map.has(s.uid)) {
+          map.set(s.uid, {
+            uid: s.uid,
+            name: s.name,
+            photoURL: s.photoURL,
+            items: [],
+            hasExclusive: false
+          });
+        }
+        const entry = map.get(s.uid);
+        entry.items.push(s);
+        if (s.visibility === 'friends') entry.hasExclusive = true;
+      });
+      return Array.from(map.values());
+    }
+
+    function renderStoriesBarHtml() {
+      const grouped = getGroupedStories();
+      const myPhoto = getAvatarUrl(state.profile);
+      return `
+        <div class="flex items-center gap-3.5 overflow-x-auto no-scrollbar py-2">
+          <button onclick="document.getElementById('story-file-input').click()" class="flex flex-col items-center shrink-0 tap-ios">
+            <div class="relative p-0.5 rounded-full border-2 border-dashed" style="border-color: var(--accent);">
+              <img src="${myPhoto}" class="avatar-52" alt="You" />
+              <span class="absolute bottom-0 right-0 w-5 h-5 rounded-full btn-accent text-xs font-bold flex items-center justify-center border" style="border-color: var(--bg-main);">+</span>
+            </div>
+            <span class="text-[11px] font-medium mt-1.5 max-w-[62px] truncate">${t('your_story')}</span>
+          </button>
+
+          ${grouped.map((g, idx) => {
+            const userObj = state.users.find(u => u.uid === g.uid) || g;
+            const ringStyle = g.hasExclusive
+              ? 'background: linear-gradient(135deg, #10B981, #059669);'
+              : 'background: linear-gradient(135deg, #B68D6A, #4A3B32);';
+            const badgeHtml = g.hasExclusive
+              ? `<span class="absolute -top-0.5 -right-0.5 px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[9px] font-bold">💚${g.items.length > 1 ? g.items.length : ''}</span>`
+              : (g.items.length > 1 ? `<span class="absolute -top-0.5 -right-0.5 px-1.5 py-0.2 rounded-full btn-accent text-[9px] font-bold">${g.items.length}</span>` : '');
+            return `
+              <button onclick="openStoryViewer(${idx})" class="flex flex-col items-center shrink-0 tap-ios">
+                <div class="relative p-[2.5px] rounded-full" style="${ringStyle}">
+                  <div class="p-[2px] rounded-full" style="background-color: var(--bg-main);">
+                    <img src="${getAvatarUrl(userObj)}" class="avatar-52" alt="${escapeHtml(g.name)}" />
+                  </div>
+                  ${badgeHtml}
+                </div>
+                <span class="text-[11px] font-medium mt-1.5 max-w-[62px] truncate">${escapeHtml(userObj.name || g.name)}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function updateHomeStoriesBar() {
+      const el = document.getElementById('home-stories-bar');
+      if (el) el.innerHTML = renderStoriesBarHtml();
+    }
+  </script>
+  <script>
+    function calculateMatchScore(other) {
+      if (!state.profile || !other) return 75;
+      const mySkills = new Set((state.profile.skills || []).map(s => s.toLowerCase()));
+      const theirSkills = (other.skills || []).map(s => s.toLowerCase());
+      let overlap = 0;
+      theirSkills.forEach(s => { if (mySkills.has(s)) overlap++; });
+      return Math.min(99, 68 + overlap * 11 + (other.role === state.profile.role ? 5 : 0));
+    }
+
+    function renderPartnerCardsHtml() {
+      const q = (state.searchQuery || '').trim().toLowerCase();
+      const filter = state.skillFilter;
+
+      const filtered = state.users.filter(u => {
+        if (!u || u.uid === state.user.uid) return false;
+        const matchQ = !q ||
+          (u.name || '').toLowerCase().includes(q) ||
+          (u.username || '').toLowerCase().includes(q) ||
+          (u.skills || []).some(s => s.toLowerCase().includes(q));
+        const matchSkill = filter === 'All' ||
+          (u.skills || []).some(s => s.toLowerCase().includes(filter.toLowerCase()));
+        return matchQ && matchSkill;
+      });
+
+      if (filtered.length === 0) {
+        return `<div class="card-surface rounded-3xl p-6 text-center text-xs" style="color: var(--text-muted);">Tidak ada partner yang cocok dengan pencarianmu.</div>`;
+      }
+
+      const featured = filtered[0];
+      const fOnline = isUserOnline(featured);
+      const fScore = calculateMatchScore(featured);
+
+      return `
+        <div class="card-surface rounded-3xl p-4 mb-4">
+          <div class="flex items-start justify-between gap-3">
+            <div onclick="openUserProfileModal('${featured.uid}')" class="flex items-center gap-3 cursor-pointer min-w-0">
+              <div class="relative shrink-0">
+                <img src="${getAvatarUrl(featured)}" class="avatar-52" alt="${escapeHtml(featured.name)}" />
+                <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 ${fOnline ? 'bg-emerald-500' : 'bg-stone-400'}" style="border-color: var(--bg-card);"></span>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <h3 class="font-bold text-base truncate">${escapeHtml(featured.name)}</h3>
+                  <span class="text-xs">🧭</span>
+                </div>
+                <p class="text-xs truncate" style="color: var(--text-muted);">${escapeHtml(featured.username || '@user')}</p>
+                <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full pill-surface text-[10px] font-medium">• ${escapeHtml(featured.role || 'Student')}</span>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full btn-accent text-[11px] font-bold shrink-0">✦ ${fScore}% Match</span>
+          </div>
+
+          <p class="text-xs italic mt-3 px-3 py-2 rounded-2xl pill-surface" style="color: var(--text-secondary);">"${escapeHtml(featured.bio || 'Ready to learn & share!')}"</p>
+
+          <div class="flex flex-wrap gap-1.5 mt-3">
+            ${(featured.skills || []).slice(0, 4).map(sk => `<span class="px-2.5 py-1 rounded-full soft-surface text-[11px] font-medium">${escapeHtml(sk)}</span>`).join('')}
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 mt-3.5">
+            <button onclick="openChatWithUser('${featured.uid}')" class="py-2.5 rounded-2xl btn-accent text-xs font-semibold flex items-center justify-center gap-1.5">
+              <span>💬</span> <span>Chat</span>
+            </button>
+            <button onclick="openUserProfileModal('${featured.uid}')" class="py-2.5 rounded-2xl soft-surface text-xs font-semibold flex items-center justify-center gap-1.5 tap-ios">
+              <span>👤</span> <span>Lihat Profil</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2 mb-4">
+          <button onclick="switchTab('friends')" class="card-surface rounded-2xl p-2.5 flex flex-col items-center gap-1 tap-ios">
+            <span class="text-base">🤝</span><span class="text-[10px] font-semibold">Friendlist</span>
+          </button>
+          <button onclick="switchTab('groups')" class="card-surface rounded-2xl p-2.5 flex flex-col items-center gap-1 tap-ios">
+            <span class="text-base">👥</span><span class="text-[10px] font-semibold">Grup</span>
+          </button>
+          <button onclick="openQuestsModal()" class="card-surface rounded-2xl p-2.5 flex flex-col items-center gap-1 tap-ios">
+            <span class="text-base">🏆</span><span class="text-[10px] font-semibold">Quest</span>
+          </button>
+          <button onclick="switchTab('umode')" class="card-surface rounded-2xl p-2.5 flex flex-col items-center gap-1 tap-ios">
+            <span class="text-base">★</span><span class="text-[10px] font-semibold">U Mode</span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between mb-2.5">
+          <h4 class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-secondary);">✦ ${t('recommended_partners')}</h4>
+          <button onclick="switchTab('friends')" class="text-xs font-semibold" style="color: var(--text-muted);">${t('see_all')}</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          ${filtered.map(u => {
+            const on = isUserOnline(u);
+            const sc = calculateMatchScore(u);
+            const isFriend = (state.profile.friends || []).includes(u.uid);
+            return `
+              <div class="card-surface rounded-3xl p-3.5 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-start justify-between gap-1">
+                    <div onclick="openUserProfileModal('${u.uid}')" class="relative cursor-pointer shrink-0">
+                      <img src="${getAvatarUrl(u)}" class="avatar-44" alt="${escapeHtml(u.name)}" />
+                      <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 ${on ? 'bg-emerald-500' : 'bg-stone-400'}" style="border-color: var(--bg-card);"></span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full btn-accent text-[10px] font-bold">✦ ${sc}%</span>
+                  </div>
+                  <h5 onclick="openUserProfileModal('${u.uid}')" class="font-bold text-sm mt-2.5 truncate cursor-pointer">${escapeHtml(u.name)}</h5>
+                  <p class="text-[11px] truncate" style="color: var(--text-muted);">${escapeHtml(u.username || '@user')} ${isFriend ? '• 💚' : ''}</p>
+                  <div class="mt-2 px-2 py-1 rounded-xl pill-surface text-[10px] truncate" style="color: var(--text-secondary);">
+                    ${escapeHtml((u.skills || ['Skill Share']).slice(0, 2).join(' • '))}
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 mt-3">
+                  <button onclick="openChatWithUser('${u.uid}')" class="flex-1 py-2 rounded-xl btn-accent text-[11px] font-semibold">💬 Chat</button>
+                  <button onclick="openUserProfileModal('${u.uid}')" class="w-8 h-8 rounded-xl soft-surface flex items-center justify-center text-xs tap-ios">📄</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function handleHomeSearchInput(val) {
+      state.searchQuery = val;
+      const target = document.getElementById('home-partners-container');
+      if (target) target.innerHTML = renderPartnerCardsHtml();
+    }
+
+    function setSkillFilter(cat) {
+      state.skillFilter = cat;
+      document.querySelectorAll('.skill-chip').forEach(btn => {
+        const active = btn.dataset.cat === cat;
+        btn.style.backgroundColor = active ? 'var(--accent)' : 'var(--bg-card)';
+        btn.style.color = active ? 'var(--accent-text)' : 'var(--text-primary)';
+      });
+      const target = document.getElementById('home-partners-container');
+      if (target) target.innerHTML = renderPartnerCardsHtml();
+    }
+
+    function updateHomePartnerList() {
+      const target = document.getElementById('home-partners-container');
+      if (target) target.innerHTML = renderPartnerCardsHtml();
+    }
+
+    function renderHomeView() {
+      const cats = ['All', 'Coding', 'Design', 'English', 'Writing'];
+      return `
+        <div id="home-stories-bar">${renderStoriesBarHtml()}</div>
+        <div class="mt-2 mb-3 relative">
+          <input type="text" id="home-search-input" value="${escapeHtml(state.searchQuery)}" oninput="handleHomeSearchInput(this.value)" placeholder="${t('search_placeholder')}" class="w-full py-3 pl-10 pr-4 rounded-2xl text-xs shadow-xs" style="background-color: var(--bg-card);" />
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm opacity-60">🔍</span>
+        </div>
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3">
+          ${cats.map(c => {
+            const active = state.skillFilter === c;
+            return `<button onclick="setSkillFilter('${c}')" data-cat="${c}" class="skill-chip px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 border tap-ios" style="border-color: var(--border-soft); background-color: ${active ? 'var(--accent)' : 'var(--bg-card)'}; color: ${active ? 'var(--accent-text)' : 'var(--text-primary)'};">${c}</button>`;
+          }).join('')}
+        </div>
+        <div id="home-partners-container">${renderPartnerCardsHtml()}</div>
+      `;
+    }
+
+    function handleStoryImageSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        state.pendingStoryImage = ev.target.result;
+        state.pendingStoryVisibility = 'public';
+        openStoryComposerModal();
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    function openStoryComposerModal() {
+      const friendCount = (state.profile.friends || []).length;
+      const modal = document.getElementById('modal-root');
+      modal.classList.remove('hidden');
+      modal.innerHTML = `
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-end justify-center p-3" onclick="if(event.target===this) closeModal()">
+          <div class="w-full max-w-[440px] rounded-3xl p-5 flex flex-col gap-3.5" style="background-color: var(--bg-main);">
+            <div class="flex items-center justify-between">
+              <h3 class="font-editorial text-2xl font-bold">Bagikan Story ✦</h3>
+              <button onclick="closeModal()" class="w-8 h-8 rounded-full card-surface text-xs">✕</button>
+            </div>
+            <div class="w-full h-56 rounded-2xl overflow-hidden soft-surface flex items-center justify-center">
+              <img src="${state.pendingStoryImage}" class="max-h-full max-w-full object-contain" alt="Preview" />
+            </div>
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-wider mb-2" style="color: var(--text-muted);">Pilih Siapa yang Bisa Melihat Story Ini:</p>
+              <div class="grid grid-cols-2 gap-2.5">
+                <button type="button" id="vis-public-btn" onclick="selectStoryVisibility('public')" class="p-3 rounded-2xl border text-left transition tap-ios" style="background-color: var(--accent); color: var(--accent-text); border-color: var(--accent);">
+                  <p class="text-xs font-bold">🌍 Publik</p>
+                  <p class="text-[10px] opacity-80 mt-0.5">Semua user SYNC Match</p>
+                </button>
+                <button type="button" id="vis-friends-btn" onclick="selectStoryVisibility('friends')" class="p-3 rounded-2xl card-surface text-left transition tap-ios">
+                  <p class="text-xs font-bold text-emerald-600">💚 Khusus Teman</p>
+                  <p class="text-[10px] mt-0.5" style="color: var(--text-secondary);">Hanya ${friendCount} temanmu</p>
+                </button>
+              </div>
+            </div>
+            <input type="text" id="story-caption-input" placeholder="Tulis caption singkat (opsional)..." class="w-full px-3.5 py-2.5 rounded-2xl text-xs" />
+            <button onclick="publishPendingStory()" class="w-full py-3 rounded-2xl btn-accent text-xs font-bold shadow-sm">Posting Story (24 Jam)</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectStoryVisibility(vis) {
+      state.pendingStoryVisibility = vis;
+      const pubBtn = document.getElementById('vis-public-btn');
+      const frBtn = document.getElementById('vis-friends-btn');
+      if (!pubBtn || !frBtn) return;
+      if (vis === 'public') {
+        pubBtn.style.backgroundColor = 'var(--accent)';
+        pubBtn.style.color = 'var(--accent-text)';
+        frBtn.style.backgroundColor = 'var(--bg-card)';
+        frBtn.style.color = 'var(--text-primary)';
+      } else {
+        frBtn.style.backgroundColor = '#059669';
+        frBtn.style.color = '#FFFFFF';
+        pubBtn.style.backgroundColor = 'var(--bg-card)';
+        pubBtn.style.color = 'var(--text-primary)';
+      }
+    }
+
+    async function publishPendingStory() {
+      if (!state.pendingStoryImage) return;
+      const caption = document.getElementById('story-caption-input')?.value.trim() || '';
+      const vis = state.pendingStoryVisibility || 'public';
+      const img = state.pendingStoryImage;
+      state.pendingStoryImage = null;
+      closeModal();
+      await db.collection('stories').add({
+        uid: state.user.uid,
+        name: state.profile.name,
+        photoURL: state.profile.photoURL || '',
+        imageUrl: img,
+        caption,
+        visibility: vis,
+        createdAtMs: Date.now()
+      });
+      showToast(vis === 'friends' ? 'Story Khusus Teman diterbitkan 💚' : 'Story Publik diterbitkan 🌍', 'Aktif selama 24 jam');
+    }
+
+    let currentStoryGroup = null;
+    let currentStorySlide = 0;
+
+    function openStoryViewer(groupIdx) {
+      const grouped = getGroupedStories();
+      if (!grouped[groupIdx]) return;
+      currentStoryGroup = grouped[groupIdx];
+      currentStorySlide = 0;
+      renderStoryModal();
+    }
+
+    function openUserStoryByUid(uid) {
+      const grouped = getGroupedStories();
+      const idx = grouped.findIndex(g => g.uid === uid);
+      if (idx !== -1) openStoryViewer(idx);
+    }
+
+    function renderStoryModal() {
+      if (!currentStoryGroup) return;
+      const items = currentStoryGroup.items;
+      const slide = items[currentStorySlide];
+      if (!slide) { closeModal(); return; }
+      const userObj = state.users.find(u => u.uid === currentStoryGroup.uid) || currentStoryGroup;
+      const isMine = currentStoryGroup.uid === state.user.uid;
+      const timeLabel = formatStoryTime(slide.createdAtMs);
+      const isExclusive = slide.visibility === 'friends';
+
+      const modal = document.getElementById('modal-root');
+      modal.classList.remove('hidden');
+      modal.innerHTML = `
+        <div class="fixed inset-0 z-50 bg-black text-white flex flex-col justify-between select-none">
+          <div class="p-4 pt-5 bg-gradient-to-b from-black/80 to-transparent z-10">
+            <div class="flex gap-1.5 mb-3">
+              ${items.map((_, i) => `<div class="flex-1 h-1 rounded-full bg-white/30 overflow-hidden"><div class="h-full ${isExclusive ? 'bg-emerald-400' : 'bg-white'} transition-all duration-300" style="width: ${i <= currentStorySlide ? '100%' : '0%'};"></div></div>`).join('')}
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <img src="${getAvatarUrl(userObj)}" class="avatar-36 border border-white/40" alt="" />
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-xs font-bold truncate">${escapeHtml(userObj.name)}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full ${isExclusive ? 'bg-emerald-500/90 text-white font-semibold' : 'bg-white/15 text-white/90'}">${isExclusive ? t('story_friends') : t('story_public')}</span>
+                  </div>
+                  <p class="text-[11px] text-white/75 mt-0.5">🕒 ${timeLabel} • (${currentStorySlide + 1}/${items.length})</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                ${isMine ? `<button onclick="deleteCurrentStory('${slide.id}')" class="px-3 py-1 rounded-full bg-red-500/85 text-white text-[11px] font-semibold">Hapus</button>` : ''}
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-sm">✕</button>
+              </div>
+            </div>
+          </div>
+          <div class="relative flex-1 flex items-center justify-center overflow-hidden">
+            <img src="${slide.imageUrl}" class="max-h-full max-w-full object-contain" alt="Story" />
+            <div onclick="prevStorySlide()" class="absolute inset-y-0 left-0 w-1/3 cursor-pointer"></div>
+            <div onclick="nextStorySlide()" class="absolute inset-y-0 right-0 w-2/3 cursor-pointer"></div>
+          </div>
+          <div class="p-5 pb-8 bg-gradient-to-t from-black/85 to-transparent text-center z-10">
+            ${slide.caption ? `<p class="text-sm font-medium">${escapeHtml(slide.caption)}</p>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function nextStorySlide() {
+      if (!currentStoryGroup) return;
+      if (currentStorySlide + 1 < currentStoryGroup.items.length) { currentStorySlide++; renderStoryModal(); }
+      else { closeModal(); }
+    }
+
+    function prevStorySlide() {
+      if (!currentStoryGroup) return;
+      if (currentStorySlide > 0) { currentStorySlide--; renderStoryModal(); }
+    }
+
+    async function deleteCurrentStory(storyId) {
+      await db.collection('stories').doc(storyId).delete();
+      showToast('Story dihapus');
+      closeModal();
+    }
+
+    function renderUModeView() {
+      const now = new Date();
+      const hr = now.getHours();
+      const greet = hr < 12 ? 'Good Morning,' : (hr < 18 ? 'Good Afternoon,' : 'Good Evening,');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dateNum = now.getDate();
+      const monthStr = months[now.getMonth()];
+      const dayStr = days[now.getDay()];
+
+      const latestChat = state.chats[0];
+      let previewUser = null;
+      let previewText = 'Belum ada pesan baru';
+      let previewTime = '';
+      if (latestChat) {
+        const pid = (latestChat.participants || []).find(id => id !== state.user.uid);
+        previewUser = state.users.find(u => u.uid === pid);
+        previewText = latestChat.lastMessage?.text || 'Stiker ✨';
+        previewTime = formatMsgClock(latestChat.updatedAtMs);
+      }
+
+      const track = state.music.playlist[state.music.currentIndex] || { title: 'No Track Selected', artist: 'Upload or Search' };
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      const weekDates = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        return { day: days[i], num: d.getDate(), isToday: d.getDate() === dateNum };
+      });
+
+      const todos = state.profile.todos || [];
+      const schedules = state.profile.schedules || [];
+      return `
+        <div class="flex flex-col gap-3.5 pb-4">
+          <div class="card-surface rounded-3xl p-4 flex items-center gap-3.5 relative overflow-hidden">
+            <div class="relative p-1 rounded-full shrink-0" style="background: linear-gradient(135deg, var(--accent), transparent);">
+              <img src="${getAvatarUrl(state.profile)}" class="avatar-64" alt="Me" />
+              <span class="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2" style="border-color: var(--bg-card);"></span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-medium" style="color: var(--text-secondary);">${greet}</p>
+              <h2 class="font-editorial text-2xl font-bold truncate">${escapeHtml(state.profile.name)} ✦</h2>
+              <p onclick="editUModeQuote()" class="text-[11px] italic mt-0.5 truncate cursor-pointer" style="color: var(--text-muted);" title="Ketuk untuk ubah kutipan">"${escapeHtml(state.profile.umodeQuote || 'Keep going, better days are coming.')}" ✎</p>
+            </div>
+          </div>
+          <div class="card-surface rounded-3xl p-3.5 grid grid-cols-3 items-center text-center divide-x" style="border-color: var(--border-soft);">
+            <div class="px-2"><p class="text-[10px] uppercase tracking-wider" style="color: var(--text-muted);">Today</p><p class="text-base font-bold mt-0.5">${dateNum} ${monthStr}</p><p class="text-[11px]" style="color: var(--text-secondary);">${dayStr}</p></div>
+            <div class="px-2 flex flex-col items-center justify-center"><span class="text-xl">⛅</span><p class="text-sm font-bold mt-0.5">27°C</p><p class="text-[10px]" style="color: var(--text-secondary);">Partly Cloudy</p></div>
+            <div class="px-2 flex flex-col items-center justify-center"><span class="text-xl">🪷</span><p class="text-[11px] font-semibold mt-1 leading-tight">${t('umode_calm')}</p></div>
+          </div>
+          <div class="grid grid-cols-5 gap-2">
+            <button onclick="switchTab('chat')" class="card-surface rounded-2xl py-3 flex flex-col items-center gap-1 tap-ios"><span class="text-base">💬</span><span class="text-[10px] font-semibold">Chat</span></button>
+            <button onclick="switchTab('groups')" class="card-surface rounded-2xl py-3 flex flex-col items-center gap-1 tap-ios"><span class="text-base">👥</span><span class="text-[10px] font-semibold">Group</span></button>
+            <button onclick="switchTab('friends')" class="card-surface rounded-2xl py-3 flex flex-col items-center gap-1 tap-ios"><span class="text-base">🤝</span><span class="text-[10px] font-semibold">Friends</span></button>
+            <button onclick="openClockNotesModal()" class="card-surface rounded-2xl py-3 flex flex-col items-center gap-1 tap-ios"><span class="text-base">📁</span><span class="text-[10px] font-semibold">Notes</span></button>
+            <button onclick="openDrawer()" class="card-surface rounded-2xl py-3 flex flex-col items-center gap-1 tap-ios"><span class="text-base">❖</span><span class="text-[10px] font-semibold">More</span></button>
+          </div>
+          <div class="card-surface rounded-3xl p-4">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-xs font-bold flex items-center gap-1.5"><span>💬</span> ${t('umode_messages')}</span>
+              <button onclick="switchTab('chat')" class="text-[11px] font-semibold" style="color: var(--text-muted);">${t('see_all')}</button>
+            </div>
+            ${previewUser ? `
+              <div onclick="openChatWithUser('${previewUser.uid}')" class="flex items-center justify-between gap-3 p-2.5 rounded-2xl pill-surface cursor-pointer tap-ios">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <img src="${getAvatarUrl(previewUser)}" class="avatar-44" alt="${escapeHtml(previewUser.name)}" />
+                  <div class="min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(previewUser.name)}</p><p class="text-[11px] truncate" style="color: var(--text-secondary);">${escapeHtml(previewText)}</p></div>
+                </div>
+                <span class="text-[10px] font-medium shrink-0" style="color: var(--text-muted);">${previewTime}</span>
+              </div>
+            ` : `<p class="text-xs py-2 text-center" style="color: var(--text-muted);">${t('no_chats')}</p>`}
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="card-surface rounded-3xl p-3.5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <button onclick="document.getElementById('umode-audio-upload').click()" class="px-2 py-1 rounded-full pill-surface text-[10px] font-semibold tap-ios">📂 File</button>
+                  <button onclick="openMusicSearchModal()" class="px-2 py-1 rounded-full pill-surface text-[10px] font-semibold tap-ios">🔍 Lagu</button>
+                </div>
+                <div class="flex items-center gap-2.5 my-2">
+                  <div class="w-11 h-11 rounded-full btn-accent flex items-center justify-center text-base shrink-0 shadow-sm ${state.music.isPlaying ? 'vinyl-spin' : ''}">🎵</div>
+                  <div class="min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(track.title)}</p><p class="text-[10px] truncate" style="color: var(--text-muted);">${escapeHtml(track.artist)}</p></div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t" style="border-color: var(--border-soft);">
+                <button onclick="toggleMusicShuffle()" class="text-xs ${state.music.shuffle ? 'opacity-100 font-bold' : 'opacity-45'}">🔀</button>
+                <button onclick="prevMusicTrack()" class="text-xs tap-ios">⏮</button>
+                <button onclick="togglePlayMusic()" class="w-8 h-8 rounded-full btn-accent flex items-center justify-center text-xs shadow-xs tap-ios">${state.music.isPlaying ? '⏸' : '▶'}</button>
+                <button onclick="nextMusicTrack()" class="text-xs tap-ios">⏭</button>
+                <button onclick="toggleMusicLoop()" class="text-xs ${state.music.loop ? 'opacity-100 font-bold' : 'opacity-45'}">🔁</button>
+              </div>
+            </div>
+            <div class="card-surface rounded-3xl p-3.5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold">📅 ${t('umode_calendar')}</span>
+                  <button onclick="addStudySchedulePrompt()" class="w-6 h-6 rounded-full pill-surface text-xs font-bold flex items-center justify-center tap-ios">+</button>
+                </div>
+                <div class="grid grid-cols-7 gap-0.5 text-center my-1.5">
+                  ${weekDates.map(wd => `<div class="flex flex-col items-center"><span class="text-[8px]" style="color: var(--text-muted);">${wd.day[0]}</span><span class="w-5 h-5 mt-0.5 rounded-full text-[10px] font-bold flex items-center justify-center ${wd.isToday ? 'btn-accent' : ''}">${wd.num}</span></div>`).join('')}
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t space-y-1.5 max-h-[68px] overflow-y-auto no-scrollbar" style="border-color: var(--border-soft);">
+                ${schedules.map(sc => `<div class="pl-2 border-l-2" style="border-color: var(--accent);"><p class="text-[11px] font-bold truncate">${escapeHtml(sc.title)}</p><p class="text-[9px]" style="color: var(--text-muted);">${escapeHtml(sc.time)}</p></div>`).join('')}
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="card-surface rounded-3xl p-3.5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold">☑ ${t('umode_todo')}</span>
+                  <button onclick="addTodoPrompt()" class="w-6 h-6 rounded-full btn-accent text-xs font-bold flex items-center justify-center tap-ios">+</button>
+                </div>
+                <div class="space-y-1.5 max-h-[105px] overflow-y-auto no-scrollbar">
+                  ${todos.length === 0 ? `<p class="text-[11px]" style="color: var(--text-muted);">Kosong</p>` : todos.map(td => `
+                    <div onclick="toggleTodoItem('${td.id}')" class="flex items-center gap-2 cursor-pointer py-0.5">
+                      <span class="w-4 h-4 rounded-full border flex items-center justify-center text-[9px] shrink-0 ${td.done ? 'btn-accent' : ''}" style="border-color: var(--accent);">${td.done ? '✓' : ''}</span>
+                      <span class="text-[11px] truncate ${td.done ? 'line-through opacity-50' : ''}">${escapeHtml(td.text)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+            <div onclick="editUModeCardQuote()" class="soft-surface rounded-3xl p-4 flex flex-col justify-between cursor-pointer tap-ios relative overflow-hidden">
+              <span class="text-xs opacity-60">✦ Daily Note</span>
+              <p class="font-editorial text-lg font-bold leading-snug my-2">"${escapeHtml(state.profile.umodeCardQuote || 'Small steps make big changes.')}"</p>
+              <span class="text-[10px]" style="color: var(--text-muted);">Ketuk untuk edit ✎</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+            <div onclick="editUModeCardQuote()" class="soft-surface rounded-3xl p-4 flex flex-col justify-between cursor-pointer tap-ios relative overflow-hidden">
+              <span class="text-xs opacity-60">✦ Daily Note</span>
+              <p class="font-editorial text-lg font-bold leading-snug my-2">"${escapeHtml(state.profile.umodeCardQuote || 'Small steps make big changes.')}"</p>
+              <span class="text-[10px]" style="color: var(--text-muted);">Ketuk untuk edit ✎</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function playCurrentTrack() {
+      const audio = document.getElementById('global-audio-player');
+      const track = state.music.playlist[state.music.currentIndex];
+      if (!audio || !track) return;
+      if (audio.src !== track.url) audio.src = track.url;
+      audio.loop = state.music.loop;
+      audio.play().then(() => {
+        state.music.isPlaying = true;
+        if (state.activeTab === 'umode') renderCurrentTab(false);
+      }).catch(() => { showToast('Ketuk Play sekali lagi untuk memutar audio'); });
+    }
+
+    function togglePlayMusic() {
+      const audio = document.getElementById('global-audio-player');
+      if (!audio) return;
+      if (state.music.isPlaying) {
+        audio.pause();
+        state.music.isPlaying = false;
+        if (state.activeTab === 'umode') renderCurrentTab(false);
+      } else { playCurrentTrack(); }
+    }
+
+    function nextMusicTrack() {
+      if (state.music.shuffle) {
+        state.music.currentIndex = Math.floor(Math.random() * state.music.playlist.length);
+      } else {
+        state.music.currentIndex = (state.music.currentIndex + 1) % state.music.playlist.length;
+      }
+      playCurrentTrack();
+    }
+
+    function prevMusicTrack() {
+      state.music.currentIndex = (state.music.currentIndex - 1 + state.music.playlist.length) % state.music.playlist.length;
+      playCurrentTrack();
+    }
+
+    function toggleMusicShuffle() {
+      state.music.shuffle = !state.music.shuffle;
+      if (state.activeTab === 'umode') renderCurrentTab(false);
+    }
+
+    function toggleMusicLoop() {
+      state.music.loop = !state.music.loop;
+      const audio = document.getElementById('global-audio-player');
+      if (audio) audio.loop = state.music.loop;
+      if (state.activeTab === 'umode') renderCurrentTab(false);
+    }
+
+    document.getElementById('global-audio-player').addEventListener('ended', () => {
+      if (!state.music.loop) nextMusicTrack();
+    });
+
+    function handleLocalAudioUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const blobUrl = URL.createObjectURL(file);
+      const cleanName = file.name.replace(/\.[^/.]+$/, '');
+      state.music.playlist.unshift({ title: cleanName, artist: 'File Perangkat', url: blobUrl });
+      state.music.currentIndex = 0;
+      playCurrentTrack();
+      showToast('Lagu dari file berhasil diputar', cleanName);
+    }
+
+    function openMusicSearchModal() {
+      const modal = document.getElementById('modal-root');
+      modal.classList.remove('hidden');
+      modal.innerHTML = `
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-end justify-center p-3" onclick="if(event.target===this) closeModal()">
+          <div class="w-full max-w-[440px] rounded-3xl p-5 max-h-[82vh] flex flex-col" style="background-color: var(--bg-main);">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-editorial text-2xl font-bold">Cari Lagu Online 🎵</h3>
+              <button onclick="closeModal()" class="w-8 h-8 rounded-full card-surface text-xs">✕</button>
+            </div>
+            <div class="flex gap-2 mb-3">
+              <input type="text" id="itunes-query-input" placeholder="Judul lagu atau nama penyanyi..." class="flex-1 px-3.5 py-2.5 rounded-2xl text-xs" onkeydown="if(event.key==='Enter') searchInternetSongs()" />
+              <button onclick="searchInternetSongs()" class="px-4 py-2.5 rounded-2xl btn-accent text-xs font-semibold">Cari</button>
+            </div>
+            <div id="itunes-results-list" class="flex-1 overflow-y-auto space-y-2 no-scrollbar">
+              <p class="text-xs text-center py-6" style="color: var(--text-muted);">Ketik judul lagu untuk memutar langsung.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function searchInternetSongs() {
+      const q = document.getElementById('itunes-query-input')?.value.trim();
+      const box = document.getElementById('itunes-results-list');
+      if (!q || !box) return;
+      box.innerHTML = `<p class="text-xs text-center py-6">Mencari lagu "${escapeHtml(q)}"...</p>`;
+      try {
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=12`);
+        const data = await res.json();
+        const tracks = (data.results || []).filter(r => r.previewUrl);
+        if (tracks.length === 0) {
+          box.innerHTML = `<p class="text-xs text-center py-6" style="color: var(--text-muted);">Lagu tidak ditemukan.</p>`;
+          return;
+        }
+        state.music.searchResults = tracks;
+        box.innerHTML = tracks.map((tr, i) => `
+          <div onclick="playSearchedSong(${i})" class="card-surface rounded-2xl p-2.5 flex items-center justify-between gap-3 cursor-pointer tap-ios">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img src="${tr.artworkUrl60}" class="w-10 h-10 rounded-xl object-cover shrink-0" />
+              <div class="min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(tr.trackName)}</p><p class="text-[11px] truncate" style="color: var(--text-muted);">${escapeHtml(tr.artistName)}</p></div>
+            </div>
+            <span class="w-8 h-8 rounded-full btn-accent flex items-center justify-center text-xs shrink-0">▶</span>
+          </div>
+        `).join('');
+      } catch (e) {
+        box.innerHTML = `<p class="text-xs text-center text-red-500 py-6">Gagal memuat lagu.</p>`;
+      }
+    }
+
+    function playSearchedSong(idx) {
+      const tr = state.music.searchResults[idx];
+      if (!tr) return;
+      state.music.playlist.unshift({ title: tr.trackName, artist: tr.artistName, url: tr.previewUrl });
+      state.music.currentIndex = 0;
+      closeModal();
+      playCurrentTrack();
+      showToast('Memutar lagu', `${tr.trackName} — ${tr.artistName}`);
+    }
+
+    async function addTodoPrompt() {
+      const text = prompt('Tambah tugas baru ke To-Do List:');
+      if (!text || !text.trim()) return;
+      const updated = [...(state.profile.todos || []), { id: 'td_' + Date.now(), text: text.trim(), done: false }];
+      await db.collection('users').doc(state.user.uid).update({ todos: updated });
+    }
+
+    async function toggleTodoItem(id) {
+      const updated = (state.profile.todos || []).map(item => item.id === id ? { ...item, done: !item.done } : item);
+      await db.collection('users').doc(state.user.uid).update({ todos: updated });
+    }
+
+    async function addStudySchedulePrompt() {
+      const title = prompt('Nama jadwal belajar:');
+      if (!title || !title.trim()) return;
+      const time = prompt('Jam belajar (contoh: 19:00 - 20:30):', '19:00 - 20:30') || '19:00 - 20:00';
+      const updated = [...(state.profile.schedules || []), { id: 'sc_' + Date.now(), title: title.trim(), time: time.trim() }];
+      await db.collection('users').doc(state.user.uid).update({ schedules: updated });
+    }
+
+    async function editUModeQuote() {
+      const q = prompt('Ubah kutipan sapaan U Mode:', state.profile.umodeQuote || '');
+      if (q && q.trim()) await db.collection('users').doc(state.user.uid).update({ umodeQuote: q.trim() });
+    }
+
+    async function editUModeCardQuote() {
+      const q = prompt('Ubah kutipan kartu harian:', state.profile.umodeCardQuote || '');
+      if (q && q.trim()) await db.collection('users').doc(state.user.uid).update({ umodeCardQuote: q.trim() });
+    }
+
+    function getChatDocId(uid1, uid2) { return [uid1, uid2].sort().join('_'); }
+
+    async function openChatWithUser(partnerUid) {
+      const partner = state.users.find(u => u.uid === partnerUid);
+      if (!partner) return;
+      const chatId = getChatDocId(state.user.uid, partnerUid);
+      const chatRef = db.collection('chats').doc(chatId);
+      const snap = await chatRef.get();
+      if (!snap.exists) {
+        await chatRef.set({ participants: [state.user.uid, partnerUid], updatedAtMs: Date.now(), lastMessage: null });
+      }
+      state.activeTab = 'chat';
+      state.activeChatId = chatId;
+      state.activeChatPartner = partner;
+      switchTab('chat');
+      state.activeChatId = chatId;
+      state.activeChatPartner = partner;
+      renderCurrentTab(true);
+    }
+
+    function renderChatListView() {
+      if (state.chats.length === 0) {
+        return `
+          <div class="card-surface rounded-3xl p-8 text-center mt-4">
+            <p class="text-3xl mb-2">💬</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text-secondary);">${t('no_chats')}</p>
+            <button onclick="switchTab('home')" class="mt-4 px-5 py-2.5 rounded-2xl btn-accent text-xs font-semibold">Cari Partner</button>
+          </div>
+        `;
+      }
+      return `
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-editorial text-2xl font-bold">Messages</h2>
+          <button onclick="switchTab('friends')" class="px-3 py-1.5 rounded-full soft-surface text-xs font-semibold tap-ios">🤝 Friendlist</button>
+        </div>
+        <div class="space-y-2.5">
+          ${state.chats.map(c => {
+            const pid = (c.participants || []).find(id => id !== state.user.uid);
+            const partner = state.users.find(u => u.uid === pid) || { uid: pid, name: 'Partner' };
+            const on = isUserOnline(partner);
+            const lm = c.lastMessage;
+            const unread = lm && lm.senderId !== state.user.uid && !lm.read;
+            return `
+              <div onclick="openChatWithUser('${partner.uid}')" class="card-surface rounded-3xl p-3.5 flex items-center justify-between gap-3 cursor-pointer tap-ios">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="relative shrink-0">
+                    <img src="${getAvatarUrl(partner)}" class="avatar-44" alt="${escapeHtml(partner.name)}" />
+                    <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 ${on ? 'bg-emerald-500' : 'bg-stone-400'}" style="border-color: var(--bg-card);"></span>
+                  </div>
+                  <div class="min-w-0">
+                    <h4 class="text-sm font-bold truncate">${escapeHtml(partner.name)}</h4>
+                    <p class="text-xs truncate mt-0.5 ${unread ? 'font-bold' : ''}" style="color: ${unread ? 'var(--text-primary)' : 'var(--text-secondary)'};">${lm ? escapeHtml(lm.text || 'Stiker ✨') : 'Mulai obrolan...'}</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  <span class="text-[10px]" style="color: var(--text-muted);">${formatMsgClock(c.updatedAtMs)}</span>
+                  ${unread ? `<span class="w-2.5 h-2.5 rounded-full btn-accent"></span>` : ''}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderChatRoomView() {
+      const p = state.activeChatPartner;
+      const latestPartner = state.users.find(u => u.uid === p.uid) || p;
+      const on = isUserOnline(latestPartner);
+
+      return `
+        <div class="flex flex-col h-[calc(100vh-148px)]">
+          <div class="card-surface rounded-3xl p-3 mb-2.5 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <button onclick="state.activeChatId=null; renderCurrentTab(true)" class="w-8 h-8 rounded-full soft-surface flex items-center justify-center text-sm shrink-0 tap-ios">←</button>
+              <img onclick="openUserProfileModal('${latestPartner.uid}')" src="${getAvatarUrl(latestPartner)}" class="avatar-36 cursor-pointer" alt="${escapeHtml(latestPartner.name)}" />
+              <div onclick="openUserProfileModal('${latestPartner.uid}')" class="min-w-0 cursor-pointer">
+                <h4 class="text-sm font-bold truncate">${escapeHtml(latestPartner.name)}</h4>
+                <p class="text-[10px] font-medium" style="color: ${on ? '#10B981' : 'var(--text-muted)'};">● ${on ? t('online') : t('offline')}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="startVoiceCall('${latestPartner.uid}')" class="w-9 h-9 rounded-full btn-accent flex items-center justify-center text-sm tap-ios" title="Telepon Suara">📞</button>
+            </div>
+          </div>
+          <div id="chat-messages-box" class="flex-1 overflow-y-auto space-y-2 px-1 py-2 no-scrollbar"></div>
+          <div id="sticker-tray" class="hidden card-surface rounded-2xl p-2.5 mb-2 grid grid-cols-8 gap-1.5 text-center">
+            ${STICKERS.map(st => `<button onclick="sendChatMessage('${st}')" class="text-xl py-1 rounded-xl hover:opacity-80 tap-ios">${st}</button>`).join('')}
+          </div>
+          <div class="card-surface rounded-3xl p-2 flex items-center gap-2 mt-1">
+            <button onclick="document.getElementById('sticker-tray').classList.toggle('hidden')" class="w-9 h-9 rounded-full soft-surface flex items-center justify-center text-base shrink-0 tap-ios">😊</button>
+            <input type="text" id="chat-text-input" placeholder="${t('type_message')}" class="flex-1 px-3.5 py-2 rounded-2xl text-xs" onkeydown="if(event.key==='Enter') sendChatMessage()" />
+            <button onclick="sendChatMessage()" class="w-9 h-9 rounded-full btn-accent flex items-center justify-center text-sm shrink-0 tap-ios">➤</button>
+          </div>
+        </div>
+      `;
+    }
+
+    let unsubActiveMessages = null;
+    function subscribeActiveChatMessages(chatId) {
+      if (unsubActiveMessages) unsubActiveMessages();
+      unsubActiveMessages = db.collection('chats').doc(chatId).collection('messages')
+        .orderBy('createdAtMs', 'asc').limit(80)
+        .onSnapshot(snap => {
+          const box = document.getElementById('chat-messages-box');
+          if (!box) return;
+          const partner = state.users.find(u => u.uid === state.activeChatPartner?.uid) || state.activeChatPartner;
+          const partnerOnline = isUserOnline(partner);
+          let markedAnyRead = false;
+
+          const html = snap.docs.map(doc => {
+            const m = { id: doc.id, ...doc.data() };
+            const isMine = m.senderId === state.user.uid;
+            if (!isMine && !m.read) {
+              markedAnyRead = true;
+              doc.ref.update({ read: true }).catch(() => {});
+            }
+            let tickHtml = '';
+            if (isMine) {
+              if (m.read) tickHtml = `<span class="text-[11px] font-bold ml-1" style="color: #38BDF8;" title="Dibaca">✓✓</span>`;
+              else if (m.deliveredOnline || partnerOnline) tickHtml = `<span class="text-[11px] opacity-65 ml-1" title="Terkirim (Online)">✓✓</span>`;
+              else tickHtml = `<span class="text-[11px] opacity-55 ml-1" title="Terkirim (Offline)">✓</span>`;
+            }
+            return `
+              <div class="flex ${isMine ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[78%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${isMine ? 'btn-accent rounded-br-xs' : 'card-surface rounded-bl-xs'}">
+                  <span>${escapeHtml(m.text)}</span>
+                  <div class="flex items-center justify-end gap-0.5 mt-1 opacity-80 text-[9px]">
+                    <span>${formatMsgClock(m.createdAtMs)}</span>${tickHtml}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+          box.innerHTML = html;
+          box.scrollTop = box.scrollHeight;
+          if (markedAnyRead) {
+            db.collection('chats').doc(chatId).update({ 'lastMessage.read': true }).catch(() => {});
+          }
+        });
+    }
+
+    async function sendChatMessage(stickerText = null) {
+      const input = document.getElementById('chat-text-input');
+      const text = stickerText || (input ? input.value.trim() : '');
+      if (!text || !state.activeChatId) return;
+      if (!stickerText && input) input.value = '';
+
+      const partner = state.users.find(u => u.uid === state.activeChatPartner?.uid) || state.activeChatPartner;
+      const partnerOnline = isUserOnline(partner);
+      const msgId = 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+      const payload = { id: msgId, senderId: state.user.uid, text, read: false, deliveredOnline: partnerOnline, createdAtMs: Date.now() };
+
+      const chatRef = db.collection('chats').doc(state.activeChatId);
+      await chatRef.collection('messages').doc(msgId).set(payload);
+      await chatRef.update({ updatedAtMs: Date.now(), lastMessage: payload });
+    }
+
+    function renderFriendsView() {
+      const friendIds = state.profile.friends || [];
+      const reqIds = state.profile.friendRequests || [];
+      const friendsList = state.users.filter(u => friendIds.includes(u.uid));
+      const reqList = state.users.filter(u => reqIds.includes(u.uid));
+
+      return `
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-editorial text-2xl font-bold">Friendlist (${friendsList.length})</h2>
+              <p class="text-[11px]" style="color: var(--text-muted);">Teman di daftar ini bisa melihat Story Khusus Teman 💚</p>
+            </div>
+            <button onclick="switchTab('home')" class="px-3 py-1.5 rounded-full soft-surface text-xs font-semibold tap-ios">+ Cari Teman</button>
+          </div>
+          ${reqList.length > 0 ? `
+            <div class="card-surface rounded-3xl p-4">
+              <h3 class="text-xs font-bold uppercase tracking-wider mb-3" style="color: var(--text-secondary);">Permintaan Pertemanan (${reqList.length})</h3>
+              <div class="space-y-2.5">
+                ${reqList.map(u => `
+                  <div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl pill-surface">
+                    <div onclick="openUserProfileModal('${u.uid}')" class="flex items-center gap-2.5 min-w-0 cursor-pointer">
+                      <img src="${getAvatarUrl(u)}" class="avatar-44" alt="${escapeHtml(u.name)}" />
+                      <div class="min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(u.name)}</p><p class="text-[10px] truncate" style="color: var(--text-muted);">${escapeHtml(u.username || '@user')}</p></div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <button onclick="acceptFriendRequest('${u.uid}')" class="px-3 py-1.5 rounded-xl btn-accent text-[11px] font-semibold">Terima</button>
+                      <button onclick="declineFriendRequest('${u.uid}')" class="px-2.5 py-1.5 rounded-xl soft-surface text-[11px] font-semibold">Tolak</button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="space-y-2.5">
+            ${friendsList.length === 0 ? `
+              <div class="card-surface rounded-3xl p-8 text-center">
+                <p class="text-2xl mb-2">🤝</p>
+                <p class="text-xs" style="color: var(--text-secondary);">Belum ada teman di Friendlist.</p>
+              </div>
+            ` : friendsList.map(u => {
+              const on = isUserOnline(u);
+              return `
+                <div class="card-surface rounded-3xl p-3.5 flex items-center justify-between gap-3">
+                  <div onclick="openUserProfileModal('${u.uid}')" class="flex items-center gap-3 min-w-0 cursor-pointer">
+                    <div class="relative shrink-0">
+                      <img src="${getAvatarUrl(u)}" class="avatar-44" alt="${escapeHtml(u.name)}" />
+                      <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 ${on ? 'bg-emerald-500' : 'bg-stone-400'}" style="border-color: var(--bg-card);"></span>
+                    </div>
+                    <div class="min-w-0"><h4 class="text-sm font-bold truncate">${escapeHtml(u.name)}</h4><p class="text-[11px]" style="color: ${on ? '#10B981' : 'var(--text-muted)'};">● ${on ? t('online') : t('offline')}</p></div>
+                  </div>
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <button onclick="openChatWithUser('${u.uid}')" class="px-3 py-2 rounded-xl btn-accent text-xs font-semibold">💬</button>
+                    <button onclick="startVoiceCall('${u.uid}')" class="px-3 py-2 rounded-xl soft-surface text-xs font-semibold">📞</button>
+                    <button onclick="removeFriend('${u.uid}')" class="px-2.5 py-2 rounded-xl soft-surface text-xs text-red-500 font-semibold" title="Hapus Teman">✕</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    async function sendFriendRequest(targetUid) {
+      if (!targetUid || targetUid === state.user.uid) return;
+      await db.collection('users').doc(targetUid).update({ friendRequests: firebase.firestore.FieldValue.arrayUnion(state.user.uid) });
+      showToast('Permintaan pertemanan terkirim 🤝');
+    }
+
+    async function acceptFriendRequest(fromUid) {
+      const meRef = db.collection('users').doc(state.user.uid);
+      const themRef = db.collection('users').doc(fromUid);
+      await meRef.update({
+        friendRequests: firebase.firestore.FieldValue.arrayRemove(fromUid),
+        friends: firebase.firestore.FieldValue.arrayUnion(fromUid)
+      });
+      await themRef.update({ friends: firebase.firestore.FieldValue.arrayUnion(state.user.uid) });
+      showToast('Sekarang kalian berteman! 💚');
+    }
+
+    async function declineFriendRequest(fromUid) {
+      await db.collection('users').doc(state.user.uid).update({ friendRequests: firebase.firestore.FieldValue.arrayRemove(fromUid) });
+    }
+
+    async function removeFriend(friendUid) {
+      if (!confirm('Hapus pengguna ini dari daftar teman?')) return;
+      await db.collection('users').doc(state.user.uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(friendUid) });
+      await db.collection('users').doc(friendUid).update({ friends: firebase.firestore.FieldValue.arrayRemove(state.user.uid) }).catch(() => {});
+      showToast('Dihapus dari daftar teman');
+    }
+
+    function openUserProfileModal(uid) {
+      const u = state.users.find(item => item.uid === uid);
+      if (!u) return;
+      const modal = document.getElementById('modal-root');
+      modal.classList.remove('hidden');
+
+      const on = isUserOnline(u);
+      const isMe = u.uid === state.user.uid;
+      const isFriend = (state.profile.friends || []).includes(u.uid);
+      const isRequested = (u.friendRequests || []).includes(state.user.uid);
+      const vouchedBy = u.vouchedBy || [];
+      const hasVouched = vouchedBy.includes(state.user.uid);
+      const userStories = state.stories.filter(s => s.uid === u.uid);
+
+      modal.innerHTML = `
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-end justify-center p-3" onclick="if(event.target===this) closeModal()">
+          <div class="w-full max-w-[440px] rounded-3xl p-5 max-h-[88vh] overflow-y-auto no-scrollbar" style="background-color: var(--bg-main);">
+            <div class="flex justify-end"><button onclick="closeModal()" class="w-8 h-8 rounded-full card-surface text-xs">✕</button></div>
+            <div class="flex flex-col items-center text-center">
+              <div class="relative">
+                <img src="${getAvatarUrl(u)}" class="avatar-84 shadow-md" alt="${escapeHtml(u.name)}" />
+                <span class="absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 ${on ? 'bg-emerald-500' : 'bg-stone-400'}" style="border-color: var(--bg-main);"></span>
+              </div>
+              <h3 class="text-xl font-bold mt-3">${escapeHtml(u.name)}</h3>
+              <p class="text-xs mt-0.5" style="color: var(--text-muted);">${escapeHtml(u.username || '@user')} • ${escapeHtml(u.role || 'Student')} • ${on ? t('online') : t('offline')}</p>
+              <p class="w-full mt-3 px-4 py-2.5 rounded-2xl pill-surface text-xs italic" style="color: var(--text-secondary);">"${escapeHtml(u.bio || 'have a good day')}"</p>
+              ${!isMe ? `
+                <div class="grid grid-cols-3 gap-2 w-full mt-4">
+                  <button onclick="${isFriend ? `closeModal(); openChatWithUser('${u.uid}')` : (isRequested ? '' : `sendFriendRequest('${u.uid}'); closeModal()`)}" class="py-2.5 rounded-2xl btn-accent text-xs font-semibold">
+                    ${isFriend ? '💚 ' + t('friends') : (isRequested ? t('requested') : t('add_friend'))}
+                  </button>
+                  <button onclick="toggleVouchUser('${u.uid}')" class="py-2.5 rounded-2xl card-surface text-xs font-semibold tap-ios">
+                    ${hasVouched ? '♥' : '♡'} ${t('vouch')} (${vouchedBy.length})
+                  </button>
+                  <button onclick="closeModal(); openChatWithUser('${u.uid}')" class="py-2.5 rounded-2xl soft-surface text-xs font-semibold tap-ios">💬 Chat</button>
+                </div>
+              ` : ''}
+            </div>
+            <div class="card-surface rounded-3xl p-4 mt-4">
+              <p class="text-xs font-bold mb-2">✦ Keahlian & Minat</p>
+              <div class="flex flex-wrap gap-1.5">
+                ${(u.skills || []).map(s => `<span class="px-3 py-1 rounded-full soft-surface text-xs font-medium">${escapeHtml(s)}</span>`).join('')}
+              </div>
+              <div class="mt-4 pt-3 border-t" style="border-color: var(--border-soft);">
+                <div class="flex justify-between text-xs font-semibold mb-1.5">
+                  <span>📊 Progres: ${escapeHtml(u.learningSkill || 'Skill Growth')}</span>
+                  <span>${u.learningProgress || 20}%</span>
+                </div>
+                <div class="w-full h-2 rounded-full soft-surface overflow-hidden">
+                  <div class="h-full rounded-full btn-accent" style="width: ${u.learningProgress || 20}%;"></div>
+                </div>
+              </div>
+            </div>
+            ${userStories.length > 0 ? `
+              <div class="card-surface rounded-3xl p-3.5 mt-3 flex items-center justify-between">
+                <span class="text-xs font-semibold">✦ Memiliki ${userStories.length} Cerita Aktif (24 Jam)</span>
+                <button onclick="openUserStoryByUid('${u.uid}')" class="px-3.5 py-1.5 rounded-xl btn-accent text-xs font-semibold">Lihat Story</button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    async function toggleVouchUser(targetUid) {
+      if (!targetUid || targetUid === state.user.uid) return;
+      const targetRef = db.collection('users').doc(targetUid);
+      const snap = await targetRef.get();
+      if (!snap.exists) return;
+      const vouchedBy = snap.data().vouchedBy || [];
+      if (vouchedBy.includes(state.user.uid)) {
+        await targetRef.update({ vouchedBy: firebase.firestore.FieldValue.arrayRemove(state.user.uid) });
+        showToast('Vouch dibatalkan');
+      } else {
+        await targetRef.update({ vouchedBy: firebase.firestore.FieldValue.arrayUnion(state.user.uid) });
+        showToast('Vouch terkirim ♡', '1 Vouch per akun tercatat');
+      }
+      setTimeout(() => openUserProfileModal(targetUid), 200);
+    }
+    function renderCommunityView() {
+      return `
+        <div class="space-y-3.5">
+          <div class="card-surface rounded-3xl p-4">
+            <h3 class="font-editorial text-xl font-bold mb-2">Komunitas Belajar ✦</h3>
+            <textarea id="community-post-input" rows="2" placeholder="Bagikan catatan belajar, pertanyaan, atau progres belajarmu..." class="w-full p-3 rounded-2xl text-xs resize-none"></textarea>
+            <div class="flex justify-end mt-2"><button onclick="publishCommunityPost()" class="px-4 py-2 rounded-2xl btn-accent text-xs font-semibold">Posting</button></div>
+          </div>
+          ${state.posts.map(p => {
+            const author = state.users.find(u => u.uid === p.uid) || p;
+            const liked = (p.likes || []).includes(state.user.uid);
+            return `
+              <div class="card-surface rounded-3xl p-4">
+                <div onclick="openUserProfileModal('${author.uid}')" class="flex items-center gap-2.5 cursor-pointer mb-2.5">
+                  <img src="${getAvatarUrl(author)}" class="avatar-36" alt="" />
+                  <div><p class="text-xs font-bold">${escapeHtml(author.name || p.authorName)}</p><p class="text-[10px]" style="color: var(--text-muted);">${formatStoryTime(p.createdAtMs)}</p></div>
+                </div>
+                <p class="text-xs leading-relaxed whitespace-pre-line">${escapeHtml(p.text)}</p>
+                <div class="flex items-center gap-4 mt-3 pt-2.5 border-t text-xs" style="border-color: var(--border-soft);">
+                  <button onclick="toggleLikePost('${p.id}')" class="font-semibold tap-ios">${liked ? '♥' : '♡'} ${(p.likes || []).length}</button>
+                  <button onclick="openChatWithUser('${author.uid}')" style="color: var(--text-secondary);">💬 Diskusi</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    async function publishCommunityPost() {
+      const box = document.getElementById('community-post-input');
+      const text = box?.value.trim();
+      if (!text) return;
+      box.value = '';
+      await db.collection('posts').add({ uid: state.user.uid, authorName: state.profile.name, text, likes: [], createdAtMs: Date.now() });
+      showToast('Postingan diterbitkan ✦');
+    }
+
+    async function toggleLikePost(postId) {
+      const ref = db.collection('posts').doc(postId);
+      const snap = await ref.get();
+      if (!snap.exists) return;
+      const likes = snap.data().likes || [];
+      if (likes.includes(state.user.uid)) {
+        await ref.update({ likes: firebase.firestore.FieldValue.arrayRemove(state.user.uid) });
+      } else {
+        await ref.update({ likes: firebase.firestore.FieldValue.arrayUnion(state.user.uid) });
+      }
+    }
+
+    function renderGroupsListView() {
+      return `
+        <div class="space-y-3.5">
+          <div class="flex items-center justify-between">
+            <h2 class="font-editorial text-2xl font-bold">Grup Belajar</h2>
+            <button onclick="createNewStudyGroup()" class="px-4 py-2 rounded-2xl btn-accent text-xs font-semibold">+ Buat Grup</button>
+          </div>
+          ${state.groups.length === 0 ? `
+            <div class="card-surface rounded-3xl p-8 text-center">
+              <p class="text-2xl mb-2">👥</p>
+              <p class="text-xs" style="color: var(--text-secondary);">Belum bergabung ke grup belajar.</p>
+            </div>
+          ` : state.groups.map(g => `
+            <div onclick="state.activeGroupId='${g.id}'; renderCurrentTab(true)" class="card-surface rounded-3xl p-4 flex items-center justify-between cursor-pointer tap-ios">
+              <div><h4 class="font-bold text-sm">${escapeHtml(g.name)}</h4><p class="text-[11px] mt-0.5" style="color: var(--text-muted);">${(g.members || []).length} Anggota • Kode: ${g.id.slice(0, 6)}</p></div>
+              <span class="px-3 py-1.5 rounded-xl soft-surface text-xs font-semibold">Buka ›</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    async function createNewStudyGroup() {
+      const name = prompt('Nama Grup Belajar baru:');
+      if (!name || !name.trim()) return;
+      const docRef = await db.collection('groups').add({ name: name.trim(), ownerId: state.user.uid, members: [state.user.uid], createdAtMs: Date.now() });
+      state.activeGroupId = docRef.id;
+      renderCurrentTab(true);
+    }
+    async function handleJoinGroupByCode(code) {
+      const ref = db.collection('groups').doc(code);
+      const snap = await ref.get();
+      if (snap.exists) {
+        await ref.update({ members: firebase.firestore.FieldValue.arrayUnion(state.user.uid) });
+        showToast('Bergabung ke grup belajar!', snap.data().name);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    function renderGroupRoomView() {
+      const g = state.groups.find(item => item.id === state.activeGroupId);
+      if (!g) return renderGroupsListView();
+      const inviteUrl = `${window.location.origin}/?join=${g.id}`;
+
+      return `
+        <div class="flex flex-col h-[calc(100vh-148px)]">
+          <div class="card-surface rounded-3xl p-3 mb-2.5 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <button onclick="state.activeGroupId=null; renderCurrentTab(true)" class="w-8 h-8 rounded-full soft-surface text-sm">←</button>
+              <div class="min-w-0"><h4 class="text-sm font-bold truncate">${escapeHtml(g.name)}</h4><p class="text-[10px]" style="color: var(--text-muted);">${(g.members || []).length} Anggota</p></div>
+            </div>
+            <button onclick="navigator.clipboard.writeText('${inviteUrl}'); showToast('Link undangan grup disalin!')" class="px-3 py-1.5 rounded-xl btn-accent text-[11px] font-semibold">🔗 Undang</button>
+          </div>
+          <div id="group-messages-box" class="flex-1 overflow-y-auto space-y-2 px-1 py-2 no-scrollbar"></div>
+          <div class="card-surface rounded-3xl p-2 flex items-center gap-2 mt-1">
+            <input type="text" id="group-text-input" placeholder="Kirim pesan ke grup..." class="flex-1 px-3.5 py-2 rounded-2xl text-xs" onkeydown="if(event.key==='Enter') sendGroupMessage()" />
+            <button onclick="sendGroupMessage()" class="w-9 h-9 rounded-full btn-accent flex items-center justify-center text-sm">➤</button>
+          </div>
+        </div>
+      `;
+    }
+
+    let unsubGroupMsgs = null;
+    function subscribeActiveGroupMessages(groupId) {
+      if (unsubGroupMsgs) unsubGroupMsgs();
+      unsubGroupMsgs = db.collection('groups').doc(groupId).collection('messages')
+        .orderBy('createdAtMs', 'asc').limit(60)
+        .onSnapshot(snap => {
+          const box = document.getElementById('group-messages-box');
+          if (!box) return;
+          box.innerHTML = snap.docs.map(d => {
+            const m = d.data();
+            const isMine = m.senderId === state.user.uid;
+            return `
+              <div class="flex ${isMine ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[78%] px-3.5 py-2 rounded-2xl text-xs ${isMine ? 'btn-accent' : 'card-surface'}">
+                  ${!isMine ? `<p class="text-[10px] font-bold opacity-75 mb-0.5">${escapeHtml(m.senderName)}</p>` : ''}
+                  <p>${escapeHtml(m.text)}</p>
+                </div>
+              </div>
+            `;
+          }).join('');
+          box.scrollTop = box.scrollHeight;
+        });
+    }
+
+    async function sendGroupMessage() {
+      const inp = document.getElementById('group-text-input');
+      const text = inp?.value.trim();
+      if (!text || !state.activeGroupId) return;
+      inp.value = '';
+      await db.collection('groups').doc(state.activeGroupId).collection('messages').add({
+        senderId: state.user.uid, senderName: state.profile.name, text, createdAtMs: Date.now()
+      });
+    }
+
+    function renderProfileView() {
+      const p = state.profile;
+      return `
+        <div class="space-y-4">
+          <div class="card-surface rounded-3xl p-5 flex flex-col items-center text-center">
+            <div onclick="document.getElementById('avatar-file-input').click()" class="relative cursor-pointer tap-ios">
+              <img src="${getAvatarUrl(p)}" class="avatar-84 shadow-md" alt="Me" />
+              <span class="absolute bottom-0 right-0 w-7 h-7 rounded-full btn-accent flex items-center justify-center text-xs border-2" style="border-color: var(--bg-card);">📷</span>
+            </div>
+            <h2 class="text-xl font-bold mt-3">${escapeHtml(p.name)}</h2>
+            <p class="text-xs" style="color: var(--text-muted);">${escapeHtml(p.username)} • ${(p.vouchedBy || []).length} Vouch</p>
+            <p class="text-xs italic mt-2.5 px-4 py-2 rounded-2xl pill-surface w-full" style="color: var(--text-secondary);">"${escapeHtml(p.bio)}"</p>
+            <div class="grid grid-cols-2 gap-2.5 w-full mt-4">
+              <button onclick="editMyProfilePrompt()" class="py-2.5 rounded-2xl btn-accent text-xs font-semibold">✎ Edit Profil</button>
+              <button onclick="switchTab('friends')" class="py-2.5 rounded-2xl soft-surface text-xs font-semibold">🤝 Teman (${(p.friends || []).length})</button>
+            </div>
+          </div>
+          <div class="card-surface rounded-3xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold">📊 Progres Belajar (${escapeHtml(p.learningSkill || 'Skill')})</span>
+              <button onclick="updateLearningProgress()" class="text-xs font-semibold underline">Ubah %</button>
+            </div>
+            <div class="w-full h-2.5 rounded-full soft-surface overflow-hidden">
+              <div class="h-full rounded-full btn-accent" style="width: ${p.learningProgress || 25}%;"></div>
+            </div>
+            <p class="text-right text-[11px] font-bold mt-1">${p.learningProgress || 25}%</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleAvatarUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        await db.collection('users').doc(state.user.uid).update({ photoURL: ev.target.result });
+        showToast('Foto profil diperbarui ✨');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function editMyProfilePrompt() {
+      const newName = prompt('Nama tampilan:', state.profile.name);
+      if (!newName || !newName.trim()) return;
+      const newBio = prompt('Bio singkat:', state.profile.bio || '') ?? state.profile.bio;
+      const newSkillsStr = prompt('Keahlian (pisahkan dengan koma):', (state.profile.skills || []).join(', '));
+      const skills = newSkillsStr ? newSkillsStr.split(',').map(s => s.trim()).filter(Boolean) : state.profile.skills;
+      await db.collection('users').doc(state.user.uid).update({ name: newName.trim(), bio: newBio.trim(), skills });
+      showToast('Profil tersimpan ✓');
+    }
+
+    async function updateLearningProgress() {
+      const skill = prompt('Topik yang sedang dipelajari:', state.profile.learningSkill || 'Web Development');
+      const pct = parseInt(prompt('Persentase progres (0 - 100):', state.profile.learningProgress || 25), 10);
+      if (!isNaN(pct)) {
+        await db.collection('users').doc(state.user.uid).update({
+          learningSkill: (skill || state.profile.learningSkill).trim(),
+          learningProgress: Math.max(0, Math.min(100, pct))
+        });
+      }
+    }
+
+    function openClockNotesModal() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const modal = document.getElementById('modal-root');
+      modal.classList.remove('hidden');
+      modal.innerHTML = `
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target===this) closeModal()">
+          <div class="w-full max-w-[420px] rounded-3xl p-5 shadow-2xl" style="background-color: var(--bg-main);">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">🧭 SYNC Time & Quick Notes</span>
+              <button onclick="closeModal()" class="w-8 h-8 rounded-full card-surface text-xs">✕</button>
+            </div>
+            <div class="card-surface rounded-3xl p-5 text-center mb-4">
+              <div id="modal-digital-clock" class="font-editorial text-5xl font-bold tracking-tight">--:--:--</div>
+              <p class="text-xs mt-1.5" style="color: var(--text-secondary);">${dateStr}</p>
+            </div>
+            <div class="card-surface rounded-3xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold">📝 Quick Notes Pribadi</span>
+                <span id="note-save-status" class="text-[10px]" style="color: var(--text-muted);">Tersimpan otomatis</span>
+              </div>
+              <textarea id="quick-notes-textarea" rows="6" oninput="autoSaveQuickNotes(this.value)" class="w-full p-3 rounded-2xl text-xs leading-relaxed resize-none" placeholder="Tulis catatan cepat...">${escapeHtml(state.profile.quickNotes || '')}</textarea>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    let noteSaveTimeout = null;
+    function autoSaveQuickNotes(val) {
+      const status = document.getElementById('note-save-status');
+      if (status) status.textContent = 'Menyimpan...';
+      clearTimeout(noteSaveTimeout);
+      noteSaveTimeout = setTimeout(async () => {
+        await db.collection('users').doc(state.user.uid).update({ quickNotes: val });
+        if (status) status.textContent = 'Tersimpan ✓';
+      }, 600);
+    }
+
+    function openReportModal() {
+      const modal = document.getElementById('modal-root');
+      modal.classList.remove('hidden');
+      modal.innerHTML = `
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target===this) closeModal()">
+          <div class="w-full max-w-[420px] rounded-3xl p-5" style="background-color: var(--bg-main);">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-editorial text-2xl font-bold">🚩 Report Keluhan</h3>
+              <button onclick="closeModal()" class="w-8 h-8 rounded-full card-surface text-xs">✕</button>
+            </div>
+            <p class="text-xs mb-3" style="color: var(--text-secondary);">Laporanmu akan tercatat di sistem dan langsung dikirimkan ke Gmail owner (<b>${OWNER_EMAIL}</b>).</p>
+            <textarea id="report-issue-text" rows="4" placeholder="Jelaskan kendala atau saranmu di sini..." class="w-full p-3.5 rounded-2xl text-xs resize-none mb-3"></textarea>
+            <button onclick="submitReportToOwner()" class="w-full py-3 rounded-2xl btn-accent text-xs font-semibold">Kirim ke Gmail Owner</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function submitReportToOwner() {
+      const text = document.getElementById('report-issue-text')?.value.trim();
+      if (!text) return;
+      await db.collection('reports').add({
+        uid: state.user.uid, senderName: state.profile.name, senderEmail: state.profile.email || '', message: text, targetOwner: OWNER_EMAIL, createdAtMs: Date.now()
+      });
+      const subject = encodeURIComponent(`[SYNC Match Report] dari ${state.profile.name}`);
+      const body = encodeURIComponent(`Pengirim: ${state.profile.name} (${state.profile.username})\nEmail: ${state.profile.email}\n\nKeluhan / Saran:\n${text}`);
+      closeModal();
+      showToast('Membuka Gmail untuk mengirim laporan...');
+      window.location.href = `mailto:${OWNER_EMAIL}?subject=${subject}&body=${body}`;
+    }
+
+    function openQuestsModal() {
+      const friendCount = (state.profile.friends || []).length;
+      const vouchCount = (state.profile.vouchedBy || []).length;
+      const modal = document.getElementById('modal-root');
+      modal.classList.remove('hidden');
+      modal.innerHTML = `
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target===this) closeModal()">
+          <div class="w-full max-w-[420px] rounded-3xl p-5" style="background-color: var(--bg-main);">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-editorial text-2xl font-bold">🏆 Misi & Lencana</h3>
+              <button onclick="closeModal()" class="w-8 h-8 rounded-full card-surface text-xs">✕</button>
+            </div>
+            <div class="space-y-2.5 text-xs">
+              <div class="card-surface rounded-2xl p-3.5 flex items-center justify-between"><span>🧭 Early Explorer (Login SYNC)</span><span class="font-bold text-emerald-500">Selesai ✓</span></div>
+              <div class="card-surface rounded-2xl p-3.5 flex items-center justify-between"><span>🤝 Social Connector (${friendCount}/3 Teman)</span><span class="font-bold">${friendCount >= 3 ? 'Selesai ✓' : `${friendCount}/3`}</span></div>
+              <div class="card-surface rounded-2xl p-3.5 flex items-center justify-between"><span>♡ Trusted Mentor (${vouchCount}/5 Vouch)</span><span class="font-bold">${vouchCount >= 5 ? 'Selesai ✓' : `${vouchCount}/5`}</span></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openNotificationsModal() {
+      const reqs = state.profile.friendRequests || [];
+      const unreadChats = state.chats.filter(c => c.lastMessage && c.lastMessage.senderId !== state.user.uid && !c.lastMessage.read);
+      const modal = document.getElementById('modal-root');
+      modal.classList.remove('hidden');
+      modal.innerHTML = `
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target===this) closeModal()">
+          <div class="w-full max-w-[420px] rounded-3xl p-5 max-h-[80vh] overflow-y-auto" style="background-color: var(--bg-main);">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-editorial text-2xl font-bold">🔔 Notifikasi</h3>
+              <button onclick="closeModal()" class="w-8 h-8 rounded-full card-surface text-xs">✕</button>
+            </div>
+            <div class="space-y-2 text-xs">
+              ${reqs.length > 0 ? `<div onclick="closeModal(); switchTab('friends')" class="card-surface rounded-2xl p-3.5 font-semibold cursor-pointer">🤝 Ada ${reqs.length} permintaan pertemanan baru ›</div>` : ''}
+              ${unreadChats.map(c => {
+                const pid = (c.participants || []).find(id => id !== state.user.uid);
+                const u = state.users.find(item => item.uid === pid);
+                return `<div onclick="closeModal(); openChatWithUser('${pid}')" class="card-surface rounded-2xl p-3.5 cursor-pointer">💬 <b>${escapeHtml(u?.name || 'Partner')}</b>: ${escapeHtml(c.lastMessage?.text || 'Pesan baru')}</div>`;
+              }).join('')}
+              ${reqs.length === 0 && unreadChats.length === 0 ? `<p class="text-center py-6" style="color: var(--text-muted);">Semua notifikasi sudah terbaca ✓</p>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    const rtcServers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
+
+    async function startVoiceCall(calleeUid) {
+      const callee = state.users.find(u => u.uid === calleeUid);
+      if (!callee) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        state.call.localStream = stream;
+        state.call.isMuted = false;
+        state.call.status = 'calling';
+        state.call.remoteUser = callee;
+
+        const pc = new RTCPeerConnection(rtcServers);
+        state.call.peerConnection = pc;
+        stream.getTracks().forEach(tr => pc.addTrack(tr, stream));
+
+        const remoteAudio = new Audio();
+        remoteAudio.autoplay = true;
+        pc.ontrack = (ev) => { remoteAudio.srcObject = ev.streams[0]; };
+
+        const callDoc = db.collection('calls').doc();
+        state.call.activeCallId = callDoc.id;
+
+        pc.onicecandidate = (ev) => { if (ev.candidate) callDoc.collection('callerCandidates').add(ev.candidate.toJSON()); };
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        await callDoc.set({
+          callerId: state.user.uid, callerName: state.profile.name, callerPhoto: state.profile.photoURL || '',
+          calleeId: calleeUid, status: 'ringing', offer: { type: offer.type, sdp: offer.sdp }, createdAtMs: Date.now()
+        });
+
+        renderCallOverlay('MEMANGGIL...', false);
+
+        callDoc.onSnapshot(async (snap) => {
+          const data = snap.data();
+          if (!data) return;
+          if (data.status === 'ended') { endVoiceCall(false); return; }
+          if (data.answer && !pc.currentRemoteDescription) {
+            state.call.status = 'connected';
+            const statusEl = document.getElementById('call-status-pill');
+            if (statusEl) statusEl.textContent = 'TERHUBUNG • SYNC VOICE';
+            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+          }
+        });
+
+        callDoc.collection('calleeCandidates').onSnapshot(snap => {
+          snap.docChanges().forEach(ch => { if (ch.type === 'added') pc.addIceCandidate(new RTCIceCandidate(ch.doc.data())).catch(() => {}); });
+        });
+      } catch (err) { showToast('Izin mikrofon diperlukan untuk menelepon'); }
+    }
+
+    function openIncomingCallOverlay(callData) {
+      state.call.activeCallId = callData.id;
+      state.call.status = 'incoming';
+      state.call.remoteUser = { uid: callData.callerId, name: callData.callerName, photoURL: callData.callerPhoto };
+      renderCallOverlay('PANGGILAN SUARA MASUK...', true);
+    }
+
+    async function answerIncomingCall() {
+      const callId = state.call.activeCallId;
+      if (!callId) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        state.call.localStream = stream;
+        state.call.isMuted = false;
+        state.call.status = 'connected';
+
+        const pc = new RTCPeerConnection(rtcServers);
+        state.call.peerConnection = pc;
+        stream.getTracks().forEach(tr => pc.addTrack(tr, stream));
+
+        const remoteAudio = new Audio();
+        remoteAudio.autoplay = true;
+        pc.ontrack = (ev) => { remoteAudio.srcObject = ev.streams[0]; };
+
+        const callDoc = db.collection('calls').doc(callId);
+        pc.onicecandidate = (ev) => { if (ev.candidate) callDoc.collection('calleeCandidates').add(ev.candidate.toJSON()); };
+
+        const snap = await callDoc.get();
+        const data = snap.data();
+        if (!data || !data.offer) return;
+
+        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+
+        await callDoc.update({ status: 'connected', answer: { type: answer.type, sdp: answer.sdp } });
+        renderCallOverlay('TERHUBUNG • SYNC VOICE', false);
+
+        callDoc.collection('callerCandidates').onSnapshot(s => {
+          s.docChanges().forEach(ch => { if (ch.type === 'added') pc.addIceCandidate(new RTCIceCandidate(ch.doc.data())).catch(() => {}); });
+        });
+        callDoc.onSnapshot(s => { if (s.data()?.status === 'ended') endVoiceCall(false); });
+      } catch (e) { showToast('Gagal mengakses mikrofon'); }
+    }
+
+    function toggleCallMute() {
+      if (!state.call.localStream) return;
+      state.call.isMuted = !state.call.isMuted;
+      state.call.localStream.getAudioTracks().forEach(tr => { tr.enabled = !state.call.isMuted; });
+      const btn = document.getElementById('call-mute-btn');
+      if (btn) {
+        btn.style.backgroundColor = state.call.isMuted ? '#EF4444' : 'rgba(255,255,255,0.16)';
+        btn.textContent = state.call.isMuted ? '🔇' : '🎙️';
+      }
+    }
+
+    async function endVoiceCall(updateRemote = true) {
+      if (updateRemote && state.call.activeCallId) {
+        db.collection('calls').doc(state.call.activeCallId).update({ status: 'ended' }).catch(() => {});
+      }
+      if (state.call.localStream) state.call.localStream.getTracks().forEach(tr => tr.stop());
+      if (state.call.peerConnection) state.call.peerConnection.close();
+      state.call = { activeCallId: null, peerConnection: null, localStream: null, isMuted: false, status: 'idle', remoteUser: null };
+      closeModal();
+    }
+
+    function renderCallOverlay(statusLabel, isIncoming) {
+      const u = state.call.remoteUser || { name: 'Partner' };
+      const modal = document.getElementById('modal-root');
+      modal.classList.remove('hidden');
+      modal.innerHTML = `
+        <div class="fixed inset-0 z-[60] flex flex-col items-center justify-between py-14 px-6 text-white" style="background-color: #2B211B;">
+          <span id="call-status-pill" class="px-4 py-1.5 rounded-full bg-white/10 text-xs font-semibold tracking-wider">${statusLabel}</span>
+          <div class="flex flex-col items-center text-center">
+            <div class="p-1.5 rounded-full border-2 border-white/25">
+              <img src="${getAvatarUrl(u)}" class="avatar-84" alt="${escapeHtml(u.name)}" />
+            </div>
+            <h2 class="text-2xl font-bold mt-4">${escapeHtml(u.name)}</h2>
+            <p class="text-xs text-white/70 mt-1">SYNC Voice Call</p>
+          </div>
+          <div class="flex items-center gap-6">
+            ${isIncoming ? `
+              <button onclick="endVoiceCall(true)" class="w-15 h-15 p-4 rounded-full bg-red-500 text-xl shadow-lg tap-ios">✕</button>
+              <button onclick="answerIncomingCall()" class="w-15 h-15 p-4 rounded-full bg-emerald-500 text-xl shadow-lg tap-ios">📞</button>
+            ` : `
+              <button id="call-mute-btn" onclick="toggleCallMute()" class="w-14 h-14 rounded-full flex items-center justify-center text-xl shadow-md tap-ios" style="background-color: rgba(255,255,255,0.16);">🎙️</button>
+              <button onclick="endVoiceCall(true)" class="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center text-xl shadow-lg tap-ios">📵</button>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    function openDrawer() { document.getElementById('side-drawer')?.classList.remove('hidden'); }
+    function closeDrawer() { document.getElementById('side-drawer')?.classList.add('hidden'); }
+    function closeModal() {
+      const m = document.getElementById('modal-root');
+      if (m) { m.classList.add('hidden'); m.innerHTML = ''; }
+    }
+
+    applyTheme(state.theme);
+    setLanguage(state.lang);
+    startLiveClock();
+  </script>
+</body>
+</html>
