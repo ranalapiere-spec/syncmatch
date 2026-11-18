@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SYNC Match - Learn, Share, Grow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #FAF7F4;
+            --card-bg: #FFFFFF;
+            --text-main: #46372E;
+            --text-sub: #7A6A5E;
+            --accent: #A3795C;
+            --border-color: #EFECE6;
+            --nav-bg: rgba(250, 247, 244, 0.95);
+            --shadow: 0 10px 30px rgba(70, 55, 46, 0.05);
+            --chrome-glow: rgba(163, 121, 92, 0.25);
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #1A1614;
+            --card-bg: #2C2623;
+            --text-main: #FAF7F4;
+            --text-sub: #D1C5BD;
+            --accent: #C49A7E;
+            --border-color: #3D3430;
+            --nav-bg: rgba(26, 22, 20, 0.95);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --chrome-glow: rgba(196, 154, 126, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding-bottom: 95px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--bg-main);
+            min-height: 100vh;
+            position: relative;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Efek Sentuhan Tombol Modern dengan Nuansa Chrome */
+        .interactive-card, .icon-btn, button, .nav-item {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .interactive-card:active, button:active, .icon-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 0 15px var(--chrome-glow), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            border-color: var(--accent);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 10px 20px;
+        }
+
+        .logo-area h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-style: italic;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .content-area {
+            padding: 10px 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Home Feed & UME Dashboard Layout */
+        .welcome-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .welcome-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            overflow: hidden;
+        }
+
+        .welcome-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .welcome-text h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .welcome-text p {
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            margin-top: 3px;
+            font-style: italic;
+        }
+
+        .grid-widgets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .widget-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .widget-full {
+            grid-column: span 2;
+        }
+
+        /* Bottom Nav dengan Posisi UME di Tengah */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 480px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 10px;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.72rem;
+            gap: 4px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .nav-item i {
+            font-size: 1.15rem;
+        }
+
+        /* Tombol Spesial UME di Tengah Bar */
+        .nav-ume-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--text-main);
+            color: var(--bg-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 6px 20px var(--chrome-glow);
+            margin-top: -10px;
+            cursor: pointer;
+        }
+
+        .nav-ume-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            cursor: pointer;
+            font-size: 0.72rem;
+            color: var(--text-sub);
+        }
+        .nav-ume-item.active span {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* Auth Screen dengan Ikon Jam Estetik */
+        #auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-main);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .auth-logo-badge {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: var(--accent);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg-main);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Layar Login dengan Ikon Jam / Kompas Estetik -->
+    <div id="auth-screen">
+        <div class="auth-logo-badge interactive-card">
+            <i class="fa-solid fa-clock"></i>
+        </div>
+        <div style="font-family: 'Playfair Display'; font-size: 2.2rem; font-style: italic; margin-bottom: 5px;">SYNC Match</div>
+        <p style="color: var(--text-sub); margin-bottom: 25px; font-size: 0.88rem;">Learn • Share • Grow</p>
+        <button class="btn-primary interactive-card" onclick="handleGoogleLogin()"><i class="fa-brands fa-google" style="margin-right: 8px;"></i> Masuk dengan Google</button>
+    </div>
+
+    <div class="app-container">
+        <!-- Header Utama -->
+        <header>
+            <div class="logo-area">
+                <h1>SYNC Match</h1>
+            </div>
+            <div class="header-icons">
+                <button class="icon-btn interactive-card" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+                <button class="icon-btn interactive-card"><i class="fa-regular fa-bell"></i></button>
+            </div>
+        </header>
+
+        <!-- Area Konten Dinamis -->
+        <div class="content-area">
+            
+            <!-- Tab 1: Home Feed Utama -->
+            <section id="view-home" class="view-section active">
+                <h2 style="font-size: 1.2rem; margin-bottom: 15px;">Beranda & Aktivitas</h2>
+                <div class="welcome-card interactive-card">
+                    <div class="welcome-avatar" id="home-avatar-container">
+                        <span id="home-avatar-initial">J</span>
+                    </div>
+                    <div class="welcome-text">
+                        <h2 id="home-display-name">Halo, Jaesslyn ✨</h2>
+                        <p>Temukan partner belajar dan kelompok studimu di sini.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2: Discover / Eksplorasi Partner -->
+            <section id="view-discover" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 15px;">Eksplorasi Partner</h2>
+                <p style="color: var(--text-sub); font-size: 0.9rem;">Cari dan filter partner belajar berdasarkan keahlian dengan mudah.</p>
+            </section>
+
+            <!-- Tab 3: UME (Personal Sanctuary Dashboard di Tengah) -->
+            <section id="view-ume" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 15px;">UME Sanctuary</h2>
+                <div class="welcome-card interactive-card">
+                    <div class="welcome-avatar" id="ume-avatar-container">
+                        <span id="ume-avatar-initial">J</span>
+                    </div>
+                    <div class="welcome-text">
+                        <h2 id="ume-display-name">Jaesslyn's UME</h2>
+                        <p>"Keep going, better days are coming."</p>
+                    </div>
+                </div>
+
+                <div class="grid-widgets">
+                    <div class="widget-card interactive-card">
+                        <p style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600;">HARI INI</p>
+                        <h3 style="font-size: 1.1rem; margin-top: 6px;">18 Nov</h3>
+                        <p style="font-size: 0.78rem; color: var(--accent); margin-top: 2px;">Selasa</p>
+                    </div>
+                    <div class="widget-card interactive-card">
+                        <p style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600;">SUASANA HATI</p>
+                        <h3 style="font-size: 1rem; margin-top: 6px;">🌸 Tenang</h3>
+                        <p style="font-size: 0.78rem; color: var(--text-sub); margin-top: 2px;">Fokus Belajar</p>
+                    </div>
+                    <div class="widget-card widget-full interactive-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 0.78rem; color: var(--text-sub); font-weight: 600;"><i class="fa-solid fa-music"></i> UME Music Sanctuary</span>
+                            <span style="font-size: 0.72rem; color: var(--accent);">Audius Stream</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="font-size: 0.95rem;">Lofi Study Beats</h4>
+                                <p style="font-size: 0.75rem; color: var(--text-sub);">Cozy Vibe</p>
+                            </div>
+                            <button class="icon-btn interactive-card" style="width: 38px; height: 38px;"><i class="fa-solid fa-play"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 4: Chat & Group -->
+            <section id="view-chat" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 15px;">Pesan & Grup</h2>
+                <p style="color: var(--text-sub); font-size: 0.9rem;">Belum ada pesan masuk.</p>
+            </section>
+
+            <!-- Tab 5: Profil -->
+            <section id="view-profile" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 15px;">Profil Saya</h2>
+                <p style="color: var(--text-sub); font-size: 0.9rem;" id="profile-email-label">Email: -</p>
+            </section>
+
+        </div>
+
+        <!-- Navigasi Bawah dengan UME di Tengah -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home', this)">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('discover', this)">
+                <i class="fa-solid fa-compass"></i>
+                <span>Discover</span>
+            </div>
+            <div class="nav-ume-item" onclick="switchTab('ume', this)">
+                <div class="nav-ume-btn interactive-card">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <span>UME</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('chat', this)">
+                <i class="fa-regular fa-comment-dots"></i>
+                <span>Chat</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile', this)">
+                <i class="fa-regular fa-user"></i>
+                <span>Profil</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Firebase SDK & Script Utama -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyC5V6OBw_pVdUZO-01HloF7u_OOGjvJb3I",
+          authDomain: "syncmatcteen.firebaseapp.com",
+          databaseURL: "https://syncmatcteen-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "syncmatcteen",
+          storageBucket: "syncmatcteen.firebasestorage.app",
+          messagingSenderId: "880276728619",
+          appId: "1:880276728619:web:9845c02854697a0db5336e",
+          measurementId: "G-JRGVRFD18P"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        window.handleGoogleLogin = function() {
+            signInWithPopup(auth, provider).then((result) => {
+                console.log("Login Berhasil:", result.user);
+            }).catch((error) => {
+                alert("Gagal Masuk: " + error.message);
+            });
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('auth-screen').style.display = 'none';
+                const name = user.displayName || 'Jaesslyn';
+                document.getElementById('home-display-name').innerText = `Halo, ${name} ✨`;
+                document.getElementById('ume-display-name').innerText = `${name}'s UME`;
+                
+                if (user.photoURL) {
+                    document.getElementById('home-avatar-container').innerHTML = `<img src="${user.photoURL}" alt="Avatar">`;
+                    document.getElementById('ume-avatar-container').innerHTML = `<img src="${user.photoURL}" alt="Avatar">`;
+                } else {
+                    const initial = name.charAt(0).toUpperCase();
+                    document.getElementById('home-avatar-initial').innerText = initial;
+                    document.getElementById('ume-avatar-initial').innerText = initial;
+                }
+                document.getElementById('profile-email-label').innerText = `Email: ${user.email}`;
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+            }
+        });
+    </script>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                icon.className = 'fa-solid fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                icon.className = 'fa-solid fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+        }
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-ume-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById('view-' + tabId).classList.add('active');
+            element.classList.add('active');
+        }
+    </script>
+</body>
+</html>
