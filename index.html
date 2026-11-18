@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>SYNC Match - Learn, Share, Grow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0B0B0F;
+            --card-bg: rgba(25, 22, 32, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FAF7F4;
+            --text-sub: #A095A8;
+            --accent: #C49A7E;
+            --nav-bg: rgba(15, 13, 20, 0.9);
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            --chrome-glow: rgba(196, 154, 126, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-main: #FAF7F4;
+            --card-bg: #FFFFFF;
+            --card-border: #EFECE6;
+            --text-main: #46372E;
+            --text-sub: #7A6A5E;
+            --accent: #A3795C;
+            --nav-bg: rgba(250, 247, 244, 0.95);
+            --shadow: 0 10px 30px rgba(70, 55, 46, 0.06);
+            --chrome-glow: rgba(163, 121, 92, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-main);
+        }
+
+        .glass-card, button, .icon-btn, .nav-item {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:active, button:active, .icon-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 0 20px var(--chrome-glow);
+            border-color: var(--accent);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 10px 20px;
+        }
+
+        .header-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-emblem {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-title-text h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .header-title-text p {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .content-area {
+            padding: 10px 20px;
+            flex: 1;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .view-section {
+            display: none;
+            width: 100%;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .greeting-widget {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .greeting-avatar {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            overflow: hidden;
+            border: 2px solid var(--card-border);
+            flex-shrink: 0;
+        }
+
+        .greeting-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .greeting-info h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .greeting-info p {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 3px;
+            font-style: italic;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .mini-widget {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .quick-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .action-icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .action-icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .action-icon-item span {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 12px;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.7rem;
+            gap: 4px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .nav-item i {
+            font-size: 1.15rem;
+        }
+
+        .nav-ume-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .nav-ume-circle {
+            width: 50px;
+            height: 50px;
+            background: var(--text-main);
+            color: var(--bg-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 8px 25px var(--chrome-glow);
+            margin-top: -12px;
+            border: 2px solid var(--card-border);
+        }
+
+        .nav-ume-center span {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        /* Auth & Onboarding Screens */
+        #auth-screen, #onboarding-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-main);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        #onboarding-screen {
+            display: none;
+            overflow-y: auto;
+            align-items: stretch;
+            text-align: left;
+        }
+
+        .auth-logo-badge {
+            width: 95px;
+            height: 95px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.3rem;
+            color: var(--accent);
+            box-shadow: var(--shadow);
+            margin-bottom: 22px;
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg-main);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: var(--shadow);
+            margin-top: 15px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: 16px;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Layar Login Google Asli -->
+    <div id="auth-screen">
+        <div class="auth-logo-badge glass-card">
+            <i class="fa-solid fa-hourglass-half"></i>
+        </div>
+        <div style="font-family: 'Playfair Display'; font-size: 2.2rem; font-style: italic; margin-bottom: 5px; color: var(--text-main);">SYNC Match</div>
+        <p style="color: var(--text-sub); margin-bottom: 25px; font-size: 0.88rem;">Learn • Share • Grow (100% Pengguna Asli)</p>
+        <button class="btn-primary glass-card" onclick="handleGoogleLogin()"><i class="fa-brands fa-google" style="margin-right: 8px;"></i> Masuk dengan Google</button>
+    </div>
+
+    <!-- 2. Layar Onboarding Pengguna Baru -->
+    <div id="onboarding-screen">
+        <div style="max-width: 420px; margin: auto; width: 100%;">
+            <h2 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 8px; color: var(--text-main);">Selamat Datang di SYNC</h2>
+            <p style="color: var(--text-sub); font-size: 0.88rem; margin-bottom: 20px;">Lengkapi biodata asli kamu untuk mulai mencocokkan partner belajar.</p>
+            
+            <label style="font-size: 0.8rem; color: var(--text-sub);">Username Unik (@)</label>
+            <input type="text" id="onboard-username" class="form-input" placeholder="contoh: jaesslyn">
+
+            <label style="font-size: 0.8rem; color: var(--text-sub);">Usia & Status</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <input type="number" id="onboard-age" class="form-input" placeholder="Usia" style="width: 30%;">
+                <input type="text" id="onboard-role" class="form-input" placeholder="Status (mis: Student)" style="width: 70%;">
+            </div>
+
+            <label style="font-size: 0.8rem; color: var(--text-sub);">Bio Singkat</label>
+            <input type="text" id="onboard-bio" class="form-input" placeholder="Let's learn together ✨">
+
+            <label style="font-size: 0.8rem; color: var(--text-sub);">Keahlian yang Dikuasai</label>
+            <input type="text" id="onboard-skills" class="form-input" placeholder="contoh: Coding, UI/UX Design">
+
+            <button class="btn-primary glass-card" onclick="saveOnboardingData()">Simpan & Masuk ke Aplikasi ✨</button>
+        </div>
+    </div>
+
+    <!-- 3. Aplikasi Utama -->
+    <div class="app-container">
+        <header>
+            <div class="header-logo-group">
+                <div class="logo-emblem glass-card">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+                <div class="header-title-text">
+                    <h1>SYNC Match</h1>
+                    <p>Live Active Peers</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn glass-card" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+                <button class="icon-btn glass-card"><i class="fa-regular fa-bell"></i></button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- Home Feed -->
+            <section id="view-home" class="view-section active">
+                <div class="glass-card greeting-widget">
+                    <div class="greeting-avatar" id="home-avatar-container">
+                        <span id="home-avatar-initial">J</span>
+                    </div>
+                    <div class="greeting-info">
+                        <h2 id="home-display-name">Good Morning, Jaesslyn ✨</h2>
+                        <p>"Keep going, better days are coming."</p>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="mini-widget">
+                        <p style="font-size: 0.72rem; color: var(--text-sub); font-weight: 600;">TODAY</p>
+                        <h3 style="font-size: 1.05rem; margin-top: 4px; color: var(--text-main);">18 Nov</h3>
+                        <p style="font-size: 0.75rem; color: var(--accent); margin-top: 2px;">Tuesday</p>
+                    </div>
+                    <div class="mini-widget">
+                        <p style="font-size: 0.72rem; color: var(--text-sub); font-weight: 600;">WEATHER</p>
+                        <h3 style="font-size: 1.05rem; margin-top: 4px; color: var(--text-main);">🌤️ 27°C</h3>
+                        <p style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">Partly Cloudy</p>
+                    </div>
+                </div>
+
+                <div class="glass-card quick-actions">
+                    <div class="action-icon-item" onclick="switchTab('chat', document.querySelectorAll('.nav-item')[2])">
+                        <div class="action-icon-circle"><i class="fa-regular fa-comment-dots"></i></div>
+                        <span>Chat</span>
+                    </div>
+                    <div class="action-icon-item" onclick="switchTab('discover', document.querySelectorAll('.nav-item')[1])">
+                        <div class="action-icon-circle"><i class="fa-solid fa-users"></i></div>
+                        <span>Group</span>
+                    </div>
+                    <div class="action-icon-item" onclick="switchTab('discover', document.querySelectorAll('.nav-item')[1])">
+                        <div class="action-icon-circle"><i class="fa-solid fa-compass"></i></div>
+                        <span>Explore</span>
+                    </div>
+                    <div class="action-icon-item">
+                        <div class="action-icon-circle"><i class="fa-solid fa-folder-open"></i></div>
+                        <span>Files</span>
+                    </div>
+                    <div class="action-icon-item">
+                        <div class="action-icon-circle"><i class="fa-solid fa-ellipsis"></i></div>
+                        <span>More</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Discover & Ask for Skill Cards -->
+            <section id="view-discover" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-main);">Eksplorasi Partner Asli</h2>
+                <div class="glass-card">
+                    <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 12px;">Geser kartu interaktif di bawah untuk mulai berinteraksi:</p>
+                    <div style="background: var(--bg-main); padding: 16px; border-radius: 16px; border: 1px solid var(--card-border);">
+                        <h4 style="font-size: 1rem; margin-bottom: 4px; color: var(--text-main);">✨ Kartu Interaktif: Ask for Skill</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 10px;">Hubungkan sesi belajar langsung dengan partner aktif.</p>
+                        <button class="btn-primary glass-card" style="margin-top: 0; padding: 10px 20px; font-size: 0.85rem;">Mulai Tanya Keahlian</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- UME Sanctuary Dashboard -->
+            <section id="view-ume" class="view-section">
+                <div class="glass-card greeting-widget">
+                    <div class="greeting-avatar" id="ume-avatar-container">
+                        <span id="ume-avatar-initial">J</span>
+                    </div>
+                    <div class="greeting-info">
+                        <h2 id="ume-display-name" style="color: var(--text-main);">UME Sanctuary</h2>
+                        <p>Personal Study Space</p>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 0.72rem; color: var(--accent); font-weight: 600;"><i class="fa-solid fa-music"></i> UME MUSIC STREAM</span>
+                    </div>
+                    <h4 style="font-size: 1rem; margin-top: 2px; color: var(--text-main);">Better Days</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-sub);">Suki Waterhouse</p>
+                </div>
+
+                <div class="info-row">
+                    <div class="glass-card" style="margin-bottom: 0;">
+                        <p style="font-size: 0.72rem; color: var(--text-sub); font-weight: 600;"><i class="fa-regular fa-calendar"></i> CALENDAR</p>
+                        <h4 style="font-size: 0.9rem; margin-top: 6px; color: var(--text-main);">Study for TKA</h4>
+                        <p style="font-size: 0.75rem; color: var(--accent);">19:00 - 21:00</p>
+                    </div>
+                    <div class="glass-card" style="margin-bottom: 0;">
+                        <p style="font-size: 0.72rem; color: var(--text-sub); font-weight: 600;"><i class="fa-solid fa-list-check"></i> TO DO LIST</p>
+                        <p style="font-size: 0.8rem; margin-top: 6px; color: var(--text-main);">✓ Finish UI Design</p>
+                        <p style="font-size: 0.8rem; margin-top: 2px; color: var(--text-main);">○ Read a book</p>
+                    </div>
+                </div>
+            </section>
+            <!-- Real-Time Chat -->
+            <section id="view-chat" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-main);">Pesan & Panggilan Suara</h2>
+                <div class="glass-card">
+                    <p style="font-size: 0.88rem; color: var(--text-sub);">Fitur chat real-time dan WebRTC Voice Call siap menghubungkanmu dengan pengguna lain.</p>
+                </div>
+            </section>
+
+            <!-- Profil Pengguna -->
+            <section id="view-profile" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-main);">Profil Saya</h2>
+                <div class="glass-card">
+                    <p style="font-size: 0.88rem; color: var(--text-sub);" id="profile-email-label">Email: -</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Bottom Navigation dengan UME di Tengah -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home', this)">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('discover', this)">
+                <i class="fa-solid fa-compass"></i>
+                <span>Discover</span>
+            </div>
+            <div class="nav-ume-center" onclick="switchTab('ume', this)">
+                <div class="nav-ume-circle glass-card">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+                <span>UME</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('chat', this)">
+                <i class="fa-regular fa-comment-dots"></i>
+                <span>Chat</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile', this)">
+                <i class="fa-regular fa-user"></i>
+                <span>Profil</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Firebase SDK & Logika Sistem Asli -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyC5V6OBw_pVdUZO-01HloF7u_OOGjvJb3I",
+          authDomain: "syncmatcteen.firebaseapp.com",
+          databaseURL: "https://syncmatcteen-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "syncmatcteen",
+          storageBucket: "syncmatcteen.firebasestorage.app",
+          messagingSenderId: "880276728619",
+          appId: "1:880276728619:web:9845c02854697a0db5336e",
+          measurementId: "G-JRGVRFD18P"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        window.handleGoogleLogin = function() {
+            signInWithPopup(auth, provider).catch((error) => {
+                alert("Gagal Masuk: " + error.message);
+            });
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('auth-screen').style.display = 'none';
+                
+                const userDocRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userDocRef);
+
+                if (!userSnap.exists()) {
+                    document.getElementById('onboarding-screen').style.display = 'flex';
+                } else {
+                    document.getElementById('onboarding-screen').style.display = 'none';
+                    const data = userSnap.data();
+                    const name = data.username || user.displayName || 'Jaesslyn';
+                    document.getElementById('home-display-name').innerText = `Good Morning, ${name} ✨`;
+                }
+
+                if (user.photoURL) {
+                    document.getElementById('home-avatar-container').innerHTML = `<img src="${user.photoURL}" alt="Avatar">`;
+                    document.getElementById('ume-avatar-container').innerHTML = `<img src="${user.photoURL}" alt="Avatar">`;
+                }
+                document.getElementById('profile-email-label').innerText = `Email: ${user.email}`;
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('onboarding-screen').style.display = 'none';
+            }
+        });
+
+        window.saveOnboardingData = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const username = document.getElementById('onboard-username').value;
+            const age = document.getElementById('onboard-age').value;
+            const role = document.getElementById('onboard-role').value;
+            const bio = document.getElementById('onboard-bio').value;
+            const skills = document.getElementById('onboard-skills').value;
+
+            if (!username) {
+                alert("Mohon isi username kamu terlebih dahulu!");
+                return;
+            }
+
+            try {
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                    username,
+                    age,
+                    role,
+                    bio,
+                    skills,
+                    createdAt: new Date().toISOString()
+                });
+                document.getElementById('onboarding-screen').style.display = 'none';
+                window.location.reload();
+            } catch (err) {
+                alert("Gagal menyimpan profil: " + err.message);
+            }
+        };
+    </script>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.getAttribute('data-theme') === 'light') {
+                html.removeAttribute('data-theme');
+                icon.className = 'fa-solid fa-moon';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+                icon.className = 'fa-solid fa-sun';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+        } else {
+            document.getElementById('theme-icon').className = 'fa-solid fa-moon';
+        }
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById('view-' + tabId).classList.add('active');
+            if (element && element.classList.contains('nav-item')) {
+                element.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
