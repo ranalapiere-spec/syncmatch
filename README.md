@@ -1,2 +1,0 @@
-# syncmatch
-website
