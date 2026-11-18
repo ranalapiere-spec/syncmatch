@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>SYNC Match - Learn, Share, Grow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #F4EBE1;
+            --card-bg: rgba(255, 250, 246, 0.85);
+            --card-border: rgba(196, 154, 126, 0.25);
+            --text-main: #46372E;
+            --text-sub: #7A6A5E;
+            --accent: #A3795C;
+            --nav-bg: rgba(244, 235, 225, 0.95);
+            --shadow: 0 10px 30px rgba(70, 55, 46, 0.08);
+            --chrome-glow: rgba(163, 121, 92, 0.25);
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #0B0B0F;
+            --card-bg: rgba(25, 22, 32, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FAF7F4;
+            --text-sub: #A095A8;
+            --accent: #C49A7E;
+            --nav-bg: rgba(15, 13, 20, 0.9);
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            --chrome-glow: rgba(196, 154, 126, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-main);
+        }
+
+        .glass-card, button, .icon-btn, .nav-item {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:active, button:active, .icon-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 0 20px var(--chrome-glow);
+            border-color: var(--accent);
+        }
+
+        /* Toast Container */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 400px;
+            pointer-events: none;
+        }
+
+        .toast-msg {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 12px 18px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInOut 3s ease forwards;
+            pointer-events: auto;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-15px); }
+            15% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-15px); }
+        }
+
+        /* Login & Onboarding */
+        #auth-screen, #onboarding-screen, #edit-profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-main);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        #onboarding-screen, #edit-profile-modal {
+            display: none;
+            overflow-y: auto;
+            text-align: left;
+            align-items: stretch;
+            z-index: 2100;
+            background: rgba(11, 11, 15, 0.85);
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-logo-badge {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            color: var(--accent);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .modal-card {
+            max-width: 440px;
+            margin: auto;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .avatar-upload-box {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            background: var(--bg-main);
+            border: 2px dashed var(--accent);
+            margin: 0 auto 18px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            color: var(--accent);
+            font-size: 1.5rem;
+            overflow: hidden;
+        }
+
+        .avatar-upload-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-plus-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            background: var(--text-main);
+            color: var(--bg-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-main);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: 16px;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+        }
+
+        .gender-options {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .gender-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 14px;
+            background: var(--bg-main);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            font-size: 0.82rem;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .gender-btn.selected {
+            background: var(--text-main);
+            color: var(--bg-main);
+        }
+
+        .chip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .chip {
+            padding: 7px 14px;
+            border-radius: 20px;
+            background: var(--bg-main);
+            border: 1px solid var(--card-border);
+            font-size: 0.78rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .chip.selected {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .add-chip-btn {
+            padding: 7px 14px;
+            border-radius: 20px;
+            background: transparent;
+            border: 1px dashed var(--accent);
+            font-size: 0.78rem;
+            color: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 10px 20px;
+        }
+
+        .header-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-emblem {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-title-text h1 {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .header-title-text p {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .badge-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #E53935;
+            border-radius: 50%;
+        }
+
+        .content-area {
+            padding: 10px 20px;
+            flex: 1;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .view-section {
+            display: none;
+            width: 100%;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        /* --- STYLING HALAMAN PROFIL (Sesuai Referensi Gambar 1001223473.jpg) --- */
+        .profile-view-container {
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 14px;
+        }
+
+        .profile-banner {
+            width: 100%;
+            height: 110px;
+            background-color: #332922;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .customize-btn-floating {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-avatar-row {
+            padding: 0 18px;
+            margin-top: -38px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 12px;
+        }
+
+        .profile-main-avatar {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            border: 3px solid var(--card-bg);
+            object-fit: cover;
+            background: var(--accent);
+        }
+
+        .profile-stats-box {
+            display: flex;
+            gap: 16px;
+            background: var(--bg-main);
+            padding: 8px 14px;
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        .p-stat h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .p-stat p {
+            font-size: 0.62rem;
+            color: var(--text-sub);
+        }
+
+        .profile-bio-section {
+            padding: 0 18px 18px 18px;
+        }
+
+        .skill-progress-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            margin-bottom: 14px;
+        }
+
+        .progress-slider-item {
+            margin-top: 12px;
+        }
+
+        .progress-slider-item input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 12px;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.7rem;
+            gap: 4px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .nav-item i {
+            font-size: 1.15rem;
+        }
+
+        .nav-ume-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .nav-ume-circle {
+            width: 50px;
+            height: 50px;
+            background: var(--text-main);
+            color: var(--bg-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 8px 25px var(--chrome-glow);
+            margin-top: -12px;
+            border: 2px solid var(--card-border);
+        }
+
+        .nav-ume-center span {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg-main);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: var(--shadow);
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <!-- 1. Halaman Login Estetik -->
+    <div id="auth-screen">
+        <div class="auth-logo-badge glass-card">
+            <i class="fa-solid fa-compass"></i>
+        </div>
+        <div style="font-family: 'Playfair Display'; font-size: 2.3rem; font-style: italic; margin-bottom: 5px; color: var(--text-main);">SYNC Match</div>
+        <p style="color: var(--text-sub); margin-bottom: 30px; font-size: 0.88rem;">— Learn • Share • Grow —</p>
+        <button class="btn-primary glass-card" onclick="handleGoogleLogin()"><i class="fa-brands fa-google" style="margin-right: 8px;"></i> Masuk dengan Google</button>
+    </div>
+
+    <!-- 2. Halaman Onboarding Pengguna Baru -->
+    <div id="onboarding-screen">
+        <div class="modal-card">
+            <div style="font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Complete Your Profile</div>
+            <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 18px;">Tell us more about yourself ♡</p>
+            
+            <div class="avatar-upload-box" id="onboard-avatar-box" onclick="document.getElementById('file-input').click()">
+                <i class="fa-regular fa-user"></i>
+                <div class="avatar-plus-badge">+</div>
+            </div>
+            <input type="file" id="file-input" style="display: none;" accept="image/*" onchange="handleImageUpload(event)">
+
+            <input type="text" id="onboard-username" class="form-input" placeholder="Masukkan username (@)">
+            <input type="text" id="onboard-fullname" class="form-input" placeholder="Nama lengkap">
+            <input type="date" id="onboard-birthdate" class="form-input">
+
+            <label style="font-size: 0.78rem; color: var(--text-sub); margin-bottom: 6px; display: block;">Jenis kelamin</label>
+            <div class="gender-options">
+                <div class="gender-btn selected" onclick="selectGender(this, 'Perempuan')">Perempuan</div>
+                <div class="gender-btn" onclick="selectGender(this, 'Laki-laki')">Laki-laki</div>
+                <div class="gender-btn" onclick="selectGender(this, 'Lainnya')">Lainnya</div>
+            </div>
+
+            <input type="text" id="onboard-bio" class="form-input" placeholder="Bio singkat (mis: Have a good day)">
+
+            <label style="font-size: 0.78rem; color: var(--text-sub); margin-bottom: 6px; display: block;">Keahlian yang Dimiliki</label>
+            <div class="chip-container" id="skills-chips">
+                <div class="chip" onclick="toggleChip(this)">Writing</div>
+                <div class="chip" onclick="toggleChip(this)">Editing</div>
+                <div class="chip" onclick="toggleChip(this)">Illustration</div>
+                <div class="chip" onclick="toggleChip(this)">English</div>
+                <div class="chip" onclick="toggleChip(this)">Web Development</div>
+                <div class="add-chip-btn" onclick="addCustomSkill()">+ Tambah Skill Lainnya</div>
+            </div>
+
+            <button class="btn-primary glass-card" style="margin-top: 0;" onclick="saveOnboardingData()">Daftar Sekarang ✨</button>
+        </div>
+    </div>
+
+    <!-- 3. Modal Edit / Customize Profil (Sesuai Permintaan) -->
+    <div id="edit-profile-modal">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-family: 'Playfair Display'; font-size: 1.3rem;">Customize Profil</h3>
+                <button onclick="closeCustomizeModal()" style="background: transparent; border: none; font-size: 1.2rem; color: var(--text-main); cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <label style="font-size: 0.78rem; color: var(--text-sub); display: block; margin-bottom: 6px;">Foto Profil (Crop & Upload)</label>
+            <div class="avatar-upload-box" id="edit-avatar-box" onclick="document.getElementById('edit-avatar-file').click()">
+                <i class="fa-regular fa-user"></i>
+                <div class="avatar-plus-badge">+</div>
+            </div>
+            <input type="file" id="edit-avatar-file" style="display: none;" accept="image/*" onchange="handleEditAvatar(event)">
+
+            <label style="font-size: 0.78rem; color: var(--text-sub);">Bio Singkat</label>
+            <input type="text" id="edit-bio-input" class="form-input" placeholder="Have a good day">
+
+            <label style="font-size: 0.78rem; color: var(--text-sub);">Atur Keeahlian (Skills)</label>
+            <div class="chip-container" id="edit-skills-chips">
+                <!-- Dinamis dari database -->
+            </div>
+            <button class="add-chip-btn" onclick="addEditCustomSkill()" style="margin-bottom: 14px;">+ Tambah Skill Baru</button>
+
+            <label style="font-size: 0.78rem; color: var(--text-sub); display: block; margin-bottom: 6px;">Progres Kemahiran Skill (%)</label>
+            <div id="skill-sliders-container">
+                <!-- Slider persentase kemahiran -->
+            </div>
+
+            <button class="btn-primary glass-card" onclick="saveProfileCustomization()">Simpan Perubahan ✨</button>
+        </div>
+    </div>
+
+    <!-- 4. Aplikasi Utama -->
+    <div class="app-container">
+        <header>
+            <div class="header-logo-group">
+                <div class="logo-emblem glass-card">
+                    <i class="fa-solid fa-compass"></i>
+                </div>
+                <div class="header-title-text">
+                    <h1>SYNC Match</h1>
+                    <p>— Learn • Share • Grow —</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn glass-card" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+                <button class="icon-btn glass-card" onclick="showToast('Tidak ada notifikasi baru')">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="badge-dot"></span>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            
+            <!-- Tab Home (Publik) -->
+            <section id="view-home" class="view-section active">
+                <div class="stories-container" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 14px; scrollbar-width: none;">
+                    <div class="story-item" onclick="showToast('Fitur Unggah Cerita Anda')">
+                        <div class="story-ring" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #E5C1CD); padding: 2px; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); background: var(--bg-main);">
+                                <i class="fa-solid fa-plus"></i>
+                            </div>
+                        </div>
+                        <span style="font-size: 0.68rem; color: var(--text-sub);">Cerita Anda</span>
+                    </div>
+                </div>
+
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass" style="color: var(--text-sub);"></i>
+                    <input type="text" placeholder="Cari partner, skill, atau komunitas...">
+                </div>
+
+                <div class="profile-hero-card">
+                    <div class="profile-hero-top">
+                        <img src="" id="home-user-avatar" class="profile-hero-avatar" alt="Avatar">
+                        <div style="flex: 1;">
+                            <h3 id="home-display-name" style="font-size: 1.1rem; font-weight: 700;">Genshin</h3>
+                            <p style="font-size: 0.75rem; color: var(--text-sub);" id="home-username-tag">@user</p>
+                        </div>
+                        <div class="match-badge">
+                            <i class="fa-solid fa-sparkles"></i> 92% Match
+                        </div>
+                    </div>
+                    <p style="font-size: 0.8rem; font-style: italic; color: var(--text-sub); margin-bottom: 12px;" id="home-bio-text">"Let's learn together ♡"</p>
+                </div>
+            </section>
+
+            <!-- Tab Komunitas / Discover -->
+            <section id="view-discover" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-main);">Komunitas & Eksplorasi</h2>
+                <div class="glass-card">
+                    <p style="font-size: 0.88rem; color: var(--text-sub);">Temukan grup belajar dan ruang diskusi publik sesama pengguna aktif.</p>
+                </div>
+            </section>
+
+            <!-- Tab UME Sanctuary (Tengah) -->
+            <section id="view-ume" class="view-section">
+                <div class="glass-card">
+                    <span style="font-size: 0.72rem; color: var(--accent); font-weight: 600;"><i class="fa-solid fa-music"></i> UME MUSIC STREAM</span>
+                    <h4 style="font-size: 1rem; margin-top: 4px; color: var(--text-main);">Better Days</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-sub);">Suki Waterhouse</p>
+                </div>
+            </section>
+
+            <!-- Tab Grup -->
+            <section id="view-group" class="view-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-main);">Grup Belajar</h2>
+                <div class="glass-card">
+                    <p style="font-size: 0.88rem; color: var(--text-sub);">Belum bergabung dengan grup belajar.</p>
+                </div>
+            </section>
+
+            <!-- ================= TAB PROFIL (Sesuai Referensi Gambar 1001223473.jpg) ================= -->
+            <section id="view-profile" class="view-section">
+                
+                <div class="profile-view-container">
+                    <div class="profile-banner" id="profile-banner-bg">
+                        <button class="customize-btn-floating glass-card" onclick="openCustomizeModal()">
+                            <i class="fa-solid fa-pen-to-square"></i> Customize Profil
+                        </button>
+                    </div>
+
+                    <div class="profile-avatar-row">
+                        <img src="" id="profile-view-avatar" class="profile-main-avatar" alt="Avatar">
+                        <div class="profile-stats-box">
+                            <div class="p-stat">
+                                <h4 id="stat-skills-count">8</h4>
+                                <p>Skills</p>
+                            </div>
+                            <div class="p-stat">
+                                <h4>0</h4>
+                                <p>Posts</p>
+                            </div>
+                            <div class="p-stat">
+                                <h4 id="stat-progress-avg">20%</h4>
+                                <p>Progress</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-bio-section">
+                        <h3 id="profile-view-name" style="font-size: 1.15rem; font-weight: 700;">moreeno</h3>
+                        <p id="profile-view-handle-tag" style="font-size: 0.75rem; color: var(--text-sub); margin-bottom: 6px;">@morenoxcavz80 • 16 y/o • Student</p>
+                        <p id="profile-view-bio" style="font-size: 0.82rem; color: var(--text-main);">have an goodday</p>
+                    </div>
+                </div>
+
+                <!-- Keahlian yang Dibagikan -->
+                <div class="glass-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="font-size: 0.95rem; font-weight: 700;">Keahlian yang Dibagikan</h4>
+                        <span style="font-size: 0.75rem; color: var(--accent); cursor: pointer;" onclick="openCustomizeModal()">+ Atur Skill</span>
+                    </div>
+                    <div class="chip-container" id="profile-skills-display">
+                        <!-- Chips Skill -->
+                    </div>
+                </div>
+
+                <!-- Progres Belajar Skill (Slider Kemahiran) -->
+                <div class="skill-progress-card">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 4px;"><i class="fa-solid fa-chart-line" style="color: var(--accent);"></i> Progres Belajar Skill</h4>
+                    <div id="profile-progress-sliders-view">
+                        <!-- Render persentase slider kemahiran -->
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home', this)">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('discover', this)">
+                <i class="fa-solid fa-compass"></i>
+                <span>Komunitas</span>
+            </div>
+            <div class="nav-ume-center" onclick="switchTab('ume', this)">
+                <div class="nav-ume-circle glass-card">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+                <span>UME</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('group', this)">
+                <i class="fa-solid fa-users"></i>
+                <span>Grup</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile', this)">
+                <i class="fa-regular fa-user"></i>
+                <span>Profil</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Firebase & Logika Sistem -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyC5V6OBw_pVdUZO-01HloF7u_OOGjvJb3I",
+          authDomain: "syncmatcteen.firebaseapp.com",
+          databaseURL: "https://syncmatcteen-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "syncmatcteen",
+          storageBucket: "syncmatcteen.firebasestorage.app",
+          messagingSenderId: "880276728619",
+          appId: "1:880276728619:web:9845c02854697a0db5336e",
+          measurementId: "G-JRGVRFD18P"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        window.showToast = function(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg glass-card';
+            toast.innerHTML = `<i class="fa-solid fa-sparkles" style="color: var(--accent);"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        };
+
+        window.handleGoogleLogin = function() {
+            signInWithPopup(auth, provider).catch((error) => {
+                showToast("Gagal Masuk: " + error.message);
+            });
+        };
+
+        let currentUserData = {
+            username: "user",
+            fullname: "Genshin",
+            bio: "have an goodday",
+            photoURL: "",
+            bannerURL: "#332922",
+            skills: ["Writing", "Editing", "Illustration", "English", "Web Development", "Copywriting", "3D Modeling"],
+            skillProgress: { "Cooking": 38, "3D Modeling": 11, "Editing": 12 }
+        };
+
+        let uploadedPhotoBase64 = "";
+        window.handleImageUpload = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedPhotoBase64 = e.target.result;
+                    document.getElementById('onboard-avatar-box').innerHTML = `<img src="${uploadedPhotoBase64}"><div class="avatar-plus-badge">+</div>`;
+                    showToast("Foto profil berhasil dimuat!");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.handleEditAvatar = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentUserData.photoURL = e.target.result;
+                    document.getElementById('edit-avatar-box').innerHTML = `<img src="${currentUserData.photoURL}"><div class="avatar-plus-badge">+</div>`;
+                    showToast("Foto profil siap diperbarui!");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.handleEditBanner = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentUserData.bannerURL = `url('${e.target.result}')`;
+                    document.getElementById('profile-banner-bg').style.backgroundImage = currentUserData.bannerURL;
+                    showToast("Banner kustom diterapkan!");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.selectBannerTheme = function(colorOrBg) {
+            currentUserData.bannerURL = colorOrBg;
+            document.getElementById('profile-banner-bg').style.background = colorOrBg;
+            showToast("Tema banner dipilih!");
+        };
+
+        window.openCustomizeModal = function() {
+            document.getElementById('edit-profile-modal').style.display = 'flex';
+            document.getElementById('edit-bio-input').value = currentUserData.bio || "";
+            if(currentUserData.photoURL) {
+                document.getElementById('edit-avatar-box').innerHTML = `<img src="${currentUserData.photoURL}"><div class="avatar-plus-badge">+</div>`;
+            }
+            renderEditModalSkills();
+            renderEditModalSliders();
+        };
+
+        window.closeCustomizeModal = function() {
+            document.getElementById('edit-profile-modal').style.display = 'none';
+        };
+
+        function renderEditModalSkills() {
+            const container = document.getElementById('edit-skills-chips');
+            container.innerHTML = '';
+            const allPossible = ["Writing", "Editing", "Illustration", "Made CGI Effect", "English", "Web Development", "Copywriting", "3D Modeling", "Cooking", "UI/UX Design"];
+            
+            allPossible.forEach(sk => {
+                const isSelected = currentUserData.skills.includes(sk);
+                const chip = document.createElement('div');
+                chip.className = `chip ${isSelected ? 'selected' : ''}`;
+                chip.innerText = sk;
+                chip.onclick = function() {
+                    chip.classList.toggle('selected');
+                    if(chip.classList.contains('selected')) {
+                        if(!currentUserData.skills.includes(sk)) currentUserData.skills.push(sk);
+                        if(currentUserData.skillProgress[sk] === undefined) currentUserData.skillProgress[sk] = 20;
+                    } else {
+                        currentUserData.skills = currentUserData.skills.filter(s => s !== sk);
+                        delete currentUserData.skillProgress[sk];
+                    }
+                    renderEditModalSliders();
+                };
+                container.appendChild(chip);
+            });
+        }
+
+        window.addEditCustomSkill = function() {
+            const val = prompt("Masukkan skill baru:");
+            if(val && val.trim()) {
+                const sk = val.trim();
+                if(!currentUserData.skills.includes(sk)) {
+                    currentUserData.skills.push(sk);
+                    currentUserData.skillProgress[sk] = 25;
+                    renderEditModalSkills();
+                    renderEditModalSliders();
+                    showToast("Skill ditambahkan!");
+                }
+            }
+        };
+
+        function renderEditModalSliders() {
+            const container = document.getElementById('skill-sliders-container');
+            container.innerHTML = '';
+            
+            Object.keys(currentUserData.skillProgress || {}).forEach(sk => {
+                const val = currentUserData.skillProgress[sk];
+                const div = document.createElement('div');
+                div.className = 'progress-slider-item';
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 4px;">
+                        <span>${sk}</span>
+                        <span id="slider-val-${sk}">${val}%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="${val}" oninput="updateSkillProgressValue('${sk}', this.value)">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.updateSkillProgressValue = function(sk, val) {
+            currentUserData.skillProgress[sk] = parseInt(val);
+            document.getElementById(`slider-val-${sk}`).innerText = `${val}%`;
+        };
+
+        window.saveProfileCustomization = async function() {
+            const user = auth.currentUser;
+            if(!user) return;
+
+            currentUserData.bio = document.getElementById('edit-bio-input').value;
+
+            try {
+                await setDoc(doc(db, "users", user.uid), currentUserData, { merge: true });
+                closeCustomizeModal();
+                updateProfileUI(currentUserData);
+                showToast("Profil berhasil diperbarui ✨");
+            } catch(err) {
+                showToast("Gagal menyimpan: " + err.message);
+            }
+        };
+
+        function updateProfileUI(data) {
+            currentUserData = data;
+            document.getElementById('home-display-name').innerText = data.fullname || data.username;
+            document.getElementById('home-username-tag').innerText = `@${data.username}`;
+            document.getElementById('home-bio-text').innerText = `"${data.bio || 'Let\'s learn together ♡'}"`;
+
+            document.getElementById('profile-view-name').innerText = data.fullname || data.username;
+            document.getElementById('profile-view-handle-tag').innerText = `@${data.username} • 16 y/o • Student`;
+            document.getElementById('profile-view-bio').innerText = data.bio;
+            
+            if(data.photoURL) {
+                document.getElementById('home-user-avatar').src = data.photoURL;
+                document.getElementById('profile-view-avatar').src = data.photoURL;
+            }
+
+            if(data.bannerURL) {
+                if(data.bannerURL.startsWith('url(')) {
+                    document.getElementById('profile-banner-bg').style.backgroundImage = data.bannerURL;
+                    document.getElementById('profile-banner-bg').style.backgroundColor = 'transparent';
+                } else {
+                    document.getElementById('profile-banner-bg').style.backgroundImage = 'none';
+                    document.getElementById('profile-banner-bg').style.backgroundColor = data.bannerURL;
+                }
+            }
+            // Render Skills Chips
+            const skillContainer = document.getElementById('profile-skills-display');
+            skillContainer.innerHTML = '';
+            (data.skills || []).forEach(sk => {
+                const c = document.createElement('div');
+                c.className = 'chip selected';
+                c.innerText = sk;
+                skillContainer.appendChild(c);
+            });
+            document.getElementById('stat-skills-count').innerText = (data.skills || []).length;
+
+            // Render Progress Sliders di Profil View
+            const progressView = document.getElementById('profile-progress-sliders-view');
+            progressView.innerHTML = '';
+            const progressObj = data.skillProgress || {};
+            const keys = Object.keys(progressObj);
+            
+            let total = 0;
+            keys.forEach(sk => {
+                total += progressObj[sk];
+                const item = document.createElement('div');
+                item.className = 'progress-slider-item';
+                item.style.marginBottom = '12px';
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">
+                        <span>${sk}</span>
+                        <span>${progressObj[sk]}%</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: var(--bg-main); border-radius: 4px; overflow: hidden; border: 1px solid var(--card-border);">
+                        <div style="width: ${progressObj[sk]}%; height: 100%; background: var(--accent); border-radius: 4px;"></div>
+                    </div>
+                `;
+                progressView.appendChild(item);
+            });
+
+            if(keys.length > 0) {
+                document.getElementById('stat-progress-avg').innerText = Math.round(total / keys.length) + '%';
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('auth-screen').style.display = 'none';
+                
+                const userDocRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userDocRef);
+
+                if (!userSnap.exists()) {
+                    document.getElementById('onboarding-screen').style.display = 'flex';
+                    if (user.photoURL) {
+                        uploadedPhotoBase64 = user.photoURL;
+                        document.getElementById('onboard-avatar-box').innerHTML = `<img src="${user.photoURL}"><div class="avatar-plus-badge">+</div>`;
+                    }
+                    if (user.displayName) {
+                        document.getElementById('onboard-fullname').value = user.displayName;
+                    }
+                } else {
+                    document.getElementById('onboarding-screen').style.display = 'none';
+                    updateProfileUI(userSnap.data());
+                }
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('onboarding-screen').style.display = 'none';
+            }
+        });
+
+        window.saveOnboardingData = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const username = document.getElementById('onboard-username').value;
+            const fullname = document.getElementById('onboard-fullname').value;
+            const bio = document.getElementById('onboard-bio').value;
+
+            if (!username || !fullname) {
+                showToast("Mohon isi username dan nama lengkap terlebih dahulu!");
+                return;
+            }
+
+            const selectedSkills = Array.from(document.querySelectorAll('#skills-chips .chip.selected')).map(c => c.innerText);
+            const finalPhoto = uploadedPhotoBase64 || user.photoURL || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150";
+
+            const initialProgress = {};
+            selectedSkills.forEach(s => { initialProgress[s] = 20; });
+
+            const newUserData = {
+                uid: user.uid,
+                email: user.email,
+                photoURL: finalPhoto,
+                bannerURL: "#332922",
+                username,
+                fullname,
+                bio: bio || "have an goodday",
+                skills: selectedSkills,
+                skillProgress: initialProgress,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await setDoc(doc(db, "users", user.uid), newUserData);
+                document.getElementById('onboarding-screen').style.display = 'none';
+                updateProfileUI(newUserData);
+                showToast("Profil berhasil dibuat! Selamat datang ✨");
+            } catch (err) {
+                showToast("Gagal menyimpan profil: " + err.message);
+            }
+        };
+    </script>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                icon.className = 'fa-solid fa-moon';
+                localStorage.setItem('theme', 'light');
+                showToast("Mode Terang diaktifkan");
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                icon.className = 'fa-solid fa-sun';
+                localStorage.setItem('theme', 'dark');
+                showToast("Mode Gelap diaktifkan");
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+        } else {
+            document.getElementById('theme-icon').className = 'fa-solid fa-moon';
+        }
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById('view-' + tabId).classList.add('active');
+            if (element && element.classList.contains('nav-item')) {
+                element.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
